@@ -1,0 +1,328 @@
+package wscconnect.android.activities;
+
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.text.method.LinkMovementMethod;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.TextView;
+
+import com.google.gson.GsonBuilder;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Cache;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import wscconnect.android.API;
+import wscconnect.android.MainApplication;
+import wscconnect.android.R;
+import wscconnect.android.Utils;
+import wscconnect.android.fragments.AppsFragment;
+import wscconnect.android.fragments.MyAppsFragment;
+import wscconnect.android.fragments.myApps.AppOptionsFragment;
+import wscconnect.android.listeners.OnBackPressedListener;
+import wscconnect.android.listeners.OnNewPushMessageListener;
+
+
+public class MainActivity extends AppCompatActivity {
+    public final static String TAG = "WSC-Connect";
+    public final static String EXTRA_NOTIFICATION = "extraNotification";
+    public final static String EXTRA_OPTION_TYPE = "extraOptionType";
+    private Fragment currentFragment;
+    private API api;
+    private BottomNavigationView navigation;
+    private String appsFragmentTag;
+    private String myAppsFragmentTag;
+    private FragmentManager fManager;
+    private String notificationAppID;
+    private OnBackPressedListener onBackPressedListener;
+    private String notificationOptionType;
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_apps:
+                    if (!(currentFragment instanceof AppsFragment)) {
+                        currentFragment = changeFragment(0);
+                    }
+                    return true;
+                case R.id.navigation_my_apps:
+                    if (!(currentFragment instanceof MyAppsFragment)) {
+                        currentFragment = changeFragment(1);
+                    } else if (notificationAppID != null) {
+                        ((MyAppsFragment) currentFragment).selectApp(notificationAppID, notificationOptionType);
+                    } else {
+                        ((MyAppsFragment) currentFragment).resetCurrentApp();
+                    }
+                    return true;
+            }
+            return false;
+        }
+
+    };
+
+    @Override
+    public void onBackPressed() {
+        if (onBackPressedListener != null) {
+            if (!onBackPressedListener.onBackPressed()) {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public void updateAppsFragment() {
+        AppsFragment fragment = (AppsFragment) fManager.findFragmentByTag(appsFragmentTag);
+        if (fragment != null) {
+            fragment.updateAdapter();
+        }
+    }
+
+    public void updateMyAppsFragment() {
+        MyAppsFragment fragment = (MyAppsFragment) fManager.findFragmentByTag(myAppsFragmentTag);
+        if (fragment != null) {
+            fragment.updateAdapter();
+        }
+    }
+
+    public void updateAllFragments() {
+        updateAppsFragment();
+        updateMyAppsFragment();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_about:
+                showAboutDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showAboutDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle(R.string.action_about);
+        builder.setMessage(R.string.dialog_about_text);
+        builder.setPositiveButton(R.string.close, null);
+
+        AlertDialog dialog = builder.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.textColor));
+        ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
+    public void setOnBackPressedListener(OnBackPressedListener callback) {
+        this.onBackPressedListener = callback;
+    }
+
+    private Fragment changeFragment(int position) {
+        Fragment newFragment = null;
+
+        switch (position) {
+            case 0:
+                newFragment = fManager.findFragmentByTag(appsFragmentTag);
+                if (newFragment != null) {
+                    fManager.beginTransaction().show(newFragment).commit();
+                } else {
+                    newFragment = new AppsFragment();
+                    fManager.beginTransaction().add(R.id.content, newFragment, appsFragmentTag).commit();
+                }
+
+                hideFragments(myAppsFragmentTag);
+                getSupportActionBar().setTitle(R.string.app_name);
+                break;
+            case 1:
+                newFragment = fManager.findFragmentByTag(myAppsFragmentTag);
+                if (newFragment != null) {
+                    fManager.beginTransaction().show(newFragment).commitNow();
+                    if (notificationAppID != null) {
+                        ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
+                        //notificationAppID = null;
+                    }
+                } else {
+                    newFragment = new MyAppsFragment();
+                    fManager.beginTransaction().add(R.id.content, newFragment, myAppsFragmentTag).commitNow();
+                    if (notificationAppID != null) {
+                        ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
+                        //notificationAppID = null;
+                    }
+                }
+
+                hideFragments(appsFragmentTag);
+                getSupportActionBar().setTitle(R.string.title_my_apps);
+                break;
+        }
+
+        return newFragment;
+    }
+
+    private void hideFragments(String... tags) {
+        for (String tag : tags) {
+            Fragment f = fManager.findFragmentByTag(tag);
+            if (f != null) {
+                fManager.beginTransaction().hide(f).commit();
+            }
+        }
+    }
+
+    @Override
+    public void onNewIntent(Intent newIntent) {
+        super.onNewIntent(newIntent);
+
+        notificationAppID = newIntent.getStringExtra(EXTRA_NOTIFICATION);
+        notificationOptionType = newIntent.getStringExtra(EXTRA_OPTION_TYPE);
+
+        if (notificationAppID != null) {
+            navigation.setSelectedItemId(R.id.navigation_my_apps);
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    //    Fabric.with(this, new Crashlytics());
+        setContentView(R.layout.activity_main);
+
+        fManager = getSupportFragmentManager();
+        appsFragmentTag = AppsFragment.class.getSimpleName();
+        myAppsFragmentTag = MyAppsFragment.class.getSimpleName();
+
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        if (!Utils.getAllAccessTokens(this).isEmpty()) {
+            navigation.setSelectedItemId(R.id.navigation_my_apps);
+        } else {
+            navigation.setSelectedItemId(R.id.navigation_apps);
+        }
+
+        notificationAppID = getIntent().getStringExtra(EXTRA_NOTIFICATION);
+        notificationOptionType = getIntent().getStringExtra(EXTRA_OPTION_TYPE);
+
+        if (notificationAppID != null) {
+            navigation.setSelectedItemId(R.id.navigation_my_apps);
+        }
+
+        ((MainApplication) getApplication()).setOnNewPushMessageListener(new OnNewPushMessageListener() {
+            @Override
+            public void onNewPushMessage(final String appID) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        notificationAppID = appID;
+                        notificationOptionType = AppOptionsFragment.OPTION_TYPE_MESSAGES;
+                        navigation.setSelectedItemId(R.id.navigation_my_apps);
+                    }
+                });
+            }
+        });
+    }
+
+    public void setActiveMenuItem(int id) {
+        navigation.setSelectedItemId(id);
+    }
+
+    public API getAPI() {
+        return getAPI(null);
+    }
+
+    public API getAPI(final String token) {
+        if (api == null || token != null) {
+            int timeout = 10;
+
+            final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+            clientBuilder.writeTimeout(timeout, TimeUnit.SECONDS);
+            clientBuilder.connectTimeout(timeout, TimeUnit.SECONDS);
+            clientBuilder.readTimeout(timeout, TimeUnit.SECONDS);
+
+            Interceptor offlineResponseCacheInterceptor = new Interceptor() {
+                @Override
+                public okhttp3.Response intercept(Chain chain) throws IOException {
+                    Request request = chain.request();
+                    if (!Utils.hasInternetConnection(MainActivity.this)) {
+                        request = request.newBuilder()
+                                .header("Cache-Control",
+                                        "public, only-if-cached, max-stale=" + 2419200)
+                                .build();
+                    }
+                    return chain.proceed(request);
+                }
+            };
+
+            clientBuilder.addInterceptor(offlineResponseCacheInterceptor);
+            clientBuilder.cache(new Cache(new File(getCacheDir(),
+                    "APICache"), 50 * 1024 * 1024));
+
+            if (token != null) {
+                clientBuilder.addInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(Chain chain) throws IOException {
+                        Request newRequest = chain.request().newBuilder()
+                                .addHeader("Authorization", "Bearer " + token)
+                                .build();
+                        return chain.proceed(newRequest);
+                    }
+                });
+            }
+
+            // add current app version
+            int versionCode;
+            try {
+                PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                versionCode = pInfo.versionCode;
+            } catch (PackageManager.NameNotFoundException e) {
+                // an error is likely not good. Set versionCode to 1
+                versionCode = 1;
+            }
+            final int finalVersionCode = versionCode;
+            clientBuilder.addInterceptor(new Interceptor() {
+                @Override
+                public okhttp3.Response intercept(Chain chain) throws IOException {
+                    Request newRequest = chain.request().newBuilder()
+                            .addHeader("X-App-Version-Code", String.valueOf(finalVersionCode))
+                            .build();
+                    return chain.proceed(newRequest);
+                }
+            });
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .client(clientBuilder.build())
+                    .baseUrl(API.ENDPOINT)
+                    .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().create()))
+                    .build();
+            api = retrofit.create(API.class);
+        }
+
+        return api;
+    }
+}

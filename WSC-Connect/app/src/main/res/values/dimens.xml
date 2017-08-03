@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="layout_padding">16dp</dimen>
+    <dimen name="layout_margin">12dp</dimen>
+    <dimen name="layout_margin_small">5dp</dimen>
+</resources>

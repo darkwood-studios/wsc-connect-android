@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_apps"
+        android:icon="@drawable/ic_apps_black_24dp"
+        android:title="@string/title_apps" />
+
+    <item
+        android:id="@+id/navigation_my_apps"
+        android:icon="@drawable/ic_grade_black_24dp"
+        android:title="@string/title_my_apps" />
+
+    <!--<item
+        android:id="@+id/navigation_account"
+        android:icon="@drawable/ic_people_black_24dp"
+        android:title="@string/title_accounts" />-->
+
+</menu>

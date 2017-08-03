@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">WSC-Connect</string>
+    <string name="title_apps">Apps</string>
+    <string name="title_my_apps">Meine Apps</string>
+    <string name="required">Pflichtfeld</string>
+    <string name="list_app_loggedIn">Eingeloggt als: %1$s</string>
+    <string name="just_now">Gerade eben</string>
+    <string name="dialog_login_username">Benutzername</string>
+    <string name="dialog_login_password">Passwort / Auth-Token</string>
+    <string name="dialog_login_third_party">Drittanbieter Login</string>
+    <string name="dialog_login_title">Login für %1$s</string>
+    <string name="dialog_login_third_party_info">Benutze den Drittanbieter Login, wenn du dich auf %1$s über einen Drittanbieter registriert hast.</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="login_failed">Der Login war nicht erfolgreich.</string>
+    <string name="login_failed_global">Beim Login ist ein Fehler aufgetreten. Versuche es später erneut.</string>
+    <string name="fragment_app_notifications_loading_info">Lade Benachrichtigungen für %1$s…</string>
+    <string name="fragment_accounts_empty">Du bist noch in keiner App angemeldet.</string>
+    <string name="fragment_accounts_login">Jetzt einloggen!</string>
+    <string name="fragment_app_notifications_empty">Keine aktuellen Benachrichtigungen</string>
+    <string name="fragment_app_notifications_app_removed">%1$s ist nicht mehr verfügbar. Du wurdest automatisch ausgeloggt.</string>
+    <string name="firebase_token_required">Dein Push-Token wurde noch nicht generiert. Versuche es erneut.</string>
+    <string name="no_internet_connection">Du bist nicht mit dem Internet verbunden.</string>
+    <string name="fragment_apps_empty">Es wurden keine aktiven Apps gefunden.</string>
+    <string name="error_general">Es ist ein Fehler aufgetreten. Versuche es erneut.</string>
+    <string name="apps_search">Apps durchsuchen…</string>
+    <string name="action_about">Über</string>
+    <string name="close">Schließen</string>
+    <string name="dialog_about_text">WSC-Connect verbindet alle deine Lieblingsseiten, die auf dem WSC (WoltLab&#174; Suite Core) basieren, in einer App. Erhalte Push-Nachrichten für neue Benachrichtigungen und vieles mehr.\n\n<b>Du besitzt eine WSC basierte Website?</b> Besuche <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> und registriere deine Seite jetzt!\n\nWSC-Connect steht in keiner Verbindung mit der WoltLab&#174; GmbH.\n\n<b>Kontakt</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Impressum</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nDeutschland</string>
+    <string name="fragment_app_options_notifications">Benachrichtigungen von %1$s</string>
+    <string name="fragment_app_options_messages">Push-Nachrichten</string>
+    <string name="fragment_app_messagess_empty">Keine Push-Nachrichten gefunden</string>
+    <string name="fragment_app_messagess_loading_info">Lade Push-Nachrichten für %1$s…</string>
+    <string name="error_request_api_not_available">Unser Server ist gerade beschäftigt. Versuche es in wenigen Minuten erneut.</string>
+
+    <array name="list_app_dialog_items">
+        <item>Mit einem anderen Account einloggen.</item>
+        <item>Logout</item>
+    </array>
+</resources>

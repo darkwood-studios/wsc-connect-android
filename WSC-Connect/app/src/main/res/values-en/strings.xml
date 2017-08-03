@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">WSC-Connect</string>
+    <string name="title_apps">Apps</string>
+    <string name="title_my_apps">My Apps</string>
+    <string name="required">Required</string>
+    <string name="list_app_loggedIn">Logged in as: %1$s</string>
+    <string name="just_now">Just now</string>
+    <string name="dialog_login_username">Username</string>
+    <string name="dialog_login_password">Password / Auth-Token</string>
+    <string name="dialog_login_title">Login for %1$s</string>
+    <string name="dialog_login_third_party">Third-party login</string>
+    <string name="dialog_login_third_party_info">Use the third-party login when you used a third-party login for %1$s.</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="login_failed">Login failed</string>
+    <string name="login_failed_global">An error occurred while logging you in. Try again.</string>
+    <string name="fragment_app_notifications_loading_info">Loading notifications for %1$s…</string>
+    <string name="fragment_accounts_empty">You are not logged in to any app.</string>
+    <string name="fragment_accounts_login">Login now!</string>
+    <string name="fragment_app_notifications_empty">No recent notifications</string>
+    <string name="fragment_app_notifications_app_removed">%1$s is no available anymore. You have been logged out.</string>
+    <string name="firebase_token_required">Your push-token is not generated yet. Please try again.</string>
+    <string name="no_internet_connection">You are not connected to the internet.</string>
+    <string name="fragment_apps_empty">No active apps found</string>
+    <string name="error_general">An error occurred. Try again.</string>
+    <string name="apps_search">Search apps…</string>
+    <string name="action_about">About</string>
+    <string name="close">Close</string>
+    <string name="dialog_about_text">WSC-Connect connects all your favorite WSC (WoltLab&#174; Suite Core)-Apps in one place. Receive notifications via push message and much more.\n\n<b>You own a WSC-App</b>? Visit <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> and register your App now!\n\nWSC-Connect is not associated with the WoltLab&#174; GmbH.\n\n<b>Contact</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Legal Notice</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nGermany</string>
+    <string name="fragment_app_options_notifications">Notifications on %1$s</string>
+    <string name="fragment_app_options_messages">Push-Messages</string>
+    <string name="fragment_app_messagess_empty">No push messages found</string>
+    <string name="fragment_app_messagess_loading_info">Loading push messages for %1$s…</string>
+    <string name="error_request_api_not_available">Our server is busy, try again in a few minutes.</string>
+
+    <array name="list_app_dialog_items">
+        <item>Login with a different account</item>
+        <item>Logout</item>
+    </array>
+</resources>
