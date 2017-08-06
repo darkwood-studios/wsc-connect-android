@@ -32,12 +32,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -46,9 +43,7 @@ import retrofit2.Response;
 import wscconnect.android.activities.MainActivity;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
-import wscconnect.android.fragments.myApps.AppOptionsFragment;
 import wscconnect.android.models.AccessTokenModel;
-import wscconnect.android.models.NotificationModel;
 
 import static wscconnect.android.activities.MainActivity.EXTRA_NOTIFICATION;
 import static wscconnect.android.activities.MainActivity.EXTRA_OPTION_TYPE;
@@ -70,8 +65,11 @@ public class Utils {
     }
 
     public static void hideProgressView(View view, ProgressBar bar, boolean makeViewVisible) {
-        ViewGroup vg = (ViewGroup) bar.getParent();
-        vg.removeView(bar);
+        if (bar != null) {
+            ViewGroup vg = (ViewGroup) bar.getParent();
+            vg.removeView(bar);
+        }
+
         if (makeViewVisible) {
             view.setVisibility(View.VISIBLE);
         }
@@ -91,6 +89,12 @@ public class Utils {
         return progressBar;
     }
 
+
+    public static void logout(Context context, String appID) {
+        Utils.saveUnreadNotifications(context, appID, 0);
+        Utils.removeAccessTokenString(context, appID);
+    }
+
     public static void saveAccessToken(Context context, String appID, String accessToken) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
         prefs.edit().putString("accessToken-" + appID, accessToken).apply();
@@ -99,6 +103,16 @@ public class Utils {
     public static void saveRefreshToken(Context context, String appID, String accessToken) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
         prefs.edit().putString("refreshToken-" + appID, accessToken).apply();
+    }
+
+    public static void saveUnreadNotifications(Context context, String appID, int count) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putInt("unreadNotifications-" + appID, count).apply();
+    }
+
+    public static int getUnreadNotifications(Context context, String appID) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        return prefs.getInt("unreadNotifications-" + appID, 0);
     }
 
     public static String getAccessTokenString(Context context, String appID) {
@@ -143,7 +157,7 @@ public class Utils {
         Collections.sort(tokens, new Comparator<AccessTokenModel>() {
             @Override
             public int compare(AccessTokenModel t1, AccessTokenModel t2) {
-                return t1.getAppName().compareTo(t2.getAppName());
+                return t1.getAppName().compareToIgnoreCase(t2.getAppName());
             }
         });
 
@@ -193,11 +207,7 @@ public class Utils {
         });
     }
 
-    private static int createNotificationID() {
-        return Integer.parseInt(new SimpleDateFormat("mmssSSS", Locale.US).format(new Date()));
-    }
-
-    public static void showSimpleNotification(Context context, String title, String message) {
+    public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, Bitmap largeIcon) {
         NotificationManager mNotificationManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -208,47 +218,26 @@ public class Utils {
 
         notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
 
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.setAction(Long.toString(System.currentTimeMillis()));
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notificationBuilder.setContentIntent(contentIntent);
-
-        notificationBuilder.setAutoCancel(true);
-        notificationBuilder.setContentTitle(title);
-        notificationBuilder.setContentText(message);
-        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
-
-        mNotificationManager.notify(createNotificationID(), notificationBuilder.build());
-    }
-
-    public static void showDataNotification(Context context, String appID, String appName, Bitmap appLogo, NotificationModel notification) {
-        NotificationManager mNotificationManager = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
-        }
-
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
-
-        if (appLogo != null) {
-            notificationBuilder.setLargeIcon(appLogo);
+        if (largeIcon != null) {
+            notificationBuilder.setLargeIcon(largeIcon);
         }
 
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction(Long.toString(System.currentTimeMillis()));
         intent.putExtra(EXTRA_NOTIFICATION, appID);
-        intent.putExtra(EXTRA_OPTION_TYPE, AppOptionsFragment.OPTION_TYPE_NOTIFICATIONS);
+        if (optionType != null) {
+            intent.putExtra(EXTRA_OPTION_TYPE, optionType);
+        }
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(contentIntent);
 
         notificationBuilder.setAutoCancel(true);
-        notificationBuilder.setContentTitle(appName);
-        notificationBuilder.setContentText(notification.getMessage());
-        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(notification.getMessage()));
+        notificationBuilder.setContentTitle(title);
+        message = Utils.fromHtml(message).toString();
+        notificationBuilder.setContentText(message);
+        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
 
-        mNotificationManager.notify(notification.getTime(), notificationBuilder.build());
+        mNotificationManager.notify(tag, id, notificationBuilder.build());
     }
 
     public static void showFullScreenPhotoDialog(final Activity activity, String photoURL) {

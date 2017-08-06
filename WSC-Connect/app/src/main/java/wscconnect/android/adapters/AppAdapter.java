@@ -75,6 +75,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
         } else {
             holder.loggedIn.setVisibility(View.GONE);
         }
+
+        int unreadNotifications = Utils.getUnreadNotifications(activity, app.getAppID());
+        if (unreadNotifications > 0) {
+            holder.unreadNotifications.setText(String.valueOf(unreadNotifications));
+            holder.unreadNotifications.setVisibility(View.VISIBLE);
+        } else {
+            holder.unreadNotifications.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -93,7 +101,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                 Utils.hideProgressView(loggedIn, progressBar);
 
                 // we ignore errors and just log the user out
-                Utils.removeAccessTokenString(activity, app.getAppID());
+                Utils.logout(activity, app.getAppID());
                 notifyItemChanged(position);
                 activity.updateMyAppsFragment();
             }
@@ -214,6 +222,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                         notifyItemChanged(position);
                         dialog.dismiss();
 
+                        activity.setNotificationAppID(app.getAppID());
                         activity.updateMyAppsFragment();
                         activity.setActiveMenuItem(R.id.navigation_my_apps);
                     } catch (IOException | JSONException e) {
@@ -238,7 +247,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
 
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name, url, loggedIn;
+        public TextView name, url, loggedIn, unreadNotifications;
         public ImageView logo;
 
         public MyViewHolder(View view) {
@@ -246,6 +255,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             name = (TextView) view.findViewById(R.id.list_app_name);
             url = (TextView) view.findViewById(R.id.list_app_url);
             loggedIn = (TextView) view.findViewById(R.id.list_app_loggedIn);
+            unreadNotifications = (TextView) view.findViewById(R.id.list_app_unread_notifications);
             logo = (ImageView) view.findViewById(R.id.list_app_logo);
 
             view.setOnClickListener(new View.OnClickListener() {

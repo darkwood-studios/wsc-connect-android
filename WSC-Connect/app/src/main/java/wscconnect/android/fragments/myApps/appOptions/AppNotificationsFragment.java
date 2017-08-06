@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import retrofit2.Response;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.activities.MainActivity;
+import wscconnect.android.adapters.AppOptionAdapter;
 import wscconnect.android.adapters.NotificationAdapter;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
@@ -42,7 +44,8 @@ public class AppNotificationsFragment extends Fragment {
     private LinearLayout loadingView;
     private TextView loadingTextView;
     private TextView emptyView;
-    private boolean loading;
+    private Call<List<NotificationModel>> apiCall;
+    private boolean loadData;
 
     public AppNotificationsFragment() {
 
@@ -53,17 +56,20 @@ public class AppNotificationsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
+        loadData = getArguments().getBoolean(AppOptionAdapter.EXTRA_LOAD_DATA, true);
 
         activity = (MainActivity) getActivity();
         notificationList = new ArrayList<>();
-        notificationAdapter = new NotificationAdapter(activity, notificationList, (AppOptionsFragment) getParentFragment());
+        notificationAdapter = new NotificationAdapter(activity, notificationList, token, (AppOptionsFragment) getParentFragment());
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(notificationAdapter);
 
-        loadingTextView.setText(getString(R.string.fragment_app_notifications_loading_info, token.getAppName()));
-        loadNotifications(null);
+        if (loadData) {
+            loadingTextView.setText(getString(R.string.fragment_app_notifications_loading_info, token.getAppName()));
+            loadNotifications(null);
+        }
     }
 
     public void setToken(AccessTokenModel token) {
@@ -76,25 +82,25 @@ public class AppNotificationsFragment extends Fragment {
             setEmptyView();
             return;
         }
-
-        if (loading) {
-            callCallback(callback, false);
-            return;
-        }
-
-        loading = true;
+        Log.i("noqwe", "loadingNotificaions " + token.getAppName());
 
         if (callback == null) {
             loadingView.setVisibility(View.VISIBLE);
         }
 
         final AccessTokenModel finalToken = token;
-        activity.getAPI(token.getToken()).getNotifications(token.getAppID()).enqueue(new RetroCallback<List<NotificationModel>>(activity) {
+
+        // cancel previous api calls
+        if (apiCall != null) {
+            apiCall.cancel();
+        }
+
+        apiCall = activity.getAPI(token.getToken()).getNotifications(token.getAppID());
+        apiCall.enqueue(new RetroCallback<List<NotificationModel>>(activity) {
             @Override
             public void onResponse(Call<List<NotificationModel>> call, Response<List<NotificationModel>> response) {
                 super.onResponse(call, response);
-
-                loading = false;
+                Log.i("noqwe", "onResponse " + token.getAppName() + " code: " + response.code());
 
                 if (response.isSuccessful()) {
                     loadingView.setVisibility(GONE);
@@ -104,6 +110,22 @@ public class AppNotificationsFragment extends Fragment {
                     notificationList.addAll(response.body());
                     notificationAdapter.notifyDataSetChanged();
 
+                    int oldUnreadNotifications = Utils.getUnreadNotifications(activity, token.getAppID());
+                    int newUnreadNotifications = 0;
+                    for (NotificationModel notification : notificationList) {
+                        if (!notification.isConfirmed()) {
+                            newUnreadNotifications++;
+                        }
+                    }
+
+                    if (oldUnreadNotifications != newUnreadNotifications) {
+                        Utils.saveUnreadNotifications(activity, token.getAppID(), newUnreadNotifications);
+                        activity.updateAppsFragment();
+                        AppOptionsFragment parentFragment = (AppOptionsFragment) getParentFragment();
+                        parentFragment.resetAdapter();
+                        parentFragment.setCustomTabView();
+                    }
+
                     setEmptyView();
                     callCallback(callback, true);
                 } else if (response.code() == 401) {
@@ -111,15 +133,16 @@ public class AppNotificationsFragment extends Fragment {
                         @Override
                         public void onReady(boolean success) {
                             if (success) {
-                                loadNotifications(null);
+                                loadNotifications(callback);
                             } else {
+                                callCallback(callback, false);
                                 // TODO show info to refresh manually
                             }
                         }
                     });
                 } else if (response.code() == 404) {
                     // app has not been found in the database, remove
-                    Utils.removeAccessTokenString(activity, token.getAppID());
+                    Utils.logout(activity, token.getAppID());
                     activity.updateAllFragments();
                     Toast.makeText(activity, activity.getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
                 } else {
@@ -134,8 +157,6 @@ public class AppNotificationsFragment extends Fragment {
             @Override
             public void onFailure(Call<List<NotificationModel>> call, Throwable t) {
                 super.onFailure(call, t);
-
-                loading = false;
 
                 loadingView.setVisibility(GONE);
                 recyclerView.setVisibility(View.VISIBLE);

@@ -21,6 +21,7 @@ import retrofit2.Response;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.activities.MainActivity;
+import wscconnect.android.adapters.AppOptionAdapter;
 import wscconnect.android.adapters.MessageAdapter;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
@@ -43,6 +44,7 @@ public class AppMessagesFragment extends Fragment {
     private TextView loadingTextView;
     private TextView emptyView;
     private boolean loading;
+    private boolean loadData;
 
     public AppMessagesFragment() {
 
@@ -53,6 +55,7 @@ public class AppMessagesFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
+        loadData = getArguments().getBoolean(AppOptionAdapter.EXTRA_LOAD_DATA, true);
 
         activity = (MainActivity) getActivity();
         messageList = new ArrayList<>();
@@ -62,9 +65,11 @@ public class AppMessagesFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(messageAdapter);
 
-        loadingTextView.setText(getString(R.string.fragment_app_messagess_loading_info, token.getAppName()));
-        Log.i(MainActivity.TAG, "AppMessagesFragment onActivityCreated loadMessages()");
-        loadMessages(null);
+        if (loadData) {
+            loadingTextView.setText(getString(R.string.fragment_app_messagess_loading_info, token.getAppName()));
+            Log.i(MainActivity.TAG, "AppMessagesFragment onActivityCreated loadMessages()");
+            loadMessages(null);
+        }
     }
 
     public void setToken(AccessTokenModel token) {
@@ -123,7 +128,7 @@ public class AppMessagesFragment extends Fragment {
                     });
                 } else if (response.code() == 404) {
                     // app has not been found in the database, remove
-                    Utils.removeAccessTokenString(activity, token.getAppID());
+                    Utils.logout(activity, token.getAppID());
                     activity.updateAllFragments();
                     Toast.makeText(activity, activity.getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
                 } else {

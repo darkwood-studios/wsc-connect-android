@@ -32,6 +32,9 @@
     <string name="fragment_app_messagess_empty">Keine Push-Nachrichten gefunden</string>
     <string name="fragment_app_messagess_loading_info">Lade Push-Nachrichten für %1$s…</string>
     <string name="error_request_api_not_available">Unser Server ist gerade beschäftigt. Versuche es in wenigen Minuten erneut.</string>
+    <string name="error_app_version_title">App-Version veraltet</string>
+    <string name="error_app_version_message">Deine installierte App-Version ist veraltet. Um die App weiterhin zu nutzen, musst du ein Update durchführen.</string>
+    <string name="error_app_version_button">Zum Play-Store</string>
 
     <array name="list_app_dialog_items">
         <item>Mit einem anderen Account einloggen.</item>

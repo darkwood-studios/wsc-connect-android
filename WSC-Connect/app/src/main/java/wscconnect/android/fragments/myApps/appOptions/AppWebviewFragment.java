@@ -21,6 +21,7 @@ import wscconnect.android.models.AccessTokenModel;
  */
 
 public class AppWebviewFragment extends Fragment {
+    private final static String USER_AGENT = "WSC-Connect Mobile Browser 1.0";
     private MainActivity activity;
     private AccessTokenModel token;
     private WebView webview;
@@ -46,6 +47,7 @@ public class AppWebviewFragment extends Fragment {
         WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
+        webSettings.setUserAgentString(USER_AGENT);
         webview.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {

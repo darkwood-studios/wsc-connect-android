@@ -32,6 +32,9 @@
     <string name="fragment_app_messagess_empty">No push messages found</string>
     <string name="fragment_app_messagess_loading_info">Loading push messages for %1$s…</string>
     <string name="error_request_api_not_available">Our server is busy, try again in a few minutes.</string>
+    <string name="error_app_version_title">Outdated app version</string>
+    <string name="error_app_version_message">Your installed app version is outdated. To continue using the app, please update it.</string>
+    <string name="error_app_version_button">Visit the Play-Store</string>
 
     <array name="list_app_dialog_items">
         <item>Login with a different account</item>

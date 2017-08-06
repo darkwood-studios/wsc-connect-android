@@ -11,6 +11,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -161,7 +162,7 @@ public class AppsFragment extends Fragment {
                     appAdapter.notifyDataSetChanged();
                     originalAppList.clear();
                     originalAppList.addAll(response.body());
-                } else if (response.code() != 501 && response.code() != 502){
+                } else if (response.code() != 501 && response.code() != 502) {
                     Toast.makeText(activity, R.string.error_general, Toast.LENGTH_SHORT).show();
                 }
 
@@ -171,6 +172,8 @@ public class AppsFragment extends Fragment {
             @Override
             public void onFailure(Call<List<AppModel>> call, Throwable t) {
                 super.onFailure(call, t);
+
+                Log.i(MainActivity.TAG, t.getMessage());
 
                 swipeRefreshView.setRefreshing(false);
                 loadingView.setVisibility(View.GONE);

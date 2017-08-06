@@ -14,6 +14,7 @@ public class NotificationModel {
     private String message;
     private String link;
     private String logo;
+    private String avatar;
     private int time;
     private boolean confirmed;
 
@@ -75,5 +76,18 @@ public class NotificationModel {
         }
 
         return DateUtils.getRelativeTimeSpanString(time * 1000, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
+    }
+
+    public String getAvatar() {
+        // glide can't properly handle .svg
+        if (avatar == null || avatar.endsWith(".svg")) {
+            return "";
+        }
+
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

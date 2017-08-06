@@ -14,9 +14,9 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
-import wscconnect.android.MainApplication;
 import wscconnect.android.Utils;
-import wscconnect.android.models.NotificationModel;
+import wscconnect.android.fragments.myApps.AppOptionsFragment;
+import wscconnect.android.models.AccessTokenModel;
 
 /**
  * Created by chris on 25.04.17.
@@ -34,19 +34,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (from.equals(GCM_SENDER_ID)) {
             String action = data.get("action");
 
-            if (message.getNotification() != null) {
-                handleSimpleNotification(message.getNotification());
-                return;
-            }
-
-            // push message from wsc-connect.com dashboard including the appID
-            if (data.get("extraNotification") != null) {
-                String appID = data.get("extraNotification");
-                ((MainApplication) getApplication()).executeOnNewPushMessageListener(appID);
-                return;
-            }
-
             if (action == null) {
+                return;
+            }
+
+            String appID = data.get("appID");
+            AccessTokenModel token = Utils.getAccessToken(this, appID);
+
+            // we are logged out in the app, but still available on the sever. Just ignore this one.
+            if (token == null) {
                 return;
             }
 
@@ -54,51 +50,56 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 case "notification":
                     handleNotification(data);
                     break;
+                case "message":
+                    handleMessage(data);
+                    break;
             }
         }
 
     }
 
-    private void handleSimpleNotification(RemoteMessage.Notification notification) {
-        Utils.showSimpleNotification(this, notification.getTitle(), notification.getBody());
+    private void handleMessage(Map<String, String> data) {
+        String title = data.get("title");
+        String message = data.get("message");
+        String appLogo = data.get("appLogo");
+        String appID = data.get("appID");
+
+        String tag = appID + AppOptionsFragment.OPTION_TYPE_MESSAGES;
+
+        createNotification(tag, (int) System.currentTimeMillis(), appID, AppOptionsFragment.OPTION_TYPE_MESSAGES, title, message, appLogo);
     }
 
-    private void handleNotification(Map data) {
-        String message = (String) data.get("message");
-        String logo = (String) data.get("logo");
-        String link = (String) data.get("link");
-        String appName = (String) data.get("appName");
-        String appID = (String) data.get("appID");
-        int time = Integer.valueOf((String) data.get("time"));
-        boolean confirmed = Boolean.valueOf((String) data.get("confirmed"));
+    private void handleNotification(Map<String, String> data) {
+        String message = data.get("message");
+        String logo = data.get("logo");
+        String appName = data.get("appName");
+        String appID = data.get("appID");
+        String eventHash = (data.get("eventHash") == null) ? "" : data.get("eventHash");
+        int authorID = Integer.parseInt((data.get("authorID") == null) ? "0" : data.get("authorID"));
 
-        NotificationModel notification = new NotificationModel();
-        notification.setMessage(message);
-        notification.setLogo(logo);
-        notification.setLink(link);
-        notification.setTime(time);
-        notification.setConfirmed(confirmed);
+        // create app/event unique tag
+        String tag = appID + eventHash;
 
-        createNotification(appID, appName, notification);
+        createNotification(tag, authorID, appID, AppOptionsFragment.OPTION_TYPE_NOTIFICATIONS, appName, message, logo);
     }
 
-    private void createNotification(final String appID, final String appName, final NotificationModel notification) {
+    private void createNotification(final String notificationTag, final int notificationID, final String appID, final String optionType, final String title, final String message, final String largeIcon) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 Glide.with(getApplicationContext())
                         .asBitmap()
-                        .load(notification.getLogo())
+                        .load(largeIcon)
                         .into(new SimpleTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                                Utils.showDataNotification(MyFirebaseMessagingService.this, appID, appName, resource, notification);
+                                Utils.showDataNotification(MyFirebaseMessagingService.this, notificationTag, notificationID, appID, optionType, title, message, resource);
                             }
 
                             @Override
                             public void onLoadFailed(@Nullable Drawable errorDrawable) {
                                 super.onLoadFailed(errorDrawable);
-                                Utils.showDataNotification(MyFirebaseMessagingService.this, appID, appName, null, notification);
+                                Utils.showDataNotification(MyFirebaseMessagingService.this, notificationTag, notificationID, appID, optionType, title, message, null);
                             }
                         });
             }

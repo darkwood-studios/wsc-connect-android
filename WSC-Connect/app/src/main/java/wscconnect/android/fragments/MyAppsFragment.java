@@ -15,8 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import wscconnect.android.R;
 import wscconnect.android.Utils;
@@ -24,6 +26,7 @@ import wscconnect.android.activities.MainActivity;
 import wscconnect.android.fragments.myApps.AppOptionsFragment;
 import wscconnect.android.listeners.OnBackPressedListener;
 import wscconnect.android.models.AccessTokenModel;
+import wscconnect.android.models.AppOptionModel;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,7 +41,7 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
     private Button loginView;
     private SparseArray<AppOptionsFragment> optionFragments;
     private String appIDToSelect;
-    private String optionTypeToSelect;
+    private HashMap<String, String> optionTypeToSelect = new HashMap<>();
 
     public MyAppsFragment() {
         // Required empty public constructor
@@ -59,7 +62,6 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(3);
         tabLayout.setupWithViewPager(viewPager, true);
-
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -75,6 +77,8 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
             }
         });
 
+        setCustomTabView();
+
         loginView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,15 +87,31 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
         });
 
         setEmptyView();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (appIDToSelect != null && tokenList != null) {
-            selectApp(appIDToSelect, optionTypeToSelect);
+            Log.i(MainActivity.TAG, "onActivityCreated optionTypeToSelect.get(appIDToSelect) " + optionTypeToSelect.get(appIDToSelect));
+            selectApp(appIDToSelect, optionTypeToSelect.get(appIDToSelect));
+        }
+    }
+
+    public void setCustomTabView() {
+        Log.i("tabfailure", "setCustomTabView tabLayout.getTabCount() " + tabLayout.getTabCount());
+        // Iterate over all tabs and set the custom view
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            tab.setCustomView(null);
+            tab.setCustomView(pagerAdapter.getTabView(i));
         }
     }
 
     public void selectApp(String appID, String optionType) {
+        Log.i(MainActivity.TAG, "selectApp");
         if (tokenList != null) {
-            Log.i(MainActivity.TAG, "tokenList != null");
             int position = -1;
 
             for (int i = 0; i < tokenList.size(); i++) {
@@ -100,29 +120,31 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
                     break;
                 }
             }
-            Log.i(MainActivity.TAG, "position: " + position);
 
             if (position != -1) {
                 viewPager.setCurrentItem(position);
                 pagerAdapter.notifyDataSetChanged();
+                setCustomTabView();
 
                 if (optionType != null) {
                     AppOptionsFragment fragment = optionFragments.get(position);
-
-                    switch (optionType) {
-                        case AppOptionsFragment.OPTION_TYPE_NOTIFICATIONS:
-                            fragment.showOption(AppOptionsFragment.OPTION_TYPE_NOTIFICATIONS);
-                            break;
+                    if (fragment != null) {
+                        Log.i(MainActivity.TAG, "selectApp position " + position);
+                        fragment.showOption(optionType);
+                    } else {
+                        optionTypeToSelect.put(appID, optionType);
                     }
                 }
             }
         } else {
+            Log.i(MainActivity.TAG, "selectApp else");
             appIDToSelect = appID;
-            optionTypeToSelect = optionType;
+            optionTypeToSelect.put(appID, optionType);
         }
     }
 
     public void updateAdapter() {
+        Log.i("tabfailure", "MyAppsFragment updateAdapter");
         tokenList.clear();
         tokenList.addAll(Utils.getAllAccessTokens(activity));
         pagerAdapter.notifyDataSetChanged();
@@ -161,6 +183,7 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
     }
 
     public void resetCurrentApp() {
+        Log.i("tabfailure", "MyAppsFragment resetCurrentApp");
         AppOptionsFragment fragment = optionFragments.get(viewPager.getCurrentItem());
         fragment.resetViews();
     }
@@ -179,24 +202,19 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
 
         @Override
         public long getItemId(int position) {
-            Log.i(MainActivity.TAG, "Pager getItemId " + tokenList.get(position).getUniqueID());
             return tokenList.get(position).getUniqueID();
         }
 
         @Override
         public Fragment getItem(int position) {
-            Log.i(MainActivity.TAG, "Pager getItem position " + position);
-            Log.i(MainActivity.TAG, "Pager getItem appID " + tokenList.get(position).getAppID() + " " + tokenList.get(position).getUsername());
-            for (AccessTokenModel token : tokenList) {
-                Log.i(MainActivity.TAG, "Pager getItem tokenList entry " + token.getAppID() + " " + token.getUserID());
-
-            }
-
             //AppOptionsFragment fragment = fragments.get(position);
             //if (fragment == null) {
             AppOptionsFragment fragment = new AppOptionsFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable(AccessTokenModel.EXTRA, tokenList.get(position));
+            bundle.putString(AppOptionModel.TYPE, optionTypeToSelect.get(tokenList.get(position).getAppID()));
+            // reset after creating
+            optionTypeToSelect.remove(tokenList.get(position).getAppID());
             fragment.setArguments(bundle);
             optionFragments.append(position, fragment);
             //fragments.put(position, fragment);
@@ -211,13 +229,11 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
 
             // check if fragment still exists or should be removed
             boolean removeFragment = true;
-            Log.i(MainActivity.TAG, "getItemPosition fragment.token: " + fragment.token.getAppID() + " " + fragment.token.getUsername());
 
             int index = 0;
             for (int i = 0; i < tokenList.size(); i++) {
                 AccessTokenModel token = tokenList.get(i);
 
-                Log.i(MainActivity.TAG, "getItemPosition token: " + token.getAppID() + " " + token.getUsername());
                 if (token.getAppID().equals(fragment.token.getAppID())) {
                     index = i;
                     removeFragment = false;
@@ -246,24 +262,24 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
             } else {
                 return index;
             }
+        }
 
-            //return POSITION_NONE;
+        public View getTabView(int position) {
+            View v = activity.getLayoutInflater().inflate(R.layout.my_apps_tab, null);
+            TextView title = (TextView) v.findViewById(R.id.my_apps_tabs_title);
+            TextView unreadNotificationsView = (TextView) v.findViewById(R.id.my_apps_tabs_unread_notifications);
+            title.setText(tokenList.get(position).getAppName());
 
-            /*if (object != null && object instanceof AppOptionsFragment) {
-                AppOptionsFragment fragment = (AppOptionsFragment) object;
+            int unreadNotifications = Utils.getUnreadNotifications(activity, tokenList.get(position).getAppID());
+            Log.i("tabfailure", "getTabView unreadNotifications" + unreadNotifications);
 
-                int index = tokenList.indexOf(fragment.token);
-                Log.i(MainActivity.TAG, "MyAppsFragment index = " + index);
-
-                if (index != -1) {
-                    //fragment.update();
-                    return POSITION_UNCHANGED;
-                } else {
-                    return POSITION_NONE;
-                }
+            if (unreadNotifications > 0) {
+                unreadNotificationsView.setText(String.valueOf(unreadNotifications));
+                unreadNotificationsView.setVisibility(View.VISIBLE);
             } else {
-                return super.getItemPosition(object);
-            }*/
+                unreadNotificationsView.setVisibility(View.GONE);
+            }
+            return v;
         }
 
         @Override

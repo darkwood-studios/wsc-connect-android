@@ -12,8 +12,10 @@ import java.util.List;
 
 import wscconnect.android.GlideApp;
 import wscconnect.android.R;
+import wscconnect.android.Utils;
 import wscconnect.android.activities.MainActivity;
 import wscconnect.android.fragments.myApps.AppOptionsFragment;
+import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.NotificationModel;
 
 /**
@@ -22,13 +24,15 @@ import wscconnect.android.models.NotificationModel;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.MyViewHolder> {
     private final AppOptionsFragment fragment;
+    private final AccessTokenModel token;
     private MainActivity activity;
     private List<NotificationModel> notificationList;
 
-    public NotificationAdapter(MainActivity activity, List<NotificationModel> notificationList, AppOptionsFragment fragment) {
+    public NotificationAdapter(MainActivity activity, List<NotificationModel> notificationList, AccessTokenModel token, AppOptionsFragment fragment) {
         this.activity = activity;
         this.notificationList = notificationList;
         this.fragment = fragment;
+        this.token = token;
     }
 
     @Override
@@ -45,7 +49,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         holder.message.setText(notification.getMessage());
         holder.time.setText(notification.getRelativeTime(activity));
-        GlideApp.with(activity).load(notification.getLogo()).error(R.drawable.ic_person_black_50dp).circleCrop().into(holder.avatar);
+        GlideApp.with(activity).load(notification.getAvatar()).error(R.drawable.ic_person_black_50dp).circleCrop().into(holder.avatar);
 
         if (!notification.isConfirmed()) {
             holder.message.setTypeface(null, Typeface.BOLD);
@@ -72,8 +76,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    NotificationModel n = notificationList.get(getAdapterPosition());
+                    int position = getAdapterPosition();
+                    NotificationModel n = notificationList.get(position);
                     fragment.showOption(AppOptionsFragment.OPTION_TYPE_WEBVIEW, n.getLink());
+
+                    if (!n.isConfirmed()) {
+                        n.setConfirmed(true);
+                        notifyItemChanged(position);
+                        Utils.saveUnreadNotifications(activity, token.getAppID(), Utils.getUnreadNotifications(activity, token.getAppID()) - 1);
+                        activity.updateAppsFragment();
+                        fragment.resetAdapter();
+                        fragment.setCustomTabView();
+                    }
                 }
             });
         }

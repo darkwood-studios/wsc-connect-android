@@ -1,6 +1,10 @@
 package wscconnect.android.callbacks;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import retrofit2.Call;
@@ -47,7 +51,19 @@ public class RetroCallback<T> implements Callback<T> {
         switch (response.code()) {
             // app version too old
             case 501:
-                // TODO show dialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(R.string.error_app_version_title);
+                builder.setMessage(R.string.error_app_version_message);
+                builder.setCancelable(false);
+                builder.setPositiveButton(R.string.error_app_version_button, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse("market://details?id=wscconnect.android"));
+                        context.startActivity(intent);
+                    }
+                });
+                builder.show();
                 break;
             // api down
             case 502:

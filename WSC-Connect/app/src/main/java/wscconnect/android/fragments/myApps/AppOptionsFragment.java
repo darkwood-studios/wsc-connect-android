@@ -1,6 +1,7 @@
 package wscconnect.android.fragments.myApps;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -32,6 +33,7 @@ import wscconnect.android.Utils;
 import wscconnect.android.activities.MainActivity;
 import wscconnect.android.adapters.AppOptionAdapter;
 import wscconnect.android.callbacks.RetroCallback;
+import wscconnect.android.fragments.MyAppsFragment;
 import wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment;
 import wscconnect.android.listeners.OnTokenUpdateListener;
 import wscconnect.android.models.AccessTokenModel;
@@ -58,6 +60,7 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
     private TextView accountUsernameView;
     private TextView accountAppNameView;
     private ImageButton accountOverflowView;
+    private String optionType;
 
     public AppOptionsFragment() {
 
@@ -66,12 +69,9 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.i(MainActivity.TAG, (savedInstanceState == null) ? "onActivityCreated savedInstanceState == null" : "onActivitCreated savedInstanceState != null");
-        if (savedInstanceState != null) {
-            Log.i(MainActivity.TAG, "savedInstanceState token = " + savedInstanceState.getParcelable(AccessTokenModel.EXTRA));
-        }
 
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
+        optionType = getArguments().getString(AppOptionModel.TYPE);
 
         activity = (MainActivity) getActivity();
         fManager = getChildFragmentManager();
@@ -113,10 +113,27 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
 
         loadUser();
         loadOptions();
+        if (optionType != null) {
+            showOption(optionType);
+            // reset
+            optionType = null;
+        } else {
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    final AppOptionAdapter.MyViewHolder notificationView = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(getPositionInRecyclerView(OPTION_TYPE_NOTIFICATIONS));
+
+                    if (notificationView != null) {
+                        notificationView.loadDropdownFragment(false);
+                        notificationView.refreshClicked();
+                    }
+                }
+            }, 10);
+        }
     }
 
     private void loadUser() {
-        Log.i(MainActivity.TAG, "loadUser username:" + token.getUsername() + " appID " + token.getAppID());
         accountUsernameView.setText(token.getUsername());
         accountAppNameView.setText(token.getAppName());
         GlideApp.with(activity).load(token.getAvatar()).error(R.drawable.ic_person_black_50dp).circleCrop().into(accountAvatarView);
@@ -146,7 +163,13 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
         optionList.add(notificationsOption);
         optionList.add(messageOptions);
 
-        appOptionAdapter.notifyDataSetChanged();
+        resetAdapter();
+    }
+
+    public void resetAdapter() {
+        if (appOptionAdapter != null) {
+            appOptionAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -176,7 +199,7 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
 
                 // we ignore errors and just log the user out
                 Utils.hideProgressView(accountOverflowView, progressBar);
-                Utils.removeAccessTokenString(activity, token.getAppID());
+                Utils.logout(activity, token.getAppID());
 
                 activity.updateAppsFragment();
                 activity.updateMyAppsFragment();
@@ -213,23 +236,45 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
         optionsLayoutView.setVisibility(View.VISIBLE);
     }
 
+    public int getPositionInRecyclerView(String optionType) {
+        // TODO later: check token, which options are enabled
+
+        switch (optionType) {
+            case OPTION_TYPE_WEBVIEW:
+                return 0;
+            case OPTION_TYPE_NOTIFICATIONS:
+                return 1;
+            case OPTION_TYPE_MESSAGES:
+                return 2;
+        }
+
+        return -1;
+    }
+
     public void showOption(String type) {
         showOption(type, null);
     }
 
-    public void showOption(String type, String webviewUrl) {
+    public void showOption(final String type, String webviewUrl) {
+        Log.i(MainActivity.TAG, "showOption type " + type);
         switch (type) {
+            case OPTION_TYPE_MESSAGES:
             case OPTION_TYPE_NOTIFICATIONS:
-                // TODO not working right now
-                //appOptionAdapter.performOptionClick(OPTION_TYPE_NOTIFICATIONS);
-                AppOptionAdapter.MyViewHolder vH = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(1);
+                // delay action, because recyclerviews viewholder might not be initialized
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppOptionAdapter.MyViewHolder notificationView = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(getPositionInRecyclerView(type));
 
-                if (vH == null)
-                loadOptions();
-                vH = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(1);
-
-                Log.i("vHd", (vH == null) ? "vH == null" : "vh != null");
-                vH.itemView.performClick();
+                        if (notificationView != null) {
+                            if (type.equals(OPTION_TYPE_NOTIFICATIONS)) {
+                                notificationView.refreshClicked();
+                            } else {
+                                notificationView.itemView.performClick();
+                            }
+                        }
+                    }
+                }, 10);
                 break;
             case OPTION_TYPE_WEBVIEW:
                 Fragment fragment;
@@ -280,6 +325,13 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
         if (contentView != null && optionsLayoutView != null) {
             contentView.setVisibility(View.GONE);
             optionsLayoutView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void setCustomTabView() {
+        MyAppsFragment parentFragment = (MyAppsFragment) getParentFragment();
+        if (parentFragment != null) {
+            parentFragment.setCustomTabView();
         }
     }
 }

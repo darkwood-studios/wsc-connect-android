@@ -5,6 +5,7 @@ package wscconnect.android.models;
  */
 
 public class AppOptionModel {
+    public final static String TYPE = "extraType";
     private String title;
     private int icon;
     private String iconUrl;

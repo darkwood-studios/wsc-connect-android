@@ -8,21 +8,23 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.GsonBuilder;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import io.fabric.sdk.android.Fabric;
 import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -30,14 +32,11 @@ import okhttp3.Request;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import wscconnect.android.API;
-import wscconnect.android.MainApplication;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.fragments.MyAppsFragment;
-import wscconnect.android.fragments.myApps.AppOptionsFragment;
 import wscconnect.android.listeners.OnBackPressedListener;
-import wscconnect.android.listeners.OnNewPushMessageListener;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -66,10 +65,14 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_my_apps:
                     if (!(currentFragment instanceof MyAppsFragment)) {
+                        Log.i(TAG, "OnNavigationItemSelectedListener !(currentFragment instanceof MyAppsFragment))");
                         currentFragment = changeFragment(1);
                     } else if (notificationAppID != null) {
+                        Log.i(TAG, "OnNavigationItemSelectedListener else if notificationOptionType " + notificationOptionType);
                         ((MyAppsFragment) currentFragment).selectApp(notificationAppID, notificationOptionType);
+                        notificationOptionType = null;
                     } else {
+                        Log.i(TAG, "OnNavigationItemSelectedListener else");
                         ((MyAppsFragment) currentFragment).resetCurrentApp();
                     }
                     return true;
@@ -109,6 +112,10 @@ public class MainActivity extends AppCompatActivity {
         updateMyAppsFragment();
     }
 
+    public void setNotificationAppID(String notificationAppID) {
+        this.notificationAppID = notificationAppID;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -137,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.show();
 
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.textColor));
         ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
@@ -166,15 +172,16 @@ public class MainActivity extends AppCompatActivity {
                 if (newFragment != null) {
                     fManager.beginTransaction().show(newFragment).commitNow();
                     if (notificationAppID != null) {
+                        Log.i(TAG, "changeFragment newFragment != null ");
                         ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
-                        //notificationAppID = null;
+                        notificationOptionType = null;
                     }
                 } else {
                     newFragment = new MyAppsFragment();
                     fManager.beginTransaction().add(R.id.content, newFragment, myAppsFragmentTag).commitNow();
                     if (notificationAppID != null) {
+                        Log.i(TAG, "changeFragment newFragment === null ");
                         ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
-                        //notificationAppID = null;
                     }
                 }
 
@@ -210,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    //    Fabric.with(this, new Crashlytics());
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
         fManager = getSupportFragmentManager();
@@ -220,19 +227,20 @@ public class MainActivity extends AppCompatActivity {
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        if (!Utils.getAllAccessTokens(this).isEmpty()) {
-            navigation.setSelectedItemId(R.id.navigation_my_apps);
-        } else {
-            navigation.setSelectedItemId(R.id.navigation_apps);
-        }
-
         notificationAppID = getIntent().getStringExtra(EXTRA_NOTIFICATION);
         notificationOptionType = getIntent().getStringExtra(EXTRA_OPTION_TYPE);
 
         if (notificationAppID != null) {
             navigation.setSelectedItemId(R.id.navigation_my_apps);
+        } else {
+            if (!Utils.getAllAccessTokens(this).isEmpty()) {
+                navigation.setSelectedItemId(R.id.navigation_my_apps);
+            } else {
+                navigation.setSelectedItemId(R.id.navigation_apps);
+            }
         }
 
+        /* TODO
         ((MainApplication) getApplication()).setOnNewPushMessageListener(new OnNewPushMessageListener() {
             @Override
             public void onNewPushMessage(final String appID) {
@@ -245,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        });*/
     }
 
     public void setActiveMenuItem(int id) {

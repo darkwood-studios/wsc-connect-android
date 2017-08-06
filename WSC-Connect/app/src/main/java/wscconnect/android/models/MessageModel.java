@@ -14,6 +14,7 @@ import wscconnect.android.R;
 public class MessageModel {
     private String message;
     private String title;
+    private String logo;
     @SerializedName("createdAt")
     private long time;
 
@@ -52,5 +53,13 @@ public class MessageModel {
         }
 
         return DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 }
