@@ -109,8 +109,8 @@ public class AppWebviewFragment extends Fragment {
         View view = inflater.inflate(
                 R.layout.fragment_app_webview, container, false);
 
-        webview = (WebView) view.findViewById(R.id.fragment_app_webview_webview);
-        refreshView = (SwipeRefreshLayout) view.findViewById(R.id.fragment_app_webview_refresh);
+        webview = view.findViewById(R.id.fragment_app_webview_webview);
+        refreshView = view.findViewById(R.id.fragment_app_webview_refresh);
 
         return view;
     }

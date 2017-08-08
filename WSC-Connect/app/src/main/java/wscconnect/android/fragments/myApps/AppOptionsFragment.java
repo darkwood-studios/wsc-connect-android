@@ -66,6 +66,10 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
 
     }
 
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -186,7 +190,7 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
     public void onPause() {
         super.onPause();
         // Log.i(MainActivity.TAG,"onPause");
-        appOptionAdapter.removeFragments();
+        //appOptionAdapter.removeFragments();
         loadOptions();
     }
 
@@ -220,13 +224,13 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
         View view = inflater.inflate(
                 R.layout.fragment_app_options, container, false);
 
-        optionsLayoutView = (LinearLayout) view.findViewById(R.id.fragment_app_options_options);
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_app_options_list);
-        contentView = (FrameLayout) view.findViewById(R.id.fragment_app_options_content);
-        accountAvatarView = (ImageView) view.findViewById(R.id.fragment_app_options_account_avatar);
-        accountUsernameView = (TextView) view.findViewById(R.id.fragment_app_options_account_username);
-        accountAppNameView = (TextView) view.findViewById(R.id.fragment_app_options_account_app_name);
-        accountOverflowView = (ImageButton) view.findViewById(R.id.fragment_app_options_account_overflow);
+        optionsLayoutView = view.findViewById(R.id.fragment_app_options_options);
+        recyclerView = view.findViewById(R.id.fragment_app_options_list);
+        contentView = view.findViewById(R.id.fragment_app_options_content);
+        accountAvatarView = view.findViewById(R.id.fragment_app_options_account_avatar);
+        accountUsernameView = view.findViewById(R.id.fragment_app_options_account_username);
+        accountAppNameView = view.findViewById(R.id.fragment_app_options_account_app_name);
+        accountOverflowView = view.findViewById(R.id.fragment_app_options_account_overflow);
 
         return view;
     }

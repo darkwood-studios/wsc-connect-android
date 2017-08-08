@@ -126,12 +126,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
         final Dialog dialog = builder.create();
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
-        final EditText usernameView = (EditText) dialogView.findViewById(R.id.dialog_login_username);
-        final EditText passwordView = (EditText) dialogView.findViewById(R.id.dialog_login_password);
-        final Button submitView = (Button) dialogView.findViewById(R.id.dialog_login_submit);
-        final Button thirdPartySubmitView = (Button) dialogView.findViewById(R.id.dialog_login_third_party_submit);
-        final ImageView passwordVisibleView = (ImageView) dialogView.findViewById(R.id.dialog_login_password_visible);
-        TextView thirdPartyInfoView = (TextView) dialogView.findViewById(R.id.dialog_login_third_party_info);
+        final EditText usernameView = dialogView.findViewById(R.id.dialog_login_username);
+        final EditText passwordView = dialogView.findViewById(R.id.dialog_login_password);
+        final Button submitView = dialogView.findViewById(R.id.dialog_login_submit);
+        final Button thirdPartySubmitView = dialogView.findViewById(R.id.dialog_login_third_party_submit);
+        final ImageView passwordVisibleView = dialogView.findViewById(R.id.dialog_login_password_visible);
+        TextView thirdPartyInfoView = dialogView.findViewById(R.id.dialog_login_third_party_info);
 
         thirdPartyInfoView.setText(activity.getString(R.string.dialog_login_third_party_info, app.getName()));
         passwordVisibleView.setOnClickListener(new View.OnClickListener() {
@@ -252,11 +252,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
 
         public MyViewHolder(View view) {
             super(view);
-            name = (TextView) view.findViewById(R.id.list_app_name);
-            url = (TextView) view.findViewById(R.id.list_app_url);
-            loggedIn = (TextView) view.findViewById(R.id.list_app_loggedIn);
-            unreadNotifications = (TextView) view.findViewById(R.id.list_app_unread_notifications);
-            logo = (ImageView) view.findViewById(R.id.list_app_logo);
+            name = view.findViewById(R.id.list_app_name);
+            url = view.findViewById(R.id.list_app_url);
+            loggedIn = view.findViewById(R.id.list_app_loggedIn);
+            unreadNotifications = view.findViewById(R.id.list_app_unread_notifications);
+            logo = view.findViewById(R.id.list_app_logo);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

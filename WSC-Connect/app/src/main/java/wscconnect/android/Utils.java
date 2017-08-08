@@ -246,7 +246,7 @@ public class Utils {
         LayoutInflater inflater = activity.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_photo, null);
 
-        ImageView photo = (ImageView) dialogView.findViewById(R.id.dialog_photo_photo);
+        ImageView photo = dialogView.findViewById(R.id.dialog_photo_photo);
 
         builder.setView(dialogView);
         final AlertDialog dialog = builder.show();

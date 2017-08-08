@@ -60,7 +60,8 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
 
         pagerAdapter = new AppOptionsFragmentPager(getChildFragmentManager());
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOffscreenPageLimit(3);
+        // TODO this allows 50 opened tabs - otherwise we got a fragment exception. Fix later, cause it consumes too much memory
+        viewPager.setOffscreenPageLimit(25);
         tabLayout.setupWithViewPager(viewPager, true);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -164,10 +165,10 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_my_apps, container, false);
-        viewPager = (ViewPager) view.findViewById(R.id.fragment_my_apps_pager);
-        tabLayout = (TabLayout) view.findViewById(R.id.fragment_my_apps_tabs);
-        emptyView = (LinearLayout) view.findViewById(R.id.fragment_my_apps_empty);
-        loginView = (Button) view.findViewById(R.id.fragment_my_apps_login);
+        viewPager = view.findViewById(R.id.fragment_my_apps_pager);
+        tabLayout = view.findViewById(R.id.fragment_my_apps_tabs);
+        emptyView = view.findViewById(R.id.fragment_my_apps_empty);
+        loginView = view.findViewById(R.id.fragment_my_apps_login);
 
         return view;
     }
@@ -189,7 +190,7 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
     }
 
     private class AppOptionsFragmentPager extends FragmentPagerAdapter {
-        //HashMap<Integer, AppOptionsFragment> fragments = new HashMap<>();
+        private HashMap<Integer, AppOptionsFragment> fragments = new HashMap<>();
 
         public AppOptionsFragmentPager(FragmentManager fm) {
             super(fm);
@@ -207,18 +208,19 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
 
         @Override
         public Fragment getItem(int position) {
-            //AppOptionsFragment fragment = fragments.get(position);
-            //if (fragment == null) {
-            AppOptionsFragment fragment = new AppOptionsFragment();
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(AccessTokenModel.EXTRA, tokenList.get(position));
-            bundle.putString(AppOptionModel.TYPE, optionTypeToSelect.get(tokenList.get(position).getAppID()));
-            // reset after creating
-            optionTypeToSelect.remove(tokenList.get(position).getAppID());
-            fragment.setArguments(bundle);
-            optionFragments.append(position, fragment);
-            //fragments.put(position, fragment);
-            //}
+           // AppOptionsFragment fragment = fragments.get(position);
+
+           // if (fragment == null) {
+                AppOptionsFragment fragment = new AppOptionsFragment();
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(AccessTokenModel.EXTRA, tokenList.get(position));
+                bundle.putString(AppOptionModel.TYPE, optionTypeToSelect.get(tokenList.get(position).getAppID()));
+                // reset after creating
+                optionTypeToSelect.remove(tokenList.get(position).getAppID());
+                fragment.setArguments(bundle);
+                optionFragments.append(position, fragment);
+                //fragments.put(position, fragment);
+           // }
 
             return fragment;
         }
@@ -253,8 +255,10 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
                 for (int i = optionFragments.size() - 1; i >= 0; i--) {
                     int key = optionFragments.keyAt(i);
                     AppOptionsFragment result = optionFragments.get(key);
-                    if (result == object) {
+                    if (result.equals(fragment)) {
                         optionFragments.remove(key);
+                      //  fragments.remove(index);
+                        break;
                     }
                 }
 
@@ -266,8 +270,8 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
 
         public View getTabView(int position) {
             View v = activity.getLayoutInflater().inflate(R.layout.my_apps_tab, null);
-            TextView title = (TextView) v.findViewById(R.id.my_apps_tabs_title);
-            TextView unreadNotificationsView = (TextView) v.findViewById(R.id.my_apps_tabs_unread_notifications);
+            TextView title = v.findViewById(R.id.my_apps_tabs_title);
+            TextView unreadNotificationsView = v.findViewById(R.id.my_apps_tabs_unread_notifications);
             title.setText(tokenList.get(position).getAppName());
 
             int unreadNotifications = Utils.getUnreadNotifications(activity, tokenList.get(position).getAppID());

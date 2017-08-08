@@ -175,10 +175,10 @@ public class AppMessagesFragment extends Fragment {
         View view = inflater.inflate(
                 R.layout.fragment_app_messages, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_app_messages_list);
-        loadingView = (LinearLayout) view.findViewById(R.id.fragment_app_messages_loading);
-        loadingTextView = (TextView) view.findViewById(R.id.fragment_app_messages_loading_info);
-        emptyView = (TextView) view.findViewById(R.id.fragment_app_messages_empty);
+        recyclerView = view.findViewById(R.id.fragment_app_messages_list);
+        loadingView = view.findViewById(R.id.fragment_app_messages_loading);
+        loadingTextView = view.findViewById(R.id.fragment_app_messages_loading_info);
+        emptyView = view.findViewById(R.id.fragment_app_messages_empty);
 
         return view;
     }

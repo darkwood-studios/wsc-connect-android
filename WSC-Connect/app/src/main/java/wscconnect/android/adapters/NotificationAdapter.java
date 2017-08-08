@@ -69,9 +69,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         public MyViewHolder(View view) {
             super(view);
-            message = (TextView) view.findViewById(R.id.list_notification_message);
-            time = (TextView) view.findViewById(R.id.list_notification_time);
-            avatar = (ImageView) view.findViewById(R.id.list_notification_avatar);
+            message = view.findViewById(R.id.list_notification_message);
+            time = view.findViewById(R.id.list_notification_time);
+            avatar = view.findViewById(R.id.list_notification_avatar);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

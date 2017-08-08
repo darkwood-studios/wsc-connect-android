@@ -122,8 +122,15 @@ public class AppNotificationsFragment extends Fragment {
                         Utils.saveUnreadNotifications(activity, token.getAppID(), newUnreadNotifications);
                         activity.updateAppsFragment();
                         AppOptionsFragment parentFragment = (AppOptionsFragment) getParentFragment();
-                        parentFragment.resetAdapter();
                         parentFragment.setCustomTabView();
+
+                        RecyclerView parentRecyclerView = parentFragment.getRecyclerView();
+                        if (parentRecyclerView != null) {
+                            AppOptionAdapter.MyViewHolder notificationView = (AppOptionAdapter.MyViewHolder) parentRecyclerView.findViewHolderForAdapterPosition(parentFragment.getPositionInRecyclerView(AppOptionsFragment.OPTION_TYPE_NOTIFICATIONS));
+                            if (notificationView != null) {
+                                notificationView.setUnreadNotifications();
+                            }
+                        }
                     }
 
                     setEmptyView();
@@ -186,10 +193,10 @@ public class AppNotificationsFragment extends Fragment {
         View view = inflater.inflate(
                 R.layout.fragment_app_notifications, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_app_notification_list);
-        loadingView = (LinearLayout) view.findViewById(R.id.fragment_app_notification_loading);
-        loadingTextView = (TextView) view.findViewById(R.id.fragment_app_notification_loading_info);
-        emptyView = (TextView) view.findViewById(R.id.fragment_app_notification_empty);
+        recyclerView = view.findViewById(R.id.fragment_app_notification_list);
+        loadingView = view.findViewById(R.id.fragment_app_notification_loading);
+        loadingTextView = view.findViewById(R.id.fragment_app_notification_loading_info);
+        emptyView = view.findViewById(R.id.fragment_app_notification_empty);
 
         return view;
     }

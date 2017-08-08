@@ -52,9 +52,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
         public MyViewHolder(View view) {
             super(view);
-            title = (TextView) view.findViewById(R.id.list_message_title);
-            message = (TextView) view.findViewById(R.id.list_message_message);
-            time = (TextView) view.findViewById(R.id.list_message_time);
+            title = view.findViewById(R.id.list_message_title);
+            message = view.findViewById(R.id.list_message_message);
+            time = view.findViewById(R.id.list_message_time);
         }
     }
 }

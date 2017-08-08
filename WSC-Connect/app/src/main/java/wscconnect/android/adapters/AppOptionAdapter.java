@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -108,13 +109,13 @@ public class AppOptionAdapter extends RecyclerView.Adapter<AppOptionAdapter.MyVi
 
         public MyViewHolder(View view) {
             super(view);
-            title = (TextView) view.findViewById(R.id.list_app_option_title);
-            unreadNotifications = (TextView) view.findViewById(R.id.list_app_option_unread_notifications);
-            icon = (ImageView) view.findViewById(R.id.list_app_option_icon);
-            more = (ImageView) view.findViewById(R.id.list_app_option_more);
-            refresh = (ImageView) view.findViewById(R.id.list_app_option_refresh);
-            frameView = (FrameLayout) view.findViewById(R.id.list_app_option_frame);
-            listView = (RelativeLayout) view.findViewById(R.id.list_app_option_list);
+            title = view.findViewById(R.id.list_app_option_title);
+            unreadNotifications = view.findViewById(R.id.list_app_option_unread_notifications);
+            icon = view.findViewById(R.id.list_app_option_icon);
+            more = view.findViewById(R.id.list_app_option_more);
+            refresh = view.findViewById(R.id.list_app_option_refresh);
+            frameView = view.findViewById(R.id.list_app_option_frame);
+            listView = view.findViewById(R.id.list_app_option_list);
 
             refresh.setOnClickListener(this);
             view.setOnClickListener(this);
@@ -129,6 +130,19 @@ public class AppOptionAdapter extends RecyclerView.Adapter<AppOptionAdapter.MyVi
                 case R.id.list_app_option:
                     rowClicked();
                     break;
+            }
+        }
+
+        public void setUnreadNotifications() {
+            AppOptionModel option = optionsList.get(getAdapterPosition());
+            if (token != null && option != null && option.getType().equals(AppOptionsFragment.OPTION_TYPE_NOTIFICATIONS)) {
+                int notifications = Utils.getUnreadNotifications(activity, token.getAppID());
+                if (notifications > 0) {
+                    unreadNotifications.setText(String.valueOf(notifications));
+                    unreadNotifications.setVisibility(View.VISIBLE);
+                } else {
+                    unreadNotifications.setVisibility(View.GONE);
+                }
             }
         }
 
@@ -180,32 +194,43 @@ public class AppOptionAdapter extends RecyclerView.Adapter<AppOptionAdapter.MyVi
         }
 
         public void loadDropdownFragment(boolean loadData) {
+            Log.i("logaAdrqw", "1");
             String optionType = optionsList.get(getAdapterPosition()).getType();
 
             int randomId = View.generateViewId();
             FragmentManager fManager = fragment.getChildFragmentManager();
             frameView.setId(randomId);
+            Log.i("logaAdrqw", "2");
 
             Fragment newFragment = fManager.findFragmentByTag(optionType);
+            Log.i("logaAdrqw", "3");
             if (newFragment != null) {
                 if (optionType.equals(AppOptionsFragment.OPTION_TYPE_MESSAGES)) {
+                    Log.i("logaAdrqw", "4");
                     ((AppMessagesFragment) newFragment).setToken(token);
                 } else {
+                    Log.i("logaAdrqw", "5");
                     ((AppNotificationsFragment) newFragment).setToken(token);
                 }
+                Log.i("logaAdrqw", "6");
                 fManager.beginTransaction().show(newFragment).commitNow();
             } else {
                 if (optionType.equals(AppOptionsFragment.OPTION_TYPE_MESSAGES)) {
+                    Log.i("logaAdrqw", "7");
                     newFragment = new AppMessagesFragment();
                 } else {
+                    Log.i("logaAdrqw", "8");
                     newFragment = new AppNotificationsFragment();
                 }
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(AccessTokenModel.EXTRA, token);
                 bundle.putBoolean(EXTRA_LOAD_DATA, loadData);
                 newFragment.setArguments(bundle);
+                Log.i("logaAdrqw", "9 frameView.getId() " + frameView.getId());
                 fManager.beginTransaction().replace(frameView.getId(), newFragment, optionType).commitNow();
+                Log.i("logaAdrqw", "10");
             }
+            Log.i("logaAdrqw", "11");
         }
 
         private void rowClicked() {

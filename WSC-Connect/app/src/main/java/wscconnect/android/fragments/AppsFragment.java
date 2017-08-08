@@ -87,7 +87,7 @@ public class AppsFragment extends Fragment {
         MenuItem menuSearch = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) menuSearch.getActionView();
         searchView.setQueryHint(getString(R.string.apps_search));
-        EditText searchTextView = (EditText) searchView.findViewById(R.id.search_src_text);
+        EditText searchTextView = searchView.findViewById(R.id.search_src_text);
         searchTextView.setTextColor(Color.WHITE);
         searchTextView.setHintTextColor(ContextCompat.getColor(activity, android.R.color.white));
 
@@ -194,10 +194,10 @@ public class AppsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_apps, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_apps_list);
-        swipeRefreshView = (SwipeRefreshLayout) view.findViewById(R.id.fragment_apps_refresh);
-        loadingView = (ProgressBar) view.findViewById(R.id.fragment_apps_loading);
-        emptyView = (TextView) view.findViewById(R.id.fragment_apps_empty);
+        recyclerView = view.findViewById(R.id.fragment_apps_list);
+        swipeRefreshView = view.findViewById(R.id.fragment_apps_refresh);
+        loadingView = view.findViewById(R.id.fragment_apps_loading);
+        emptyView = view.findViewById(R.id.fragment_apps_empty);
 
         return view;
     }

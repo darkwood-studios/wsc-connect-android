@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         appsFragmentTag = AppsFragment.class.getSimpleName();
         myAppsFragmentTag = MyAppsFragment.class.getSimpleName();
 
-        navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         notificationAppID = getIntent().getStringExtra(EXTRA_NOTIFICATION);
