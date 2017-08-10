@@ -135,7 +135,7 @@ public class AppMessagesFragment extends Fragment {
                     loadingView.setVisibility(GONE);
                     recyclerView.setVisibility(View.VISIBLE);
 
-                    Toast.makeText(activity, R.string.error_general, Toast.LENGTH_SHORT).show();
+                    RetroCallback.showRequestError(activity);
                     callCallback(callback, false);
                 }
             }
@@ -149,7 +149,6 @@ public class AppMessagesFragment extends Fragment {
                 loadingView.setVisibility(GONE);
                 recyclerView.setVisibility(View.VISIBLE);
 
-                Toast.makeText(activity, R.string.error_general, Toast.LENGTH_SHORT).show();
                 callCallback(callback, false);
             }
         });

@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -163,7 +162,7 @@ public class AppsFragment extends Fragment {
                     originalAppList.clear();
                     originalAppList.addAll(response.body());
                 } else if (response.code() != 501 && response.code() != 502) {
-                    Toast.makeText(activity, R.string.error_general, Toast.LENGTH_SHORT).show();
+                    RetroCallback.showRequestError(activity);
                 }
 
                 setEmptyView();
@@ -172,8 +171,6 @@ public class AppsFragment extends Fragment {
             @Override
             public void onFailure(Call<List<AppModel>> call, Throwable t) {
                 super.onFailure(call, t);
-
-                Log.i(MainActivity.TAG, t.getMessage());
 
                 swipeRefreshView.setRefreshing(false);
                 loadingView.setVisibility(View.GONE);
