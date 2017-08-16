@@ -186,7 +186,9 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
     public void resetCurrentApp() {
         Log.i("tabfailure", "MyAppsFragment resetCurrentApp");
         AppOptionsFragment fragment = optionFragments.get(viewPager.getCurrentItem());
-        fragment.resetViews();
+        if (fragment != null) {
+            fragment.resetViews();
+        }
     }
 
     private class AppOptionsFragmentPager extends FragmentPagerAdapter {

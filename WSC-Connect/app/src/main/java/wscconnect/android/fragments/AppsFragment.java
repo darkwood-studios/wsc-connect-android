@@ -11,7 +11,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -161,6 +160,9 @@ public class AppsFragment extends Fragment {
                     appAdapter.notifyDataSetChanged();
                     originalAppList.clear();
                     originalAppList.addAll(response.body());
+
+                    // update actionbar
+                    updateSubtitle();
                 } else if (response.code() != 501 && response.code() != 502) {
                     RetroCallback.showRequestError(activity);
                 }
@@ -176,6 +178,12 @@ public class AppsFragment extends Fragment {
                 loadingView.setVisibility(View.GONE);
             }
         });
+    }
+
+    public void updateSubtitle() {
+        if (activity != null && activity.getCurrentFragment() instanceof AppsFragment && appList != null && appList.size() > 0 && isAdded()) {
+            activity.getSupportActionBar().setSubtitle(getResources().getQuantityString(R.plurals.fragment_apps_subtitle, appList.size(), appList.size()));
+        }
     }
 
     private void setEmptyView() {

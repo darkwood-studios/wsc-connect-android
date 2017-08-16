@@ -1,6 +1,7 @@
 package wscconnect.android;
 
 import android.app.Application;
+import android.support.v7.app.AppCompatDelegate;
 
 import wscconnect.android.listeners.OnNewPushMessageListener;
 
@@ -9,6 +10,13 @@ import wscconnect.android.listeners.OnNewPushMessageListener;
  */
 public class MainApplication extends Application {
     private OnNewPushMessageListener onNewPushMessageListener;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
 
     public void setOnNewPushMessageListener(OnNewPushMessageListener onNewPushMessageListener) {
         this.onNewPushMessageListener = onNewPushMessageListener;

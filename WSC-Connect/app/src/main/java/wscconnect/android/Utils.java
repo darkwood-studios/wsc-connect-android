@@ -8,12 +8,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.NotificationCompat;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
@@ -45,6 +50,9 @@ import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
 import wscconnect.android.models.AccessTokenModel;
 
+import static android.content.Context.VIBRATOR_SERVICE;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static wscconnect.android.activities.MainActivity.EXTRA_NOTIFICATION;
 import static wscconnect.android.activities.MainActivity.EXTRA_OPTION_TYPE;
 
@@ -223,6 +231,7 @@ public class Utils {
         }
 
         Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP);
         intent.setAction(Long.toString(System.currentTimeMillis()));
         intent.putExtra(EXTRA_NOTIFICATION, appID);
         if (optionType != null) {
@@ -236,6 +245,27 @@ public class Utils {
         message = Utils.fromHtml(message).toString();
         notificationBuilder.setContentText(message);
         notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+
+        // get preferences
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String ringtone = prefs.getString("pref_notifications_ringtone", null);
+        boolean vibrate = prefs.getBoolean("pref_notifications_vibration", false);
+
+        if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+            notificationBuilder.setSound(Uri.parse(ringtone), AudioManager.STREAM_NOTIFICATION);
+        }
+
+        if (vibrate && audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
+            Vibrator v = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
+            long pattern[] = new long[] { 0, 300, 100, 300 };
+
+            if (Build.VERSION.SDK_INT >= 26) {
+                v.vibrate(VibrationEffect.createWaveform(pattern, -1));
+            } else {
+                v.vibrate(pattern, -1);
+            }
+        }
 
         mNotificationManager.notify(tag, id, notificationBuilder.build());
     }

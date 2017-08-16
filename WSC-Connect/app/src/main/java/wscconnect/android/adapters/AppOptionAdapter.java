@@ -67,7 +67,7 @@ public class AppOptionAdapter extends RecyclerView.Adapter<AppOptionAdapter.MyVi
         if (option.getIconUrl() != null) {
             GlideApp.with(activity).load(option.getIconUrl()).error(option.getIcon()).circleCrop().into(holder.icon);
         } else {
-            holder.icon.setBackgroundResource(option.getIcon());
+            holder.icon.setImageResource(option.getIcon());
         }
         holder.more.setImageResource(option.getMoreIcon());
 

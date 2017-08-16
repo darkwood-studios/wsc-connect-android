@@ -1,7 +1,11 @@
 package wscconnect.android.fragments.myApps;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -126,11 +130,13 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    final AppOptionAdapter.MyViewHolder notificationView = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(getPositionInRecyclerView(OPTION_TYPE_NOTIFICATIONS));
+                    if (!isStateSaved()) {
+                        final AppOptionAdapter.MyViewHolder notificationView = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(getPositionInRecyclerView(OPTION_TYPE_NOTIFICATIONS));
 
-                    if (notificationView != null) {
-                        notificationView.loadDropdownFragment(false);
-                        notificationView.refreshClicked();
+                        if (notificationView != null) {
+                            notificationView.loadDropdownFragment(false);
+                            notificationView.refreshClicked();
+                        }
                     }
                 }
             }, 10);
@@ -268,44 +274,53 @@ public class AppOptionsFragment extends Fragment implements OnTokenUpdateListene
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        AppOptionAdapter.MyViewHolder notificationView = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(getPositionInRecyclerView(type));
+                        if (!isStateSaved()) {
+                            AppOptionAdapter.MyViewHolder notificationView = (AppOptionAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(getPositionInRecyclerView(type));
 
-                        if (notificationView != null) {
-                            if (type.equals(OPTION_TYPE_NOTIFICATIONS)) {
-                                notificationView.refreshClicked();
-                            } else {
-                                notificationView.itemView.performClick();
+                            if (notificationView != null) {
+                                if (type.equals(OPTION_TYPE_NOTIFICATIONS)) {
+                                    notificationView.refreshClicked();
+                                } else {
+                                    notificationView.itemView.performClick();
+                                }
                             }
                         }
                     }
                 }, 10);
                 break;
             case OPTION_TYPE_WEBVIEW:
-                Fragment fragment;
-                FragmentTransaction transaction = fManager.beginTransaction();
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                boolean openInWebview = prefs.getBoolean("pref_others_open_in_webview", true);
 
-                fragment = fManager.findFragmentByTag(webviewFragmentTag);
-                if (fragment != null) {
-                    fManager.beginTransaction().show(fragment).commit();
-                    if (webviewUrl != null) {
-                        ((AppWebviewFragment) fragment).setUrl(webviewUrl);
-                        ((AppWebviewFragment) fragment).loadWebview();
+                if (openInWebview) {
+                    Fragment fragment;
+                    FragmentTransaction transaction = fManager.beginTransaction();
+
+                    fragment = fManager.findFragmentByTag(webviewFragmentTag);
+                    if (fragment != null) {
+                        fManager.beginTransaction().show(fragment).commit();
+                        if (webviewUrl != null) {
+                            ((AppWebviewFragment) fragment).setUrl(webviewUrl);
+                            ((AppWebviewFragment) fragment).loadWebview();
+                        }
+                    } else {
+                        fragment = new AppWebviewFragment();
+
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(AccessTokenModel.EXTRA, token);
+                        if (webviewUrl != null) {
+                            bundle.putString("webviewUrl", webviewUrl);
+                        }
+                        fragment.setArguments(bundle);
+                        transaction.add(R.id.fragment_app_options_content, fragment, webviewFragmentTag).commit();
+                        transaction.addToBackStack(null);
                     }
+
+                    optionsLayoutView.setVisibility(View.GONE);
+                    contentView.setVisibility(View.VISIBLE);
                 } else {
-                    fragment = new AppWebviewFragment();
-
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelable(AccessTokenModel.EXTRA, token);
-                    if (webviewUrl != null) {
-                        bundle.putString("webviewUrl", webviewUrl);
-                    }
-                    fragment.setArguments(bundle);
-                    transaction.add(R.id.fragment_app_options_content, fragment, webviewFragmentTag).commit();
-                    transaction.addToBackStack(null);
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((webviewUrl == null) ? token.getAppUrl() : webviewUrl)));
                 }
-
-                optionsLayoutView.setVisibility(View.GONE);
-                contentView.setVisibility(View.VISIBLE);
                 break;
         }
     }
