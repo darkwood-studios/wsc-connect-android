@@ -19,6 +19,7 @@
     <string name="fragment_accounts_login">Login now!</string>
     <string name="fragment_app_notifications_empty">No recent notifications</string>
     <string name="fragment_app_notifications_app_removed">%1$s is no available anymore. You have been logged out.</string>
+    <string name="fragment_app_notifications_logged_out">You have been logged out from %1$s. Please login again.</string>
     <string name="firebase_token_required">Your push-token is not generated yet. Please try again.</string>
     <string name="no_internet_connection">You are not connected to the internet.</string>
     <string name="fragment_apps_empty">No active apps found</string>
@@ -53,4 +54,8 @@
         <item quantity="one">%1$d App</item>
         <item quantity="other">%1$d Apps</item>
     </plurals>
-</resources>
+
+    <plurals name="fragment_apps_subtitle_users">
+        <item quantity="one">%1$d User</item>
+        <item quantity="other">%1$d Users</item>
+    </plurals></resources>

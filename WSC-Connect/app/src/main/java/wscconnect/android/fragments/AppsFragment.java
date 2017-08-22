@@ -118,6 +118,16 @@ public class AppsFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        // set list to default list, in case a search was performed
+        if (hidden) {
+            performSearch(null);
+        }
+    }
+
     private void performSearch(String query) {
         appList.clear();
         appList.addAll(originalAppList);
@@ -139,7 +149,11 @@ public class AppsFragment extends Fragment {
                 setEmptyView();
             } else {
                 appList.clear();
-                appList.addAll(originalAppList);
+                for (AppModel app : originalAppList) {
+                    if (app.isVisible()) {
+                        appList.add(app);
+                    }
+                }
                 appAdapter.notifyDataSetChanged();
             }
         }
@@ -156,7 +170,11 @@ public class AppsFragment extends Fragment {
 
                 if (response.isSuccessful()) {
                     appList.clear();
-                    appList.addAll(response.body());
+                    for (AppModel app : response.body()) {
+                        if (app.isVisible()) {
+                            appList.add(app);
+                        }
+                    }
                     appAdapter.notifyDataSetChanged();
                     originalAppList.clear();
                     originalAppList.addAll(response.body());
@@ -182,7 +200,12 @@ public class AppsFragment extends Fragment {
 
     public void updateSubtitle() {
         if (activity != null && activity.getCurrentFragment() instanceof AppsFragment && appList != null && appList.size() > 0 && isAdded()) {
-            activity.getSupportActionBar().setSubtitle(getResources().getQuantityString(R.plurals.fragment_apps_subtitle, appList.size(), appList.size()));
+            int users = 0;
+
+            for (AppModel app : appList) {
+                users += app.getUserCount();
+            }
+            activity.getSupportActionBar().setSubtitle(getResources().getQuantityString(R.plurals.fragment_apps_subtitle_apps, appList.size(), appList.size()) + ", " + getResources().getQuantityString(R.plurals.fragment_apps_subtitle_users, users, users));
         }
     }
 

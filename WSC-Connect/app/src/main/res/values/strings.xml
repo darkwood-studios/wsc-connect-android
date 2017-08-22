@@ -19,6 +19,7 @@
     <string name="fragment_accounts_login">Jetzt einloggen!</string>
     <string name="fragment_app_notifications_empty">Keine aktuellen Benachrichtigungen</string>
     <string name="fragment_app_notifications_app_removed">%1$s ist nicht mehr verfügbar. Du wurdest automatisch ausgeloggt.</string>
+    <string name="fragment_app_notifications_logged_out">Du wurdest von %1$s ausgeloggt. Bitte logge dich erneut ein.</string>
     <string name="firebase_token_required">Dein Push-Token wurde noch nicht generiert. Versuche es erneut.</string>
     <string name="no_internet_connection">Du bist nicht mit dem Internet verbunden.</string>
     <string name="fragment_apps_empty">Es wurden keine aktiven Apps gefunden.</string>
@@ -49,11 +50,13 @@
         <item>Logout</item>
     </array>
 
-    <plurals name="fragment_apps_subtitle">
+    <plurals name="fragment_apps_subtitle_apps">
         <item quantity="one">%1$d App</item>
         <item quantity="other">%1$d Apps</item>
     </plurals>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <plurals name="fragment_apps_subtitle_users">
+        <item quantity="one">%1$d Benutzer</item>
+        <item quantity="other">%1$d Benutzer</item>
+    </plurals>
 </resources>

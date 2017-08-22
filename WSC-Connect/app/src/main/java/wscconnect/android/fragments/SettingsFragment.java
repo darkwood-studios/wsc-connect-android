@@ -36,7 +36,7 @@ public class SettingsFragment extends PreferenceFragment {
 
         final RingtonePreference ringtonePref = (RingtonePreference) findPreference("pref_notifications_ringtone");
 
-        if (ringtone != null && !ringtone.isEmpty()) {
+        if (ringtone != null && !ringtone.isEmpty() && !getRingtoneName(ringtone).isEmpty()) {
             ringtonePref.setSummary(getRingtoneName(ringtone));
         }
 
@@ -44,8 +44,8 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object o) {
                 String value = (String) o;
-                if (!value.isEmpty()) {
-                    ringtonePref.setSummary(getRingtoneName((String) o));
+                if (!value.isEmpty() && !getRingtoneName(value).isEmpty()) {
+                    ringtonePref.setSummary(getRingtoneName(value));
                 } else {
                     ringtonePref.setSummary(R.string.pref_notifications_ringtone_summary);
                 }
@@ -56,9 +56,12 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private String getRingtoneName(String value) {
+        String name = "";
         Uri ringtoneUri = Uri.parse(value);
         Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), ringtoneUri);
-        String name = ringtone.getTitle(getActivity());
+        if (ringtone != null) {
+            name = ringtone.getTitle(getActivity());
+        }
 
         return name;
     }

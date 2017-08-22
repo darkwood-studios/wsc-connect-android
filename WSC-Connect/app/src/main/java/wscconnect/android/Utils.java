@@ -75,7 +75,9 @@ public class Utils {
     public static void hideProgressView(View view, ProgressBar bar, boolean makeViewVisible) {
         if (bar != null) {
             ViewGroup vg = (ViewGroup) bar.getParent();
-            vg.removeView(bar);
+            if (vg != null) {
+                vg.removeView(bar);
+            }
         }
 
         if (makeViewVisible) {

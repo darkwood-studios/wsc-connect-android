@@ -12,6 +12,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
+import wscconnect.android.activities.MainActivity;
 
 /**
  * Created by chris on 30.07.17.
@@ -32,14 +33,16 @@ public class RetroCallback<T> implements Callback<T> {
             toast.cancel();
         }
 
-        String m = context.getString(R.string.error_general);
+        if (MainActivity.IS_VISIBLE) {
+            String m = context.getString(R.string.error_general);
 
-        if (!Utils.hasInternetConnection(context)) {
-            m = context.getString(R.string.no_internet_connection);
+            if (!Utils.hasInternetConnection(context)) {
+                m = context.getString(R.string.no_internet_connection);
+            }
+
+            toast = Toast.makeText(context, m, Toast.LENGTH_SHORT);
+            toast.show();
         }
-
-        toast = Toast.makeText(context, m, Toast.LENGTH_SHORT);
-        toast.show();
     }
 
     @Override

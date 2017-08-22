@@ -15,7 +15,11 @@ public class AppModel {
     private String appID;
     private String name;
     private String url;
+    private String apiUrl;
     private String logo;
+    @SerializedName("_users")
+    private int userCount;
+    private boolean visible = true;
 
     public String getAppID() {
         return appID;
@@ -51,5 +55,29 @@ public class AppModel {
 
     public boolean isLoggedIn(Context context) {
         return (Utils.getAccessTokenString(context, appID) != null);
+    }
+
+    public int getUserCount() {
+        return userCount;
+    }
+
+    public void setUserCount(int userCount) {
+        this.userCount = userCount;
+    }
+
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
+    public void setApiUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

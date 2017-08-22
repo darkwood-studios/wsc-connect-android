@@ -2,6 +2,7 @@ package wscconnect.android.adapters;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -10,6 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -24,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -39,6 +47,7 @@ import wscconnect.android.models.AppModel;
 import wscconnect.android.models.LoginModel;
 
 import static wscconnect.android.Utils.getAccessToken;
+import static wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment.USER_AGENT;
 
 /**
  * Created by chris on 18.07.17.
@@ -121,7 +130,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
         LayoutInflater inflater = activity.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_login, null);
 
-        builder.setTitle(activity.getString(R.string.dialog_login_title, app.getUrl()));
+        builder.setTitle(activity.getString(R.string.dialog_login_title, app.getName()));
         builder.setView(dialogView);
         final Dialog dialog = builder.create();
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -201,45 +210,97 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
         disableButton.setEnabled(false);
 
         Log.i(MainActivity.TAG, "starting login");
-        activity.getAPI().login(app.getAppID(), new LoginModel(username, password, FirebaseInstanceId.getInstance().getToken(), thirdParty)).enqueue(new RetroCallback<ResponseBody>(activity) {
+        final LoginModel loginModel = new LoginModel();
+        loginModel.setUsername(username);
+        loginModel.setPassword(password);
+        loginModel.setFirebaseToken(FirebaseInstanceId.getInstance().getToken());
+        loginModel.setThirdPartyLogin(thirdParty);
+        loginModel.setDevice(Build.MODEL);
+
+        activity.getAPI().login(app.getAppID(), loginModel).enqueue(new RetroCallback<ResponseBody>(activity) {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 super.onResponse(call, response);
                 Log.i(MainActivity.TAG, "onResponse " + response.code());
 
-                Utils.hideProgressView(loadingButton, progressBar);
-                disableButton.setEnabled(true);
-
                 if (response.isSuccessful()) {
                     try {
                         JSONObject obj = new JSONObject(response.body().string());
-                        String accessToken = obj.getString("accessToken");
-                        String refreshToken = obj.getString("refreshToken");
+                        final String accessToken = obj.getString("accessToken");
+                        final String refreshToken = obj.getString("refreshToken");
+                        final String wscConnectToken = obj.getString("wscConnectToken");
 
-                        Utils.saveAccessToken(activity, app.getAppID(), accessToken);
-                        Utils.saveRefreshToken(activity, app.getAppID(), refreshToken);
+                        // no auto login on thirdparty
+                        if (loginModel.isThirdPartyLogin()) {
+                            saveLogin(accessToken, refreshToken);
+                        } else {
+                            WebView webview = new WebView(activity);
+                            final WebSettings webSettings = webview.getSettings();
+                            webSettings.setUserAgentString(USER_AGENT);
+                            final String postData = "type=loginCookie&username=" + URLEncoder.encode(loginModel.getUsername(), "UTF-8") + "&password=" + URLEncoder.encode(loginModel.getPassword(), "UTF-8") + "&wscConnectToken=" + URLEncoder.encode(wscConnectToken, "UTF-8");
 
-                        notifyItemChanged(position);
-                        dialog.dismiss();
+                            webview.setWebViewClient(new WebViewClient() {
+                                @Override
+                                public void onPageFinished(WebView view, String url) {
+                                    super.onPageFinished(view, url);
+                                    hideLoading();
+                                    saveLogin(accessToken, refreshToken);
+                                }
 
-                        activity.setNotificationAppID(app.getAppID());
-                        activity.updateMyAppsFragment();
-                        activity.setActiveMenuItem(R.id.navigation_my_apps);
+                                @Override
+                                public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                                    //Handle the error
+                                    super.onReceivedError(view, errorCode, description, failingUrl);
+
+                                    // also redirect on error, user will just not be logged in
+                                    hideLoading();
+                                    saveLogin(accessToken, refreshToken);
+                                }
+
+                                @Override
+                                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                                    super.onReceivedError(view, request, error);
+
+                                    // also redirect on error, user will just not be logged in
+                                    hideLoading();
+                                    saveLogin(accessToken, refreshToken);
+                                }
+                            });
+                            webview.postUrl(app.getApiUrl(), postData.getBytes());
+                        }
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
                 } else if (response.code() == 401) {
+                    Utils.hideProgressView(loadingButton, progressBar);
+                    disableButton.setEnabled(true);
                     Toast.makeText(activity, R.string.login_failed, Toast.LENGTH_SHORT).show();
                 } else {
+                    hideLoading();
                     Toast.makeText(activity, R.string.login_failed_global, Toast.LENGTH_SHORT).show();
                 }
             }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i(MainActivity.TAG, "onFailure " + t.getMessage());
+            private void saveLogin(String accessToken, String refreshToken) {
+                Utils.saveAccessToken(activity, app.getAppID(), accessToken);
+                Utils.saveRefreshToken(activity, app.getAppID(), refreshToken);
+
+                notifyItemChanged(position);
+                dialog.dismiss();
+
+                activity.setNotificationAppID(app.getAppID());
+                activity.updateMyAppsFragment();
+                activity.setActiveMenuItem(R.id.navigation_my_apps);
+            }
+
+            private void hideLoading() {
                 Utils.hideProgressView(loadingButton, progressBar);
                 disableButton.setEnabled(true);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                hideLoading();
                 Toast.makeText(activity, R.string.login_failed_global, Toast.LENGTH_SHORT).show();
             }
         });

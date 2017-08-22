@@ -9,13 +9,7 @@ public class LoginModel {
     private String password;
     private String firebaseToken;
     private boolean thirdPartyLogin;
-
-    public LoginModel(String username, String password, String firebaseToken, boolean thirdPartyLogin) {
-        this.username = username;
-        this.password = password;
-        this.firebaseToken = firebaseToken;
-        this.thirdPartyLogin = thirdPartyLogin;
-    }
+    private String device;
 
     public String getUsername() {
         return username;
@@ -47,5 +41,13 @@ public class LoginModel {
 
     public void setThirdPartyLogin(boolean thirdPartyLogin) {
         this.thirdPartyLogin = thirdPartyLogin;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 }

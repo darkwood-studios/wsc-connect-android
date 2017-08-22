@@ -3,6 +3,7 @@ package wscconnect.android.activities;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -44,6 +46,7 @@ import static wscconnect.android.Utils.getAllAccessTokens;
 
 
 public class MainActivity extends AppCompatActivity {
+    public static boolean IS_VISIBLE = true;
     public final static String TAG = "WSC-Connect";
     public final static String EXTRA_NOTIFICATION = "extraNotification";
     public final static String EXTRA_OPTION_TYPE = "extraOptionType";
@@ -130,6 +133,20 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        IS_VISIBLE = false;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        IS_VISIBLE = true;
     }
 
     @Override
