@@ -7,4 +7,5 @@
     <color name="textColorAccent">#838587</color>
     <color name="textColorPressed">#ffffff</color>
     <color name="buttonTextColor">#ffffff</color>
+    <color name="transparentDarkColor">#5d000000</color>
 </resources>

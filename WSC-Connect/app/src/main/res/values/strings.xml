@@ -1,52 +1,54 @@
 <resources>
     <string name="app_name">WSC-Connect</string>
     <string name="title_apps">Apps</string>
-    <string name="title_my_apps">Meine Apps</string>
-    <string name="required">Pflichtfeld</string>
-    <string name="list_app_loggedIn">Eingeloggt als: %1$s</string>
-    <string name="just_now">Gerade eben</string>
-    <string name="dialog_login_username">Benutzername</string>
-    <string name="dialog_login_password">Passwort / Auth-Token</string>
-    <string name="dialog_login_third_party">Drittanbieter Login</string>
-    <string name="dialog_login_title">Login für %1$s</string>
-    <string name="dialog_login_third_party_info">Benutze den Drittanbieter Login, wenn du dich auf %1$s über einen Drittanbieter registriert hast.</string>
+    <string name="title_my_apps">My Apps</string>
+    <string name="required">Required</string>
+    <string name="just_now">Just now</string>
+    <string name="dialog_login_username">Username</string>
+    <string name="dialog_login_password">Password / Auth-Token</string>
+    <string name="dialog_login_title">Login for %1$s</string>
+    <string name="dialog_login_third_party">Third-party login</string>
+    <string name="dialog_login_third_party_info">Use the third-party login when you used a third-party login for %1$s.</string>
     <string name="logout">Logout</string>
     <string name="login">Login</string>
-    <string name="login_failed">Der Login war nicht erfolgreich.</string>
-    <string name="login_failed_global">Beim Login ist ein Fehler aufgetreten. Versuche es später erneut.</string>
-    <string name="fragment_app_notifications_loading_info">Lade Benachrichtigungen für %1$s…</string>
-    <string name="fragment_accounts_empty">Du bist noch in keiner App angemeldet.</string>
-    <string name="fragment_accounts_login">Jetzt einloggen!</string>
-    <string name="fragment_app_notifications_empty">Keine aktuellen Benachrichtigungen</string>
-    <string name="fragment_app_notifications_app_removed">%1$s ist nicht mehr verfügbar. Du wurdest automatisch ausgeloggt.</string>
-    <string name="fragment_app_notifications_logged_out">Du wurdest von %1$s ausgeloggt. Bitte logge dich erneut ein.</string>
-    <string name="firebase_token_required">Dein Push-Token wurde noch nicht generiert. Versuche es erneut.</string>
-    <string name="no_internet_connection">Du bist nicht mit dem Internet verbunden.</string>
-    <string name="fragment_apps_empty">Es wurden keine aktiven Apps gefunden.</string>
-    <string name="error_general">Es ist ein Fehler aufgetreten. Versuche es erneut.</string>
-    <string name="apps_search">Apps durchsuchen…</string>
-    <string name="action_about">Über</string>
-    <string name="action_settings">Einstellungen</string>
-    <string name="close">Schließen</string>
-    <string name="dialog_about_text">WSC-Connect verbindet alle deine Lieblingsseiten, die auf dem WSC (WoltLab&#174; Suite Core) basieren, in einer App. Erhalte Push-Nachrichten für neue Benachrichtigungen und vieles mehr.\n\n<b>Du besitzt eine WSC basierte Website?</b> Besuche <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> und registriere deine Seite jetzt!\n\nWSC-Connect steht in keiner Verbindung mit der WoltLab&#174; GmbH.\n\n<b>Kontakt</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Impressum</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nDeutschland</string>
-    <string name="fragment_app_options_notifications">Benachrichtigungen von %1$s</string>
-    <string name="fragment_app_options_messages">Push-Nachrichten</string>
-    <string name="fragment_app_messagess_empty">Keine Push-Nachrichten gefunden</string>
-    <string name="fragment_app_messagess_loading_info">Lade Push-Nachrichten für %1$s…</string>
-    <string name="error_request_api_not_available">Unser Server ist gerade beschäftigt. Versuche es in wenigen Minuten erneut.</string>
-    <string name="error_app_version_title">App-Version veraltet</string>
-    <string name="error_app_version_message">Deine installierte App-Version ist veraltet. Um die App weiterhin zu nutzen, musst du ein Update durchführen.</string>
-    <string name="error_app_version_button">Zum Play-Store</string>
-    <string name="pref_notifications">Benachrichtigungen</string>
+    <string name="login_failed">Login failed</string>
+    <string name="login_failed_global">An error occurred while logging you in. Try again.</string>
+    <string name="fragment_app_notifications_loading_info">Loading notifications for %1$s…</string>
+    <string name="fragment_accounts_empty">You are not logged in to any app.</string>
+    <string name="fragment_accounts_login">Login now!</string>
+    <string name="fragment_app_notifications_empty">No recent notifications</string>
+    <string name="fragment_app_notifications_app_removed">%1$s is no available anymore. You have been logged out.</string>
+    <string name="fragment_app_notifications_logged_out">You have been logged out from %1$s. Please login again.</string>
+    <string name="firebase_token_required">Your push-token is not generated yet. Please try again.</string>
+    <string name="no_internet_connection">You are not connected to the internet.</string>
+    <string name="fragment_apps_empty">No active apps found</string>
+    <string name="error_general">An error occurred. Try again.</string>
+    <string name="apps_search">Search apps…</string>
+    <string name="apps_sort">Sort apps…</string>
+    <string name="action_about">About</string>
+    <string name="action_settings">Settings</string>
+    <string name="close">Close</string>
+    <string name="dialog_about_text">WSC-Connect connects all your favorite WSC (WoltLab&#174; Suite Core)-Apps in one place. Receive notifications via push message and much more.\n\n<b>You own a WSC-App</b>? Visit <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> and register your App now!\n\nWSC-Connect is not associated with the WoltLab&#174; GmbH.\n\n<b>Contact</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Legal Notice</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nGermany</string>
+    <string name="fragment_app_options_notifications">Notifications on %1$s</string>
+    <string name="fragment_app_options_messages">Push-Messages</string>
+    <string name="fragment_app_messagess_empty">No push messages found</string>
+    <string name="fragment_app_messagess_loading_info">Loading push messages for %1$s…</string>
+    <string name="error_request_api_not_available">Our server is busy, try again in a few minutes.</string>
+    <string name="error_app_version_title">Outdated app version</string>
+    <string name="error_app_version_message">Your installed app version is outdated. To continue using the app, please update it.</string>
+    <string name="error_app_version_button">Visit the Play-Store</string>
+    <string name="pref_notifications">Notifications</string>
     <string name="pref_notifications_vibration_title">Vibration</string>
-    <string name="pref_notifications_vibration_summary">Vibration für neue Benachrichtigungen</string>
-    <string name="pref_notifications_ringtone_title">Ton</string>
-    <string name="pref_notifications_ringtone_summary">Ton für neue Benachrichtigungen</string>
-    <string name="pref_others">Sonstiges</string>
-    <string name="pref_others_open_in_webview">Webseiten in der App öffnen</string>
+    <string name="pref_notifications_vibration_summary">Vibration for new notifications</string>
+    <string name="pref_notifications_ringtone_title">Sound</string>
+    <string name="pref_notifications_ringtone_summary">Sound for new notifications</string>
+    <string name="pref_others">Other</string>
+    <string name="pref_others_open_in_webview">Open websites in app</string>
+    <string name="action_sort_users">Sort by users</string>
+    <string name="action_sort_name">Sort by name</string>
 
     <array name="list_app_dialog_items">
-        <item>Mit einem anderen Account einloggen.</item>
+        <item>Login with a different account</item>
         <item>Logout</item>
     </array>
 
@@ -56,7 +58,7 @@
     </plurals>
 
     <plurals name="fragment_apps_subtitle_users">
-        <item quantity="one">%1$d Benutzer</item>
-        <item quantity="other">%1$d Benutzer</item>
+        <item quantity="one">%1$d User</item>
+        <item quantity="other">%1$d Users</item>
     </plurals>
 </resources>

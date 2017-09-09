@@ -59,7 +59,7 @@ public class RetroCallback<T> implements Callback<T> {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle(R.string.error_app_version_title);
                     builder.setMessage(R.string.error_app_version_message);
-                   // builder.setCancelable(false);
+                    // builder.setCancelable(false);
                     builder.setPositiveButton(R.string.error_app_version_button, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {

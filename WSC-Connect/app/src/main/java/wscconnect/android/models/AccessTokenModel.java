@@ -33,6 +33,7 @@ public class AccessTokenModel implements Parcelable {
     private String token;
     private String appUrl;
     private String appLogo;
+    private String appApiUrl;
 
     protected AccessTokenModel(Parcel in) {
         userID = in.readInt();
@@ -44,6 +45,7 @@ public class AccessTokenModel implements Parcelable {
         appUrl = in.readString();
         appLogo = in.readString();
         uniqueID = in.readLong();
+        appApiUrl = in.readString();
     }
 
     public AccessTokenModel() {
@@ -62,6 +64,7 @@ public class AccessTokenModel implements Parcelable {
         token.setToken(jwt.toString());
         token.setAppUrl(jwt.getClaim("appUrl").asString());
         token.setAppLogo(jwt.getClaim("appLogo").asString());
+        token.setAppApiUrl(jwt.getClaim("appApiUrl").asString());
 
         return token;
     }
@@ -135,6 +138,7 @@ public class AccessTokenModel implements Parcelable {
         parcel.writeString(appUrl);
         parcel.writeString(appLogo);
         parcel.writeLong(uniqueID);
+        parcel.writeString(appApiUrl);
     }
 
     public String getAppUrl() {
@@ -155,5 +159,13 @@ public class AccessTokenModel implements Parcelable {
 
     public long getUniqueID() {
         return uniqueID;
+    }
+
+    public String getAppApiUrl() {
+        return appApiUrl;
+    }
+
+    public void setAppApiUrl(String appApiUrl) {
+        this.appApiUrl = appApiUrl;
     }
 }

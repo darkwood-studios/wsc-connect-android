@@ -44,9 +44,4 @@
 
 -keepattributes *Annotation*
 -keep class wscconnect.android.models.** { *; }
-
--assumenosideeffects class android.util.Log {
-    public static *** d(...);
-    public static *** v(...);
-    public static *** i(...);
-}
+-printmapping mapping.txt

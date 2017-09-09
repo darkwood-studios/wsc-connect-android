@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
@@ -18,10 +18,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,6 +48,8 @@ public class AppsFragment extends Fragment {
     private AppAdapter appAdapter;
     private ProgressBar loadingView;
     private TextView emptyView;
+    private Menu menu;
+    private ImageView detailsLogo;
 
     public AppsFragment() {
         // Required empty public constructor
@@ -61,7 +66,7 @@ public class AppsFragment extends Fragment {
         originalAppList = new ArrayList<>();
         appAdapter = new AppAdapter(activity, appList);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        GridLayoutManager layoutManager = new GridLayoutManager(activity, 3);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(appAdapter);
 
@@ -77,10 +82,52 @@ public class AppsFragment extends Fragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_sort_name:
+                sortListByName();
+                appAdapter.notifyDataSetChanged();
+                this.menu.findItem(R.id.action_sort_name).setVisible(false);
+                this.menu.findItem(R.id.action_sort_users).setVisible(true);
+                break;
+            case R.id.action_sort_users:
+                Collections.sort(appList, new Comparator<AppModel>() {
+                    @Override
+                    public int compare(AppModel a1, AppModel a2) {
+                        return a2.getUserCount() - a1.getUserCount();
+                    }
+                });
+                appAdapter.notifyDataSetChanged();
+                this.menu.findItem(R.id.action_sort_users).setVisible(false);
+                this.menu.findItem(R.id.action_sort_name).setVisible(true);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void sortListByName() {
+        sortListByName(null);
+    }
+
+    private void sortListByName(List<AppModel> list) {
+        Collections.sort((list == null) ? appList : list, new Comparator<AppModel>() {
+            @Override
+            public int compare(AppModel a1, AppModel a2) {
+                String app1Name = a1.getName().replaceAll("[^a-zA-Z]", "").toLowerCase();
+                String app2Name = a2.getName().replaceAll("[^a-zA-Z]", "").toLowerCase();
+
+                return app1Name.compareToIgnoreCase(app2Name);
+            }
+        });
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        inflater.inflate(R.menu.apps_search, menu);
+        inflater.inflate(R.menu.apps_fragment, menu);
+
+        this.menu = menu;
 
         MenuItem menuSearch = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) menuSearch.getActionView();
@@ -116,6 +163,8 @@ public class AppsFragment extends Fragment {
                 return false;
             }
         });
+
+        //GlideApp.with(activity).load("https://cwalz.de/300x300.png").error(R.drawable.ic_apps_black_24dp).into(detailsLogo);
     }
 
     @Override
@@ -175,9 +224,11 @@ public class AppsFragment extends Fragment {
                             appList.add(app);
                         }
                     }
+                    sortListByName();
                     appAdapter.notifyDataSetChanged();
                     originalAppList.clear();
                     originalAppList.addAll(response.body());
+                    sortListByName(originalAppList);
 
                     // update actionbar
                     updateSubtitle();
@@ -226,6 +277,7 @@ public class AppsFragment extends Fragment {
         swipeRefreshView = view.findViewById(R.id.fragment_apps_refresh);
         loadingView = view.findViewById(R.id.fragment_apps_loading);
         emptyView = view.findViewById(R.id.fragment_apps_empty);
+        //detailsLogo = view.findViewById(R.id.fragment_apps_details_logo);
 
         return view;
     }

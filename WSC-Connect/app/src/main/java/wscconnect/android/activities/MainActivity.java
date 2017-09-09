@@ -3,7 +3,6 @@ package wscconnect.android.activities;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -18,7 +17,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -40,16 +38,17 @@ import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.fragments.MyAppsFragment;
+import wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment;
 import wscconnect.android.listeners.OnBackPressedListener;
 
 import static wscconnect.android.Utils.getAllAccessTokens;
 
 
 public class MainActivity extends AppCompatActivity {
-    public static boolean IS_VISIBLE = true;
     public final static String TAG = "WSC-Connect";
     public final static String EXTRA_NOTIFICATION = "extraNotification";
     public final static String EXTRA_OPTION_TYPE = "extraOptionType";
+    public static boolean IS_VISIBLE = true;
     private Fragment currentFragment;
     private API api;
     private BottomNavigationView navigation;
@@ -187,7 +186,9 @@ public class MainActivity extends AppCompatActivity {
             case 0:
                 newFragment = fManager.findFragmentByTag(appsFragmentTag);
                 if (newFragment != null) {
-                    fManager.beginTransaction().show(newFragment).commit();
+                    if (!newFragment.isStateSaved()) {
+                        fManager.beginTransaction().show(newFragment).commit();
+                    }
                 } else {
                     newFragment = new AppsFragment();
                     fManager.beginTransaction().add(R.id.content, newFragment, appsFragmentTag).commit();
@@ -199,11 +200,13 @@ public class MainActivity extends AppCompatActivity {
             case 1:
                 newFragment = fManager.findFragmentByTag(myAppsFragmentTag);
                 if (newFragment != null) {
-                    fManager.beginTransaction().show(newFragment).commitNow();
-                    if (notificationAppID != null) {
-                        Log.i(TAG, "changeFragment newFragment != null ");
-                        ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
-                        notificationOptionType = null;
+                    if (!newFragment.isStateSaved()) {
+                        fManager.beginTransaction().show(newFragment).commitNow();
+                        if (notificationAppID != null) {
+                            Log.i(TAG, "changeFragment newFragment != null ");
+                            ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
+                            notificationOptionType = null;
+                        }
                     }
                 } else {
                     newFragment = new MyAppsFragment();
@@ -247,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupCrashlyrics();
+        //setupCrashlyrics();
         setContentView(R.layout.activity_main);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -301,10 +304,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public API getAPI() {
-        return getAPI(null);
+        return getAPI(API.ENDPOINT, null);
     }
 
     public API getAPI(final String token) {
+        return getAPI(API.ENDPOINT, token);
+    }
+
+    public API getAPI(final String url, final String token) {
         if (api == null || token != null) {
             int timeout = 10;
 
@@ -343,6 +350,17 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
 
+            // set user agent
+            clientBuilder.addInterceptor(new Interceptor() {
+                @Override
+                public okhttp3.Response intercept(Chain chain) throws IOException {
+                    Request newRequest = chain.request().newBuilder()
+                            .addHeader("User-Agent", AppWebviewFragment.USER_AGENT)
+                            .build();
+                    return chain.proceed(newRequest);
+                }
+            });
+
             // add current app version
             int versionCode;
             try {
@@ -365,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
 
             Retrofit retrofit = new Retrofit.Builder()
                     .client(clientBuilder.build())
-                    .baseUrl(API.ENDPOINT)
+                    .baseUrl(url)
                     .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().create()))
                     .build();
             api = retrofit.create(API.class);

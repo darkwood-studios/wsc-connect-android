@@ -11,9 +11,4 @@
         android:icon="@drawable/ic_grade_black_24dp"
         android:title="@string/title_my_apps" />
 
-    <!--<item
-        android:id="@+id/navigation_account"
-        android:icon="@drawable/ic_people_black_24dp"
-        android:title="@string/title_accounts" />-->
-
 </menu>

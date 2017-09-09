@@ -9,11 +9,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -24,19 +22,21 @@ import wscconnect.android.R;
 import wscconnect.android.activities.MainActivity;
 import wscconnect.android.models.AccessTokenModel;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by chris on 18.07.17.
  */
 
 public class AppWebviewFragment extends Fragment {
     public final static String USER_AGENT = "WSC-Connect Mobile Browser 1.0";
+    private static final int PICKFILE_REQUEST_CODE = 1337;
     private MainActivity activity;
     private AccessTokenModel token;
     private WebView webview;
     private String webviewUrl;
     private SwipeRefreshLayout refreshView;
     private ValueCallback<Uri[]> mFilePathCallback;
-    private static final int PICKFILE_REQUEST_CODE = 1337;
 
     public AppWebviewFragment() {
 
@@ -104,7 +104,7 @@ public class AppWebviewFragment extends Fragment {
     }
 
     private String getWebViewUrl() {
-       return (webviewUrl == null) ? token.getAppUrl() : webviewUrl;
+        return (webviewUrl == null) ? token.getAppUrl() : webviewUrl;
     }
 
     public boolean goBackWebview() {
@@ -118,9 +118,9 @@ public class AppWebviewFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode,
-                                    Intent intent) {
-        if (requestCode == PICKFILE_REQUEST_CODE) {
-            if(intent.getData() != null){
+                                 Intent intent) {
+        if (requestCode == PICKFILE_REQUEST_CODE && intent != null && resultCode == RESULT_OK) {
+            if (intent.getData() != null) {
                 //If uploaded with Android Gallery (max 1 image)
                 Uri selectedFile = intent.getData();
                 Uri[] uris = new Uri[1];
@@ -131,7 +131,7 @@ public class AppWebviewFragment extends Fragment {
                 int count = clipData.getItemCount();
                 Uri[] uris = new Uri[count];
 
-                for(int i = 0; i < count; i++){
+                for (int i = 0; i < count; i++) {
                     ClipData.Item item = clipData.getItemAt(i);
                     uris[i] = item.getUri();
                 }

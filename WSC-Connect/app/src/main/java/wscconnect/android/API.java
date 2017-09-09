@@ -2,13 +2,17 @@ package wscconnect.android;
 
 import java.util.List;
 
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import wscconnect.android.models.AppModel;
+import wscconnect.android.models.ConversationModel;
 import wscconnect.android.models.LoginModel;
 import wscconnect.android.models.MessageModel;
 import wscconnect.android.models.NotificationModel;
@@ -18,8 +22,8 @@ import wscconnect.android.models.NotificationModel;
  */
 
 public interface API {
-    String ENDPOINT = "https://api.wsc-connect.com/";
-    //String ENDPOINT = "http://192.168.1.42:1337/";
+    //String ENDPOINT = "https://api.wsc-connect.com/";
+    String ENDPOINT = "http://192.168.2.114:1337/";
 
     @GET("apps")
     Call<List<AppModel>> getApps();
@@ -38,4 +42,8 @@ public interface API {
 
     @POST("token")
     Call<ResponseBody> getAccessToken();
+
+    @Multipart
+    @POST("index.php?wsc-connect-api")
+    Call<List<ConversationModel>> getConversations(@Part("type") RequestBody type);
 }

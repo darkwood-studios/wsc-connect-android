@@ -3,6 +3,7 @@ package wscconnect.android.adapters;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -11,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.webkit.CookieManager;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -20,6 +20,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +32,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -42,11 +45,9 @@ import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.activities.MainActivity;
 import wscconnect.android.callbacks.RetroCallback;
-import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.AppModel;
 import wscconnect.android.models.LoginModel;
 
-import static wscconnect.android.Utils.getAccessToken;
 import static wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment.USER_AGENT;
 
 /**
@@ -54,8 +55,10 @@ import static wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment.
  */
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
+    private static final int WEBVIEW_TIMEOUT = 8000;
     private MainActivity activity;
     private List<AppModel> appList;
+    private boolean webviewFinishedLoading;
 
     public AppAdapter(MainActivity activity, List<AppModel> appList) {
         this.activity = activity;
@@ -75,22 +78,29 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
         AppModel app = appList.get(position);
 
         holder.name.setText(app.getName());
-        holder.url.setText(app.getUrl());
-        GlideApp.with(activity).load(app.getLogo()).circleCrop().error(R.drawable.ic_apps_black_24dp).into(holder.logo);
-        if (app.isLoggedIn(activity)) {
-            AccessTokenModel token = getAccessToken(activity, app.getAppID());
-            holder.loggedIn.setText(activity.getString(R.string.list_app_loggedIn, token.getUsername()));
-            holder.loggedIn.setVisibility(View.VISIBLE);
-        } else {
-            holder.loggedIn.setVisibility(View.GONE);
+
+        URI uri = null;
+        try {
+            uri = new URI(app.getUrl());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
+
+        if (uri != null) {
+            holder.url.setText(uri.getHost().replace("www.", ""));
+        } else {
+            holder.url.setText(app.getUrl());
+        }
+
+        GlideApp.with(activity).load(app.getLogo()).error(R.drawable.ic_apps_black_24dp).into(holder.logo);
+        holder.users.setText(String.valueOf(app.getUserCount()));
 
         int unreadNotifications = Utils.getUnreadNotifications(activity, app.getAppID());
         if (unreadNotifications > 0) {
             holder.unreadNotifications.setText(String.valueOf(unreadNotifications));
-            holder.unreadNotifications.setVisibility(View.VISIBLE);
+            holder.unreadNotificationsContainer.setVisibility(View.VISIBLE);
         } else {
-            holder.unreadNotifications.setVisibility(View.GONE);
+            holder.unreadNotificationsContainer.setVisibility(View.GONE);
         }
     }
 
@@ -221,6 +231,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 super.onResponse(call, response);
+
                 Log.i(MainActivity.TAG, "onResponse " + response.code());
 
                 if (response.isSuccessful()) {
@@ -234,7 +245,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                         if (loginModel.isThirdPartyLogin()) {
                             saveLogin(accessToken, refreshToken);
                         } else {
-                            WebView webview = new WebView(activity);
+                            final WebView webview = new WebView(activity);
                             final WebSettings webSettings = webview.getSettings();
                             webSettings.setUserAgentString(USER_AGENT);
                             final String postData = "type=loginCookie&username=" + URLEncoder.encode(loginModel.getUsername(), "UTF-8") + "&password=" + URLEncoder.encode(loginModel.getPassword(), "UTF-8") + "&wscConnectToken=" + URLEncoder.encode(wscConnectToken, "UTF-8");
@@ -243,6 +254,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                                 @Override
                                 public void onPageFinished(WebView view, String url) {
                                     super.onPageFinished(view, url);
+
                                     hideLoading();
                                     saveLogin(accessToken, refreshToken);
                                 }
@@ -267,6 +279,20 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                                 }
                             });
                             webview.postUrl(app.getApiUrl(), postData.getBytes());
+
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // in case the webview login is not finished after the timeout, cancel it manually
+                                    if (!webviewFinishedLoading) {
+                                        if (webview != null) {
+                                            webview.stopLoading();
+                                        }
+                                        webviewFinishedLoading = true;
+                                        saveLogin(accessToken, refreshToken);
+                                    }
+                                }
+                            }, WEBVIEW_TIMEOUT);
                         }
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
@@ -286,11 +312,15 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                 Utils.saveRefreshToken(activity, app.getAppID(), refreshToken);
 
                 notifyItemChanged(position);
-                dialog.dismiss();
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
 
                 activity.setNotificationAppID(app.getAppID());
                 activity.updateMyAppsFragment();
                 activity.setActiveMenuItem(R.id.navigation_my_apps);
+
+                webviewFinishedLoading = true;
             }
 
             private void hideLoading() {
@@ -308,15 +338,19 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
 
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name, url, loggedIn, unreadNotifications;
+        public LinearLayout unreadNotificationsContainer;
+        public LinearLayout usersContainer;
+        public TextView name, url, users, unreadNotifications;
         public ImageView logo;
 
         public MyViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.list_app_name);
             url = view.findViewById(R.id.list_app_url);
-            loggedIn = view.findViewById(R.id.list_app_loggedIn);
+            users = view.findViewById(R.id.list_app_users);
+            usersContainer = view.findViewById(R.id.list_app_users_container);
             unreadNotifications = view.findViewById(R.id.list_app_unread_notifications);
+            unreadNotificationsContainer = view.findViewById(R.id.list_app_unread_notifications_container);
             logo = view.findViewById(R.id.list_app_logo);
 
             view.setOnClickListener(new View.OnClickListener() {
@@ -333,7 +367,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                                         showLoginDialog(app, getAdapterPosition());
                                         break;
                                     case 1:
-                                        logout(app, loggedIn, getAdapterPosition());
+                                        logout(app, users, getAdapterPosition());
                                         break;
                                 }
                             }

@@ -152,7 +152,7 @@ public class AppNotificationsFragment extends Fragment {
                     Utils.logout(activity, token.getAppID());
                     activity.updateAllFragments();
                     Toast.makeText(activity, activity.getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
-                } else if  (response.code() == 403) {
+                } else if (response.code() == 403) {
                     // user has been logged out
                     Utils.logout(activity, token.getAppID());
                     activity.updateAllFragments();

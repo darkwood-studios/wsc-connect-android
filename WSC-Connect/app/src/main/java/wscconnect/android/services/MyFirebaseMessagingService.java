@@ -31,7 +31,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Map<String, String> data = message.getData();
 
         // only accept messages from the correct sender
-        if (from.equals(GCM_SENDER_ID)) {
+        if (from != null && from.equals(GCM_SENDER_ID)) {
             String action = data.get("action");
 
             if (action == null) {

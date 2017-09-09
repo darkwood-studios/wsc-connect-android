@@ -70,6 +70,36 @@ public class AppMessagesFragment extends Fragment {
             Log.i(MainActivity.TAG, "AppMessagesFragment onActivityCreated loadMessages()");
             loadMessages(null);
         }
+
+        // TODO use this to get the conversations
+        /*Log.i(MainActivity.TAG, "token.getAppApiUrl(): " + token.getAppApiUrl());
+        Uri uri = Uri.parse(token.getAppApiUrl());
+        String host = uri.getScheme() + "://" + uri.getHost();
+
+        if (!host.endsWith("/")) {
+            host = host + "/";
+        }
+        Log.i(MainActivity.TAG, "host: " + host);
+        host = host.replace("localhost", "192.168.2.114");
+        Log.i(MainActivity.TAG, "host2: " + host);
+
+        activity.getAPI(host, token.getToken()).getConversations(RequestBody.create(MediaType.parse("text/plain"), "getConversations")).enqueue(new RetroCallback<List<ConversationModel>>(activity) {
+            @Override
+            public void onResponse(Call<List<ConversationModel>> call, Response<List<ConversationModel>> response) {
+                super.onResponse(call, response);
+
+                Log.i(MainActivity.TAG, "success: " + response.isSuccessful());
+                Log.i(MainActivity.TAG, "response: " + response.body().toString());
+                Log.i(MainActivity.TAG, "response call:" + call.request().headers().toString());
+            }
+
+            @Override
+            public void onFailure(Call<List<ConversationModel>> call, Throwable t) {
+                super.onFailure(call, t);
+
+                Log.i(MainActivity.TAG, "error: " + t.getMessage());
+            }
+        });*/
     }
 
     public void setToken(AccessTokenModel token) {

@@ -1,81 +1,112 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_list"
-    android:clickable="true"
-    android:paddingBottom="@dimen/layout_margin"
-    android:paddingLeft="@dimen/layout_padding"
-    android:paddingRight="@dimen/layout_padding"
-    android:paddingTop="@dimen/layout_margin">
+    android:padding="5dp">
 
-    <RelativeLayout
-        android:id="@+id/list_app_logo_container"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_centerVertical="true">
-
-        <ImageView
-            android:id="@+id/list_app_logo"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <TextView
-            android:id="@+id/list_app_unread_notifications"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/badge"
-            android:textColor="#ffffff"
-            android:textSize="10sp"
-            android:visibility="gone" />
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/layout_margin"
-        android:layout_toEndOf="@id/list_app_logo_container"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/list_app_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@drawable/text_list"
-            android:textSize="16sp" />
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_challenge_card_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        card_view:cardElevation="0dp"
+        card_view:cardMaxElevation="0dp"
+        card_view:cardUseCompatPadding="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:background="#f6f6f6">
 
-            <TextView
-                android:id="@+id/list_app_url"
+            <FrameLayout
+                android:id="@+id/card_challenge_cover_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginEnd="@dimen/layout_margin"
-                android:layout_toStartOf="@+id/list_app_loggedIn"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@drawable/text_list_accent"
-                android:textSize="12sp" />
+                android:layout_height="70dp">
 
-            <TextView
-                android:id="@+id/list_app_loggedIn"
+                <ImageView
+                    android:id="@+id/list_app_logo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="centerCrop" />
+
+                <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/list_app_unread_notifications_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginStart="3dp"
+                    android:background="@drawable/badge"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="3dp"
+                        app:srcCompat="@drawable/ic_notifications_white_12dp" />
+
+                    <TextView
+                        android:id="@+id/list_app_unread_notifications"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/list_app_users_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginEnd="3dp"
+                    android:background="@drawable/badge_primary">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="3dp"
+                        app:srcCompat="@drawable/ic_people_white_12dp" />
+
+                    <TextView
+                        android:id="@+id/list_app_users"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+            </FrameLayout>
+
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                android:textColor="@drawable/text_list_accent"
-                android:textSize="10sp" />
+                android:layout_below="@id/card_challenge_cover_container"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/list_app_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/list_app_url"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/list_app_name"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="11sp" />
+            </RelativeLayout>
         </RelativeLayout>
 
-    </LinearLayout>
+    </android.support.v7.widget.CardView>
 
-</RelativeLayout>
+</LinearLayout>

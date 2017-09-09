@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
@@ -64,8 +65,12 @@ public class Utils {
     public final static String SHARED_PREF_KEY = "wsc-connect";
 
     public static boolean hasInternetConnection(Context context) {
+        if (context == null) return false;
+
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     public static void hideProgressView(View view, ProgressBar bar) {
@@ -167,7 +172,10 @@ public class Utils {
         Collections.sort(tokens, new Comparator<AccessTokenModel>() {
             @Override
             public int compare(AccessTokenModel t1, AccessTokenModel t2) {
-                return t1.getAppName().compareToIgnoreCase(t2.getAppName());
+                String app1Name = t1.getAppName().replaceAll("[^a-zA-Z]", "").toLowerCase();
+                String app2Name = t2.getAppName().replaceAll("[^a-zA-Z]", "").toLowerCase();
+
+                return app1Name.compareToIgnoreCase(app2Name);
             }
         });
 
@@ -260,7 +268,7 @@ public class Utils {
 
         if (vibrate && audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
             Vibrator v = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
-            long pattern[] = new long[] { 0, 300, 100, 300 };
+            long pattern[] = new long[]{0, 300, 100, 300};
 
             if (Build.VERSION.SDK_INT >= 26) {
                 v.vibrate(VibrationEffect.createWaveform(pattern, -1));

@@ -210,19 +210,19 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
 
         @Override
         public Fragment getItem(int position) {
-           // AppOptionsFragment fragment = fragments.get(position);
+            // AppOptionsFragment fragment = fragments.get(position);
 
-           // if (fragment == null) {
-                AppOptionsFragment fragment = new AppOptionsFragment();
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(AccessTokenModel.EXTRA, tokenList.get(position));
-                bundle.putString(AppOptionModel.TYPE, optionTypeToSelect.get(tokenList.get(position).getAppID()));
-                // reset after creating
-                optionTypeToSelect.remove(tokenList.get(position).getAppID());
-                fragment.setArguments(bundle);
-                optionFragments.append(position, fragment);
-                //fragments.put(position, fragment);
-           // }
+            // if (fragment == null) {
+            AppOptionsFragment fragment = new AppOptionsFragment();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(AccessTokenModel.EXTRA, tokenList.get(position));
+            bundle.putString(AppOptionModel.TYPE, optionTypeToSelect.get(tokenList.get(position).getAppID()));
+            // reset after creating
+            optionTypeToSelect.remove(tokenList.get(position).getAppID());
+            fragment.setArguments(bundle);
+            optionFragments.append(position, fragment);
+            //fragments.put(position, fragment);
+            // }
 
             return fragment;
         }
@@ -259,7 +259,7 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
                     AppOptionsFragment result = optionFragments.get(key);
                     if (result.equals(fragment)) {
                         optionFragments.remove(key);
-                      //  fragments.remove(index);
+                        //  fragments.remove(index);
                         break;
                     }
                 }
