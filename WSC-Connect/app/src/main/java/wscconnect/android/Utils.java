@@ -25,6 +25,8 @@ import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -71,6 +73,21 @@ public class Utils {
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 
         return networkInfo != null && networkInfo.isConnected();
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        try {
+            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            if (((activity.getCurrentFocus() != null) && (activity.getCurrentFocus().getWindowToken() != null))) {
+                ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void showKeyboard(Context context) {
+        ((InputMethodManager) (context).getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 
     public static void hideProgressView(View view, ProgressBar bar) {

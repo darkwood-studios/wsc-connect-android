@@ -46,11 +46,9 @@
     <string name="pref_others_open_in_webview">Open websites in app</string>
     <string name="action_sort_users">Sort by users</string>
     <string name="action_sort_name">Sort by name</string>
-
-    <array name="list_app_dialog_items">
-        <item>Login with a different account</item>
-        <item>Logout</item>
-    </array>
+    <string name="fragment_apps_details_logged_in_switch">Login with a different account</string>
+    <string name="fragment_apps_details_logged_in_show">Open in My Apps</string>
+    <string name="fragment_apps_details_logged_in_as">Logged in as: %1$s</string>
 
     <plurals name="fragment_apps_subtitle_apps">
         <item quantity="one">%1$d App</item>

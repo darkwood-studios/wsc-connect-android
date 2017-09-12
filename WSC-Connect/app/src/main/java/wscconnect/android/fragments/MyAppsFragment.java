@@ -52,12 +52,11 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
         super.onActivityCreated(savedInstanceState);
 
         activity = (MainActivity) getActivity();
-        activity.setOnBackPressedListener(this);
         optionFragments = new SparseArray<>();
         tokenList = new ArrayList<>();
-
         tokenList.addAll(Utils.getAllAccessTokens(activity));
 
+        activity.setOnBackPressedListener(this);
         pagerAdapter = new AppOptionsFragmentPager(getChildFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         // TODO this allows 50 opened tabs - otherwise we got a fragment exception. Fix later, cause it consumes too much memory
@@ -97,6 +96,15 @@ public class MyAppsFragment extends Fragment implements OnBackPressedListener {
         if (appIDToSelect != null && tokenList != null) {
             Log.i(MainActivity.TAG, "onActivityCreated optionTypeToSelect.get(appIDToSelect) " + optionTypeToSelect.get(appIDToSelect));
             selectApp(appIDToSelect, optionTypeToSelect.get(appIDToSelect));
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        if (!hidden) {
+            activity.setOnBackPressedListener(this);
         }
     }
 

@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     };
+    public Toolbar toolbar;
 
     @Override
     public void onBackPressed() {
@@ -191,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     newFragment = new AppsFragment();
-                    fManager.beginTransaction().add(R.id.content, newFragment, appsFragmentTag).commit();
+                    fManager.beginTransaction().add(R.id.activity_main_content, newFragment, appsFragmentTag).commit();
                 }
 
                 hideFragments(myAppsFragmentTag);
@@ -210,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     newFragment = new MyAppsFragment();
-                    fManager.beginTransaction().add(R.id.content, newFragment, myAppsFragmentTag).commitNow();
+                    fManager.beginTransaction().add(R.id.activity_main_content, newFragment, myAppsFragmentTag).commitNow();
                     if (notificationAppID != null) {
                         Log.i(TAG, "changeFragment newFragment === null ");
                         ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
@@ -253,13 +255,17 @@ public class MainActivity extends AppCompatActivity {
         //setupCrashlyrics();
         setContentView(R.layout.activity_main);
 
+        toolbar = (Toolbar) findViewById(R.id.activity_main_toolbar);
+
+        setSupportActionBar(toolbar);
+
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         fManager = getSupportFragmentManager();
         appsFragmentTag = AppsFragment.class.getSimpleName();
         myAppsFragmentTag = MyAppsFragment.class.getSimpleName();
 
-        navigation = findViewById(R.id.navigation);
+        navigation = findViewById(R.id.activity_main_navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         notificationAppID = getIntent().getStringExtra(EXTRA_NOTIFICATION);

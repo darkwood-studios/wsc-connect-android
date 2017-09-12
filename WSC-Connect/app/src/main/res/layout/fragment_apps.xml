@@ -27,37 +27,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!--<LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="150dp">
-
-            <ImageView
-                android:id="@+id/fragment_apps_details_logo"
-                android:scaleType="centerCrop"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            
-            <TextView
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:background="@color/transparentDarkColor"
-                android:text="cWalz Development"
-                android:padding="8dp"
-                android:layout_gravity="bottom"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            </FrameLayout>
-        </LinearLayout>-->
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/fragment_apps_list"
             android:layout_width="match_parent"
@@ -66,5 +35,123 @@
             android:paddingRight="5dp" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:id="@+id/fragment_apps_details"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/fragment_apps_details_logo"
+            android:scaleType="centerCrop"
+            android:layout_width="match_parent"
+            android:layout_height="150dp" />
+
+        <LinearLayout
+            android:id="@+id/fragment_apps_details_root_logged_in"
+            android:visibility="gone"
+            android:padding="@dimen/layout_padding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/fragment_apps_details_logged_in_as"
+                style="@style/TextSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center" />
+
+            <Button
+                android:id="@+id/fragment_apps_details_logged_in_show"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/layout_margin_small"
+                android:text="@string/fragment_apps_details_logged_in_show" />
+
+            <Button
+                android:id="@+id/fragment_apps_details_logged_in_switch"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/fragment_apps_details_logged_in_switch"
+                android:textSize="16sp"
+                android:textColor="@color/textColor" />
+            <Button
+                android:id="@+id/fragment_apps_details_logged_in_logout"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/logout"
+                android:textSize="16sp"
+                android:textColor="@color/textColor" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/fragment_apps_details_root"
+            android:padding="@dimen/layout_padding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/fragment_apps_details_username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/dialog_login_username"
+                android:inputType="textFilter|textNoSuggestions"
+                android:maxLines="1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/fragment_apps_details_password"
+                    android:layout_width="1dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/dialog_login_password"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+
+                <ImageView
+                    android:id="@+id/fragment_apps_details_password_visible"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="@dimen/layout_margin_small" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/fragment_apps_details_login_submit"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/login" />
+
+            <Button
+                android:id="@+id/fragment_apps_details_login_third_party_submit"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_login_third_party"
+                android:textSize="16sp"
+                android:textColor="@color/textColor" />
+
+            <TextView
+                android:id="@+id/fragment_apps_details_login_third_party_info"
+                style="@style/TextSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </FrameLayout>

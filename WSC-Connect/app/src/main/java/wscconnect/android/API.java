@@ -22,8 +22,8 @@ import wscconnect.android.models.NotificationModel;
  */
 
 public interface API {
-    //String ENDPOINT = "https://api.wsc-connect.com/";
-    String ENDPOINT = "http://192.168.2.114:1337/";
+    String ENDPOINT = "https://api.wsc-connect.com/";
+    //String ENDPOINT = "http://192.168.2.114:1337/";
 
     @GET("apps")
     Call<List<AppModel>> getApps();
