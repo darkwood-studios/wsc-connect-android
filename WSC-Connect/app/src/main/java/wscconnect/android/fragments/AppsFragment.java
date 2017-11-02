@@ -422,6 +422,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             swipeRefreshView.setVisibility(View.VISIBLE);
             setupToolbar(false, null);
             updateSubtitle();
+            Utils.hideKeyboard(activity);
 
             // reset edittext values
             usernameView.setText("");
