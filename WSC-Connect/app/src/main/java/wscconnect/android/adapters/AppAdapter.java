@@ -61,11 +61,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             holder.url.setText(app.getUrl());
         }
 
-        GlideApp.with(activity).load(app.getLogo()).error(R.drawable.ic_apps_black_24dp).into(holder.logo);
+        GlideApp.with(activity).load(app.getLogo()).into(holder.logo);
         holder.users.setText(String.valueOf(app.getUserCount()));
 
         int unreadNotifications = Utils.getUnreadNotifications(activity, app.getAppID());
-        if (unreadNotifications > 0) {
+        if (unreadNotifications > 0 && Utils.getAccessTokenString(activity, app.getAppID()) != null) {
             holder.unreadNotifications.setText(String.valueOf(unreadNotifications));
             holder.unreadNotificationsContainer.setVisibility(View.VISIBLE);
         } else {

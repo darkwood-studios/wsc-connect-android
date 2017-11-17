@@ -6,7 +6,6 @@
     <string name="just_now">Just now</string>
     <string name="dialog_login_username">Username</string>
     <string name="dialog_login_password">Password / Auth-Token</string>
-    <string name="dialog_login_title">Login for %1$s</string>
     <string name="dialog_login_third_party">Third-party login</string>
     <string name="dialog_login_third_party_info">Use the third-party login when you used a third-party login for %1$s.</string>
     <string name="logout">Logout</string>
@@ -29,8 +28,6 @@
     <string name="action_settings">Settings</string>
     <string name="close">Close</string>
     <string name="dialog_about_text">WSC-Connect connects all your favorite WSC (WoltLab&#174; Suite Core)-Apps in one place. Receive notifications via push message and much more.\n\n<b>You own a WSC-App</b>? Visit <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> and register your App now!\n\nWSC-Connect is not associated with the WoltLab&#174; GmbH.\n\n<b>Contact</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Legal Notice</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nGermany</string>
-    <string name="fragment_app_options_notifications">Notifications on %1$s</string>
-    <string name="fragment_app_options_messages">Push-Messages</string>
     <string name="fragment_app_messagess_empty">No push messages found</string>
     <string name="fragment_app_messagess_loading_info">Loading push messages for %1$s…</string>
     <string name="error_request_api_not_available">Our server is busy, try again in a few minutes.</string>
@@ -49,6 +46,31 @@
     <string name="fragment_apps_details_logged_in_switch">Login with a different account</string>
     <string name="fragment_apps_details_logged_in_show">Open in My Apps</string>
     <string name="fragment_apps_details_logged_in_as">Logged in as: %1$s</string>
+    <string name="fragment_my_apps_username">Logged in as %1$s</string>
+    <string name="activity_app_tab_webview">Website</string>
+    <string name="activity_app_tab_messages">Messages</string>
+    <string name="activity_app_tab_notifications">Notifications</string>
+    <string name="activity_app_tab_conversations">Conversations</string>
+    <string name="fragment_app_conversations_empty">No recent conversations</string>
+    <string name="fragment_app_conversations_loading_info">Loading conversations for %1$s…</string>
+    <string name="list_conversation_message_header_participants">Participants: %1$s</string>
+    <string name="list_conversation_message_dialog_copied">Message copied</string>
+    <string name="submit">Submit</string>
+    <string name="list_conversation_message_form_hint">Write an answer…</string>
+    <string name="list_conversation_message_form_closed">Conversation closed</string>
+    <string name="list_conversation_message_form_error_censorship">Your message contains the following censored words: %1$s</string>
+    <string name="list_conversation_message_form_error_length">Your message is too long with %1$d characters. Maximum characters: %2$d</string>
+    <string name="fragment_app_conversations_package">Please contact the admin of %1$s. The conversation plugin could not be found.</string>
+    <string name="activity_app_token_null">A critical error occurred. Please login again.</string>
+
+    <array name="list_my_apps_dialog_items">
+        <item>Logout</item>
+    </array>
+
+    <array name="list_conversation_message_dialog_items">
+        <item>Copy message</item>
+        <item>Show full message</item>
+    </array>
 
     <plurals name="fragment_apps_subtitle_apps">
         <item quantity="one">%1$d App</item>

@@ -1,8 +1,6 @@
 package wscconnect.android.activities;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -21,25 +19,11 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.gson.GsonBuilder;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import io.fabric.sdk.android.Fabric;
-import okhttp3.Cache;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import wscconnect.android.API;
 import wscconnect.android.R;
-import wscconnect.android.Utils;
 import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.fragments.MyAppsFragment;
-import wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment;
 import wscconnect.android.listeners.OnBackPressedListener;
 
 import static wscconnect.android.Utils.getAllAccessTokens;
@@ -51,14 +35,12 @@ public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_OPTION_TYPE = "extraOptionType";
     public static boolean IS_VISIBLE = true;
     private Fragment currentFragment;
-    private API api;
     private BottomNavigationView navigation;
     private String appsFragmentTag;
     private String myAppsFragmentTag;
     private FragmentManager fManager;
     private String notificationAppID;
     private OnBackPressedListener onBackPressedListener;
-    private String notificationOptionType;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -75,13 +57,6 @@ public class MainActivity extends AppCompatActivity {
                     if (!(currentFragment instanceof MyAppsFragment)) {
                         Log.i(TAG, "OnNavigationItemSelectedListener !(currentFragment instanceof MyAppsFragment))");
                         currentFragment = changeFragment(1);
-                    } else if (notificationAppID != null) {
-                        Log.i(TAG, "OnNavigationItemSelectedListener else if notificationOptionType " + notificationOptionType);
-                        ((MyAppsFragment) currentFragment).selectApp(notificationAppID, notificationOptionType);
-                        notificationOptionType = null;
-                    } else {
-                        Log.i(TAG, "OnNavigationItemSelectedListener else");
-                        ((MyAppsFragment) currentFragment).resetCurrentApp();
                     }
                     return true;
             }
@@ -112,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     public void updateMyAppsFragment() {
         MyAppsFragment fragment = (MyAppsFragment) fManager.findFragmentByTag(myAppsFragmentTag);
         if (fragment != null) {
-            fragment.updateAdapter();
+            fragment.updateData();
         }
     }
 
@@ -206,8 +181,6 @@ public class MainActivity extends AppCompatActivity {
                         fManager.beginTransaction().show(newFragment).commitNow();
                         if (notificationAppID != null) {
                             Log.i(TAG, "changeFragment newFragment != null ");
-                            ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
-                            notificationOptionType = null;
                         }
                     }
                 } else {
@@ -215,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
                     fManager.beginTransaction().add(R.id.activity_main_content, newFragment, myAppsFragmentTag).commitNow();
                     if (notificationAppID != null) {
                         Log.i(TAG, "changeFragment newFragment === null ");
-                        ((MyAppsFragment) newFragment).selectApp(notificationAppID, notificationOptionType);
                     }
                 }
 
@@ -242,7 +214,6 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(newIntent);
 
         notificationAppID = newIntent.getStringExtra(EXTRA_NOTIFICATION);
-        notificationOptionType = newIntent.getStringExtra(EXTRA_OPTION_TYPE);
 
         if (notificationAppID != null) {
             navigation.setSelectedItemId(R.id.navigation_my_apps);
@@ -252,10 +223,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setupCrashlyrics();
+        setupCrashlyrics();
         setContentView(R.layout.activity_main);
 
-        toolbar = (Toolbar) findViewById(R.id.activity_main_toolbar);
+        toolbar = findViewById(R.id.activity_main_toolbar);
 
         setSupportActionBar(toolbar);
 
@@ -269,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         notificationAppID = getIntent().getStringExtra(EXTRA_NOTIFICATION);
-        notificationOptionType = getIntent().getStringExtra(EXTRA_OPTION_TYPE);
 
         if (notificationAppID != null) {
             navigation.setSelectedItemId(R.id.navigation_my_apps);
@@ -280,21 +250,6 @@ public class MainActivity extends AppCompatActivity {
                 navigation.setSelectedItemId(R.id.navigation_apps);
             }
         }
-
-        /* TODO
-        ((MainApplication) getApplication()).setOnNewPushMessageListener(new OnNewPushMessageListener() {
-            @Override
-            public void onNewPushMessage(final String appID) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        notificationAppID = appID;
-                        notificationOptionType = AppOptionsFragment.OPTION_TYPE_MESSAGES;
-                        navigation.setSelectedItemId(R.id.navigation_my_apps);
-                    }
-                });
-            }
-        });*/
     }
 
     private void setupCrashlyrics() {
@@ -307,94 +262,5 @@ public class MainActivity extends AppCompatActivity {
 
     public void setActiveMenuItem(int id) {
         navigation.setSelectedItemId(id);
-    }
-
-    public API getAPI() {
-        return getAPI(API.ENDPOINT, null);
-    }
-
-    public API getAPI(final String token) {
-        return getAPI(API.ENDPOINT, token);
-    }
-
-    public API getAPI(final String url, final String token) {
-        if (api == null || token != null) {
-            int timeout = 10;
-
-            final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-            clientBuilder.writeTimeout(timeout, TimeUnit.SECONDS);
-            clientBuilder.connectTimeout(timeout, TimeUnit.SECONDS);
-            clientBuilder.readTimeout(timeout, TimeUnit.SECONDS);
-
-            Interceptor offlineResponseCacheInterceptor = new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request request = chain.request();
-                    if (!Utils.hasInternetConnection(MainActivity.this)) {
-                        request = request.newBuilder()
-                                .header("Cache-Control",
-                                        "public, only-if-cached, max-stale=" + 2419200)
-                                .build();
-                    }
-                    return chain.proceed(request);
-                }
-            };
-
-            clientBuilder.addInterceptor(offlineResponseCacheInterceptor);
-            clientBuilder.cache(new Cache(new File(getCacheDir(),
-                    "APICache"), 50 * 1024 * 1024));
-
-            if (token != null) {
-                clientBuilder.addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(Chain chain) throws IOException {
-                        Request newRequest = chain.request().newBuilder()
-                                .addHeader("Authorization", "Bearer " + token)
-                                .build();
-                        return chain.proceed(newRequest);
-                    }
-                });
-            }
-
-            // set user agent
-            clientBuilder.addInterceptor(new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request newRequest = chain.request().newBuilder()
-                            .addHeader("User-Agent", AppWebviewFragment.USER_AGENT)
-                            .build();
-                    return chain.proceed(newRequest);
-                }
-            });
-
-            // add current app version
-            int versionCode;
-            try {
-                PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                versionCode = pInfo.versionCode;
-            } catch (PackageManager.NameNotFoundException e) {
-                // an error is likely not good. Set versionCode to 1
-                versionCode = 1;
-            }
-            final int finalVersionCode = versionCode;
-            clientBuilder.addInterceptor(new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request newRequest = chain.request().newBuilder()
-                            .addHeader("X-App-Version-Code", String.valueOf(finalVersionCode))
-                            .build();
-                    return chain.proceed(newRequest);
-                }
-            });
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(clientBuilder.build())
-                    .baseUrl(url)
-                    .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().create()))
-                    .build();
-            api = retrofit.create(API.class);
-        }
-
-        return api;
     }
 }

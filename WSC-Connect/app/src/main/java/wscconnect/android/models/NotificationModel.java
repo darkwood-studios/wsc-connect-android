@@ -68,14 +68,14 @@ public class NotificationModel {
             return "";
         }
 
-        long time = this.time;
+        long timeInMillis = (long) time * 1000;
 
         // less than a minute ago
-        if (System.currentTimeMillis() - (time * 1000) <= 60000) {
+        if (System.currentTimeMillis() - timeInMillis <= 60000) {
             return context.getString(R.string.just_now);
         }
 
-        return DateUtils.getRelativeTimeSpanString(time * 1000, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
+        return DateUtils.getRelativeTimeSpanString(timeInMillis, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
     }
 
     public String getAvatar() {

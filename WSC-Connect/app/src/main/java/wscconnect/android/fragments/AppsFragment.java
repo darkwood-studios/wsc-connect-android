@@ -1,6 +1,7 @@
 package wscconnect.android.fragments;
 
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -54,10 +55,12 @@ import retrofit2.Response;
 import wscconnect.android.GlideApp;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
+import wscconnect.android.activities.AppActivity;
 import wscconnect.android.activities.MainActivity;
 import wscconnect.android.adapters.AppAdapter;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.listeners.OnBackPressedListener;
+import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.AppModel;
 import wscconnect.android.models.LoginModel;
 
@@ -259,7 +262,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
     }
 
     private void loadApps() {
-        activity.getAPI().getApps().enqueue(new RetroCallback<List<AppModel>>(activity) {
+        Utils.getAPI(activity).getApps().enqueue(new RetroCallback<List<AppModel>>(activity) {
             @Override
             public void onResponse(Call<List<AppModel>> call, Response<List<AppModel>> response) {
                 super.onResponse(call, response);
@@ -325,8 +328,15 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             swipeRefreshView.setVisibility(View.GONE);
             detailsContainer.setVisibility(View.VISIBLE);
 
+            if (menu != null) {
+                MenuItem actionSearch = menu.findItem(R.id.action_search);
+                if (actionSearch != null) {
+                    actionSearch.collapseActionView();
+                }
+            }
+
             setupToolbar(true, app);
-            GlideApp.with(activity).load(app.getLogo()).error(R.drawable.ic_apps_black_24dp).into(detailsLogo);
+            GlideApp.with(activity).load(app.getLogo()).into(detailsLogo);
 
             if (app.isLoggedIn(activity) && !forceLogin) {
                 loggedInAs.setText(getString(R.string.fragment_apps_details_logged_in_as, Utils.getAccessToken(activity, app.getAppID()).getUsername()
@@ -353,7 +363,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                         switchAccountButton.setEnabled(false);
                         final ProgressBar progressBar = Utils.showProgressView(activity, logoutAccountButton, android.R.attr.progressBarStyle);
                         String token = Utils.getAccessTokenString(activity, app.getAppID());
-                        activity.getAPI(token).logout(app.getAppID()).enqueue(new RetroCallback<ResponseBody>(activity) {
+                        Utils.getAPI(activity, token).logout(app.getAppID()).enqueue(new RetroCallback<ResponseBody>(activity) {
                             @Override
                             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                                 super.onResponse(call, response);
@@ -450,8 +460,16 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         } else {
             activity.getSupportActionBar().setTitle(R.string.app_name);
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            menu.findItem(R.id.action_sort).setVisible(true);
-            menu.findItem(R.id.action_search).setVisible(true);
+            if (menu != null) {
+                MenuItem actionSort = menu.findItem(R.id.action_sort);
+                if (actionSort != null) {
+                    actionSort.setVisible(true);
+                }
+                MenuItem actionSearch = menu.findItem(R.id.action_search);
+                if (actionSearch != null) {
+                    actionSearch.setVisible(true);
+                }
+            }
         }
     }
 
@@ -495,12 +513,13 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         loginModel.setThirdPartyLogin(thirdParty);
         loginModel.setDevice(Build.MODEL);
 
-        activity.getAPI().login(app.getAppID(), loginModel).enqueue(new RetroCallback<ResponseBody>(activity) {
+        Utils.getAPI(activity).login(app.getAppID(), loginModel).enqueue(new RetroCallback<ResponseBody>(activity) {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 super.onResponse(call, response);
 
                 Log.i(MainActivity.TAG, "onResponse " + response.code());
+                    Log.i(MainActivity.TAG, "onResponse " + response.raw().message());
 
                 if (response.isSuccessful()) {
                     try {
@@ -581,11 +600,16 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
 
                 activity.setNotificationAppID(app.getAppID());
                 activity.updateMyAppsFragment();
-                activity.setActiveMenuItem(R.id.navigation_my_apps);
 
                 webviewFinishedLoading = true;
-                switchToDetailView(false, false, null);
+
                 Utils.hideKeyboard(activity);
+
+                Intent appDetail = new Intent(activity, AppActivity.class);
+                appDetail.putExtra(AccessTokenModel.EXTRA, Utils.getAccessToken(activity, app.getAppID()));
+
+                switchToDetailView(false, false, null);
+                activity.startActivity(appDetail);
             }
 
             private void hideLoading() {

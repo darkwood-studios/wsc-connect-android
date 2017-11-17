@@ -28,14 +28,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@drawable/text_list"
-            android:textSize="14sp" />
+            android:textSize="@dimen/list_title" />
 
         <TextView
             android:id="@+id/list_notification_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@drawable/text_list_accent"
-            android:textSize="11sp" />
+            android:textSize="@dimen/list_subtitle" />
 
     </LinearLayout>
 

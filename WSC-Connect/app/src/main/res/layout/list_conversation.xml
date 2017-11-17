@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_list"
+    android:clickable="true"
+    android:paddingBottom="@dimen/layout_margin"
+    android:paddingLeft="@dimen/layout_padding"
+    android:paddingRight="@dimen/layout_padding"
+    android:paddingTop="@dimen/layout_margin">
+
+    <ImageView
+        android:id="@+id/list_conversation_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/layout_margin"
+        android:layout_toEndOf="@id/list_conversation_avatar"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/list_conversation_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@drawable/text_list"
+            android:textSize="@dimen/list_title" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/list_conversation_participants"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/list_conversation_time"
+                android:textColor="@drawable/text_list_accent"
+                android:textSize="@dimen/list_subtitle" />
+
+            <TextView
+                android:id="@+id/list_conversation_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_subtitle"
+                android:layout_alignParentEnd="true"
+                android:textColor="@drawable/text_list_accent"
+                android:textSize="@dimen/list_subtitle" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

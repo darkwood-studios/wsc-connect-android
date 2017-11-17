@@ -19,7 +19,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import wscconnect.android.R;
-import wscconnect.android.activities.MainActivity;
+import wscconnect.android.listeners.OnBackPressedListener;
+import wscconnect.android.listeners.OnFragmentUpdateListener;
 import wscconnect.android.models.AccessTokenModel;
 
 import static android.app.Activity.RESULT_OK;
@@ -28,10 +29,10 @@ import static android.app.Activity.RESULT_OK;
  * Created by chris on 18.07.17.
  */
 
-public class AppWebviewFragment extends Fragment {
+public class AppWebviewFragment extends Fragment implements OnBackPressedListener, OnFragmentUpdateListener {
     public final static String USER_AGENT = "WSC-Connect Mobile Browser 1.0";
+    public final static String URL = "webviewUrl";
     private static final int PICKFILE_REQUEST_CODE = 1337;
-    private MainActivity activity;
     private AccessTokenModel token;
     private WebView webview;
     private String webviewUrl;
@@ -46,10 +47,11 @@ public class AppWebviewFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        token = getArguments().getParcelable(AccessTokenModel.EXTRA);
-        webviewUrl = getArguments().getString("webviewUrl");
+        if (getArguments() != null) {
+            token = getArguments().getParcelable(AccessTokenModel.EXTRA);
+            webviewUrl = getArguments().getString(URL);
+        }
 
-        activity = (MainActivity) getActivity();
         prepareWebview();
     }
 
@@ -173,5 +175,24 @@ public class AppWebviewFragment extends Fragment {
 
     public void setUrl(String webviewUrl) {
         this.webviewUrl = webviewUrl;
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (webview != null && webview.canGoBack()) {
+            webview.goBack();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void onUpdate(Bundle bundle) {
+        String url = bundle.getString(URL);
+        if (url != null) {
+            setUrl(url);
+            loadWebview();
+        }
     }
 }

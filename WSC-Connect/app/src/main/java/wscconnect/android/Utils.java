@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -22,41 +24,54 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.auth0.android.jwt.JWT;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.gson.GsonBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cache;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
-import wscconnect.android.activities.MainActivity;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import wscconnect.android.activities.AppActivity;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
+import wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment;
 import wscconnect.android.models.AccessTokenModel;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
-import static wscconnect.android.activities.MainActivity.EXTRA_NOTIFICATION;
 import static wscconnect.android.activities.MainActivity.EXTRA_OPTION_TYPE;
 
 /**
@@ -65,6 +80,8 @@ import static wscconnect.android.activities.MainActivity.EXTRA_OPTION_TYPE;
 
 public class Utils {
     public final static String SHARED_PREF_KEY = "wsc-connect";
+    private static boolean accessTokenRefreshing;
+    private static SimpleCallback onRefreshAccessTokenFinishCallback;
 
     public static boolean hasInternetConnection(Context context) {
         if (context == null) return false;
@@ -124,6 +141,7 @@ public class Utils {
 
     public static void logout(Context context, String appID) {
         Utils.saveUnreadNotifications(context, appID, 0);
+        Utils.saveUnreadConversations(context, appID, 0);
         Utils.removeAccessTokenString(context, appID);
     }
 
@@ -145,6 +163,16 @@ public class Utils {
     public static int getUnreadNotifications(Context context, String appID) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
         return prefs.getInt("unreadNotifications-" + appID, 0);
+    }
+
+    public static void saveUnreadConversations(Context context, String appID, int count) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putInt("unreadConversations-" + appID, count).apply();
+    }
+
+    public static int getUnreadConversations(Context context, String appID) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        return prefs.getInt("unreadConversations-" + appID, 0);
     }
 
     public static String getAccessTokenString(Context context, String appID) {
@@ -209,27 +237,62 @@ public class Utils {
         }
     }
 
-    public static void refreshAccessToken(final MainActivity activity, final String appID, final SimpleCallback callback) {
-        String refreshToken = Utils.getRefreshTokenString(activity, appID);
+    private static void callOnRefreshAccessTokenFinishCallback(boolean success) {
+        if (onRefreshAccessTokenFinishCallback != null) {
+            onRefreshAccessTokenFinishCallback.onReady(success);
+        }
+    }
 
-        activity.getAPI(refreshToken).getAccessToken().enqueue(new RetroCallback<ResponseBody>(activity) {
+    private static void setOnRefreshAccessTokenFinishCallback(SimpleCallback callback) {
+        onRefreshAccessTokenFinishCallback = callback;
+    }
+
+    public static void refreshAccessToken(final Activity activity, final String appID, final SimpleCallback callback) {
+        String refreshToken = Utils.getRefreshTokenString(activity, appID);
+        Log.i("uohsda", "refreshAccessToken");
+
+        if (accessTokenRefreshing) {
+            Log.i("uohsda", "accessTokenRefreshing is true");
+            setOnRefreshAccessTokenFinishCallback(new SimpleCallback() {
+                @Override
+                public void onReady(boolean success) {
+                    Log.i("uohsda", "setOnRefreshAccessTokenFinishCallback");
+                    setOnRefreshAccessTokenFinishCallback(null);
+                    callback.onReady(success);
+                }
+            });
+            return;
+        }
+
+        accessTokenRefreshing = true;
+
+        Utils.getAPI(activity, refreshToken).getAccessToken().enqueue(new RetroCallback<ResponseBody>(activity) {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 super.onResponse(call, response);
+
+                accessTokenRefreshing = false;
 
                 if (response.isSuccessful()) {
                     JSONObject obj;
                     try {
                         obj = new JSONObject(response.body().string());
                         String accessToken = obj.getString("accessToken");
+                        Log.i("uohsda", "new token: " + accessToken);
+
                         saveAccessToken(activity, appID, accessToken);
                         callback.onReady(true);
+                        callOnRefreshAccessTokenFinishCallback(true);
                     } catch (JSONException | IOException e) {
                         e.printStackTrace();
                         callback.onReady(false);
+                        callOnRefreshAccessTokenFinishCallback(false);
                     }
                 } else {
+                    Log.i("uohsda", "new token failed: " + response.code());
+
                     callback.onReady(false);
+                    callOnRefreshAccessTokenFinishCallback(false);
                 }
             }
 
@@ -237,12 +300,16 @@ public class Utils {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 super.onFailure(call, t);
 
+                accessTokenRefreshing = false;
+                t.printStackTrace();
+
                 callback.onReady(false);
+                callOnRefreshAccessTokenFinishCallback(false);
             }
         });
     }
 
-    public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, Bitmap largeIcon) {
+    public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, String eventName, int eventID, Bitmap largeIcon) {
         NotificationManager mNotificationManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -257,10 +324,12 @@ public class Utils {
             notificationBuilder.setLargeIcon(largeIcon);
         }
 
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, AppActivity.class);
         intent.setFlags(FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP);
         intent.setAction(Long.toString(System.currentTimeMillis()));
-        intent.putExtra(EXTRA_NOTIFICATION, appID);
+        intent.putExtra(AccessTokenModel.EXTRA, Utils.getAccessToken(context, appID));
+        intent.putExtra(AppActivity.EXTRA_EVENT_NAME, eventName);
+        intent.putExtra(AppActivity.EXTRA_EVENT_ID, eventID);
         if (optionType != null) {
             intent.putExtra(EXTRA_OPTION_TYPE, optionType);
         }
@@ -339,6 +408,147 @@ public class Utils {
             return Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY);
         } else {
             return Html.fromHtml(source);
+        }
+    }
+
+    public static API getAPI(Context context) {
+        return Utils.getAPI(context, API.ENDPOINT, null);
+    }
+
+    public static API getAPI(Context context, final String token) {
+        return Utils.getAPI(context, API.ENDPOINT, token);
+    }
+
+    public static API getAPI(final Context context, final String url, final String token) {
+        int timeout = 10;
+
+        final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+        clientBuilder.writeTimeout(timeout, TimeUnit.SECONDS);
+        clientBuilder.connectTimeout(timeout, TimeUnit.SECONDS);
+        clientBuilder.readTimeout(timeout, TimeUnit.SECONDS);
+
+        Interceptor offlineResponseCacheInterceptor = new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                if (!Utils.hasInternetConnection(context)) {
+                    request = request.newBuilder()
+                            .header("Cache-Control",
+                                    "public, only-if-cached, max-stale=" + 2419200)
+                            .build();
+                }
+                return chain.proceed(request);
+            }
+        };
+
+        clientBuilder.addInterceptor(offlineResponseCacheInterceptor);
+        clientBuilder.cache(new Cache(new File(context.getCacheDir(),
+                "APICache"), 50 * 1024 * 1024));
+
+        if (token != null) {
+            clientBuilder.addInterceptor(new Interceptor() {
+                @Override
+                public okhttp3.Response intercept(Chain chain) throws IOException {
+                    Request newRequest = chain.request().newBuilder()
+                            .addHeader("Authorization", "Bearer " + token)
+                            .build();
+                    return chain.proceed(newRequest);
+                }
+            });
+        }
+
+        // set user agent
+        clientBuilder.addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request newRequest = chain.request().newBuilder()
+                        .addHeader("User-Agent", AppWebviewFragment.USER_AGENT)
+                        .build();
+                return chain.proceed(newRequest);
+            }
+        });
+
+        // add current app version
+        int versionCode;
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            versionCode = pInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // an error is likely not good. Set versionCode to 1
+            versionCode = 1;
+        }
+        final int finalVersionCode = versionCode;
+        clientBuilder.addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request newRequest = chain.request().newBuilder()
+                        .addHeader("X-App-Version-Code", String.valueOf(finalVersionCode))
+                        .build();
+                return chain.proceed(newRequest);
+            }
+        });
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(clientBuilder.build())
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().setLenient().create()))
+                .build();
+        return retrofit.create(API.class);
+    }
+
+    public static String prepareApiUrl(String appApiUrl) {
+        appApiUrl = appApiUrl.replace("index.php/WSCConnectAPI/", "");
+        appApiUrl = appApiUrl.replace("index.php?wsc-connect-api/", "");
+        appApiUrl = appApiUrl.replace("wsc-connect-api/", "");
+        appApiUrl = appApiUrl.replace("index.php?wsc-connect-api", "");
+        appApiUrl = appApiUrl.replace("wsc-connect-api", "");
+
+        if (!appApiUrl.endsWith("/")) {
+            appApiUrl = appApiUrl + "/";
+        }
+
+        return appApiUrl;
+    }
+
+    public static void setError(Context context, TextView view) {
+        setError(context, view, context.getString(R.string.required));
+    }
+
+    public static void setError(Context context, TextView view, String error) {
+        view.requestFocus();
+        view.setError(error);
+        ViewParent parent = view.getParent();
+        if (parent != null) {
+            parent.requestChildFocus(view, view);
+        }
+    }
+
+    public static void showLoadingOverlay(Activity activity, boolean show) {
+        if (activity == null) {
+            return;
+        }
+
+        Window window = activity.getWindow();
+
+        if (window == null) {
+            return;
+        }
+
+        ViewGroup rootView = (ViewGroup) window.getDecorView().findViewById(android.R.id.content);
+        LayoutInflater li = LayoutInflater.from(activity);
+        View loadingView = li.inflate(R.layout.loading_overlay_view, null);
+
+        View v = rootView.findViewById(R.id.loading_overlay_view);
+        if (show) {
+            if (v == null) {
+                rootView.addView(loadingView);
+            } else {
+                v.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (v != null) {
+                rootView.findViewById(R.id.loading_overlay_view).setVisibility(View.GONE);
+            }
         }
     }
 }

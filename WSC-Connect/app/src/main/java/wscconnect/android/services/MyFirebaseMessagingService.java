@@ -15,7 +15,6 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Map;
 
 import wscconnect.android.Utils;
-import wscconnect.android.fragments.myApps.AppOptionsFragment;
 import wscconnect.android.models.AccessTokenModel;
 
 /**
@@ -63,10 +62,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String message = data.get("message");
         String appLogo = data.get("appLogo");
         String appID = data.get("appID");
+        int eventID = Integer.parseInt((data.get("eventID") == null) ? "0" : data.get("eventID"));
+        String eventName = (data.get("eventName") == null) ? "" : data.get("eventName");
 
-        String tag = appID + AppOptionsFragment.OPTION_TYPE_MESSAGES;
+        String tag = appID + "message";
 
-        createNotification(tag, (int) System.currentTimeMillis(), appID, AppOptionsFragment.OPTION_TYPE_MESSAGES, title, message, appLogo);
+        createNotification(tag, (int) System.currentTimeMillis(), appID, "message", title, message, eventName, eventID, appLogo);
     }
 
     private void handleNotification(Map<String, String> data) {
@@ -75,15 +76,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String appName = data.get("appName");
         String appID = data.get("appID");
         String eventHash = (data.get("eventHash") == null) ? "" : data.get("eventHash");
+        int eventID = Integer.parseInt((data.get("eventID") == null) ? "0" : data.get("eventID"));
+        String eventName = (data.get("eventName") == null) ? "" : data.get("eventName");
         int authorID = Integer.parseInt((data.get("authorID") == null) ? "0" : data.get("authorID"));
 
         // create app/event unique tag
         String tag = appID + eventHash;
 
-        createNotification(tag, authorID, appID, AppOptionsFragment.OPTION_TYPE_NOTIFICATIONS, appName, message, logo);
+        createNotification(tag, authorID, appID, "notification", appName, message, eventName, eventID, logo);
     }
 
-    private void createNotification(final String notificationTag, final int notificationID, final String appID, final String optionType, final String title, final String message, final String largeIcon) {
+    private void createNotification(final String notificationTag, final int notificationID, final String appID, final String optionType, final String title, final String message, final String eventName, final int eventID, final String largeIcon) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
@@ -93,13 +96,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .into(new SimpleTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                                Utils.showDataNotification(MyFirebaseMessagingService.this, notificationTag, notificationID, appID, optionType, title, message, resource);
+                                Utils.showDataNotification(MyFirebaseMessagingService.this, notificationTag, notificationID, appID, optionType, title, message, eventName, eventID, resource);
                             }
 
                             @Override
                             public void onLoadFailed(@Nullable Drawable errorDrawable) {
                                 super.onLoadFailed(errorDrawable);
-                                Utils.showDataNotification(MyFirebaseMessagingService.this, notificationTag, notificationID, appID, optionType, title, message, null);
+                                Utils.showDataNotification(MyFirebaseMessagingService.this, notificationTag, notificationID, appID, optionType, title, message, eventName, eventID, null);
                             }
                         });
             }

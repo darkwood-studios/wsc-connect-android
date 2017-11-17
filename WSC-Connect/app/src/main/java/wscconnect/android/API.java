@@ -12,6 +12,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import wscconnect.android.models.AppModel;
+import wscconnect.android.models.ConversationMessageModel;
 import wscconnect.android.models.ConversationModel;
 import wscconnect.android.models.LoginModel;
 import wscconnect.android.models.MessageModel;
@@ -28,9 +29,6 @@ public interface API {
     @GET("apps")
     Call<List<AppModel>> getApps();
 
-    @GET("notifications/{app}")
-    Call<List<NotificationModel>> getNotifications(@Path("app") String app);
-
     @GET("messages/{app}")
     Call<List<MessageModel>> getMessages(@Path("app") String app);
 
@@ -45,5 +43,25 @@ public interface API {
 
     @Multipart
     @POST("index.php?wsc-connect-api")
-    Call<List<ConversationModel>> getConversations(@Part("type") RequestBody type);
+    Call<List<NotificationModel>> getNotifications(@Part("type") RequestBody type);
+
+    @Deprecated
+    @GET("notifications/{app}")
+    Call<List<NotificationModel>> getNotifications(@Path("app") String app);
+
+    @Multipart
+    @POST("index.php?wsc-connect-api")
+    Call<List<ConversationModel>> getConversations(@Part("type") RequestBody type, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
+
+    @Multipart
+    @POST("index.php?wsc-connect-api")
+    Call<List<ConversationMessageModel>> getConversationMessages(@Part("type") RequestBody type, @Part("id") RequestBody conversationID, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
+
+    @Multipart
+    @POST("index.php?wsc-connect-api")
+    Call<ConversationMessageModel> getConversationMessage(@Part("type") RequestBody type, @Part("id") RequestBody messageID);
+
+    @Multipart
+    @POST("index.php?wsc-connect-api")
+    Call<ConversationMessageModel> addConversationMessage(@Part("type") RequestBody type, @Part("id") RequestBody conversationID, @Part("message") RequestBody message);
 }

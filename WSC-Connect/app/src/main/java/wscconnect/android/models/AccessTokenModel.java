@@ -5,7 +5,14 @@ import android.os.Parcelable;
 
 import com.auth0.android.jwt.JWT;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
+import static wscconnect.android.activities.AppActivity.FRAGMENT_CONVERSATIONS;
+import static wscconnect.android.activities.AppActivity.FRAGMENT_MESSAGES;
+import static wscconnect.android.activities.AppActivity.FRAGMENT_NOTIFICATIONS;
+import static wscconnect.android.activities.AppActivity.FRAGMENT_WEBVIEW;
 
 /**
  * Created by chris on 18.07.17.
@@ -34,6 +41,8 @@ public class AccessTokenModel implements Parcelable {
     private String appUrl;
     private String appLogo;
     private String appApiUrl;
+    private List<String> appTabs = new ArrayList<String>();
+    private transient List<String> orderedTabs;
 
     protected AccessTokenModel(Parcel in) {
         userID = in.readInt();
@@ -46,6 +55,7 @@ public class AccessTokenModel implements Parcelable {
         appLogo = in.readString();
         uniqueID = in.readLong();
         appApiUrl = in.readString();
+        in.readList(appTabs, null);
     }
 
     public AccessTokenModel() {
@@ -65,6 +75,7 @@ public class AccessTokenModel implements Parcelable {
         token.setAppUrl(jwt.getClaim("appUrl").asString());
         token.setAppLogo(jwt.getClaim("appLogo").asString());
         token.setAppApiUrl(jwt.getClaim("appApiUrl").asString());
+        token.setAppTabs(jwt.getClaim("appTabs").asList(String.class));
 
         return token;
     }
@@ -139,6 +150,7 @@ public class AccessTokenModel implements Parcelable {
         parcel.writeString(appLogo);
         parcel.writeLong(uniqueID);
         parcel.writeString(appApiUrl);
+        parcel.writeList(appTabs);
     }
 
     public String getAppUrl() {
@@ -167,5 +179,34 @@ public class AccessTokenModel implements Parcelable {
 
     public void setAppApiUrl(String appApiUrl) {
         this.appApiUrl = appApiUrl;
+    }
+
+    public List<String> getAppTabs() {
+        // order of the tabs should be: forum|webview, notifications, conversations, messages
+        if (orderedTabs == null) {
+            orderedTabs = new ArrayList<>();
+
+            if (appTabs.contains(FRAGMENT_WEBVIEW)) {
+                orderedTabs.add(FRAGMENT_WEBVIEW);
+            }
+
+            if (appTabs.contains(FRAGMENT_NOTIFICATIONS)) {
+                orderedTabs.add(FRAGMENT_NOTIFICATIONS);
+            }
+
+            if (appTabs.contains(FRAGMENT_CONVERSATIONS)) {
+                orderedTabs.add(FRAGMENT_CONVERSATIONS);
+            }
+
+            if (appTabs.contains(FRAGMENT_MESSAGES)) {
+                orderedTabs.add(FRAGMENT_MESSAGES);
+            }
+        }
+
+        return orderedTabs;
+    }
+
+    public void setAppTabs(List<String> appTabs) {
+        this.appTabs = appTabs;
     }
 }

@@ -1,5 +1,6 @@
 package wscconnect.android.adapters;
 
+import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.TextView;
 import java.util.List;
 
 import wscconnect.android.R;
-import wscconnect.android.activities.MainActivity;
 import wscconnect.android.models.MessageModel;
 
 /**
@@ -17,10 +17,10 @@ import wscconnect.android.models.MessageModel;
  */
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHolder> {
-    private MainActivity activity;
+    private Activity activity;
     private List<MessageModel> messageList;
 
-    public MessageAdapter(MainActivity activity, List<MessageModel> messageList) {
+    public MessageAdapter(Activity activity, List<MessageModel> messageList) {
         this.activity = activity;
         this.messageList = messageList;
     }
