@@ -97,9 +97,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    final AppModel app = appList.get(getAdapterPosition());
-
-                    fragment.switchToDetailView(true, false, app);
+                    try {
+                        final AppModel app = appList.get(getAdapterPosition());
+                        fragment.switchToDetailView(true, false, app);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        activity.getString(R.string.error_general);
+                    }
                 }
             });
         }
