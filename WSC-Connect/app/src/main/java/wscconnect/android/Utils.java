@@ -1,6 +1,8 @@
 package wscconnect.android;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -25,6 +28,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -309,11 +313,27 @@ public class Utils {
         });
     }
 
+    @TargetApi(26)
+    private static void initChannels(Context context) {
+        if (Build.VERSION.SDK_INT < 26) {
+            return;
+        }
+
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel channel = new NotificationChannel("default",
+                context.getString(R.string.default_notification_channel),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        notificationManager.createNotificationChannel(channel);
+    }
+
     public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, String eventName, int eventID, Bitmap largeIcon) {
+
+        initChannels(context);
         NotificationManager mNotificationManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, "default");
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
         }
@@ -441,7 +461,24 @@ public class Utils {
             }
         };
 
+        Interceptor fixUrlInterceptor = new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                String url = request.url().toString();
+                url = url.replace("%3F", "?");
+                url = url.replace("%2F", "/");
+
+                request = request.newBuilder()
+                        .url(url)
+                        .build();
+
+                return chain.proceed(request);
+            }
+        };
+
         clientBuilder.addInterceptor(offlineResponseCacheInterceptor);
+        clientBuilder.addInterceptor(fixUrlInterceptor);
         clientBuilder.cache(new Cache(new File(context.getCacheDir(),
                 "APICache"), 50 * 1024 * 1024));
 
@@ -494,6 +531,22 @@ public class Utils {
                 .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().setLenient().create()))
                 .build();
         return retrofit.create(API.class);
+    }
+
+    public static String getApiUrlExtension(String appApiUrl) {
+        if (appApiUrl.contains("index.php/WSCConnectAPI/")) {
+            return "index.php/WSCConnectAPI/";
+        } else if (appApiUrl.contains("index.php?wsc-connect-api/")) {
+            return "index.php?wsc-connect-api/";
+        } else if (appApiUrl.contains("wsc-connect-api/")) {
+            return "wsc-connect-api/";
+        } else if (appApiUrl.contains("index.php?wsc-connect-api")) {
+            return "index.php?wsc-connect-api";
+        } else if (appApiUrl.contains("wsc-connect-api")) {
+            return "wsc-connect-api";
+        }
+
+        return "";
     }
 
     public static String prepareApiUrl(String appApiUrl) {
@@ -550,5 +603,10 @@ public class Utils {
                 rootView.findViewById(R.id.loading_overlay_view).setVisibility(View.GONE);
             }
         }
+    }
+
+    public static int dpToPx(int dp, Context context) {
+        Resources r = context.getResources();
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
     }
 }

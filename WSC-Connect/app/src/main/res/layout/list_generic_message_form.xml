@@ -10,8 +10,9 @@
     android:paddingTop="@dimen/layout_margin">
 
         <EditText
-            android:id="@+id/list_conversation_message_form_text"
+            android:id="@+id/list_generic_message_form_text"
             android:hint="@string/list_conversation_message_form_hint"
+            android:inputType="textMultiLine|textCapSentences"
             android:background="@drawable/input"
             android:gravity="top|start"
             android:textColor="@color/textColor"
@@ -23,7 +24,7 @@
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/list_conversation_message_form_submit"
+            android:id="@+id/list_generic_message_form_submit"
             style="@style/Widget.AppCompat.Button.Colored"
             android:text="@string/submit"
             android:layout_width="match_parent"

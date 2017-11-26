@@ -30,6 +30,7 @@
     <string name="dialog_about_text">WSC-Connect connects all your favorite WSC (WoltLab&#174; Suite Core)-Apps in one place. Receive notifications via push message and much more.\n\n<b>You own a WSC-App</b>? Visit <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> and register your App now!\n\nWSC-Connect is not associated with the WoltLab&#174; GmbH.\n\n<b>Contact</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Legal Notice</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nGermany</string>
     <string name="fragment_app_messagess_empty">No push messages found</string>
     <string name="fragment_app_messagess_loading_info">Loading push messages for %1$s…</string>
+    <string name="fragment_app_forum_loading_info">Loading boards for %1$s…</string>
     <string name="error_request_api_not_available">Our server is busy, try again in a few minutes.</string>
     <string name="error_app_version_title">Outdated app version</string>
     <string name="error_app_version_message">Your installed app version is outdated. To continue using the app, please update it.</string>
@@ -47,6 +48,7 @@
     <string name="fragment_apps_details_logged_in_show">Open in My Apps</string>
     <string name="fragment_apps_details_logged_in_as">Logged in as: %1$s</string>
     <string name="fragment_my_apps_username">Logged in as %1$s</string>
+    <string name="activity_app_tab_forum">Forum</string>
     <string name="activity_app_tab_webview">Website</string>
     <string name="activity_app_tab_messages">Messages</string>
     <string name="activity_app_tab_notifications">Notifications</string>
@@ -62,6 +64,11 @@
     <string name="list_conversation_message_form_error_length">Your message is too long with %1$d characters. Maximum characters: %2$d</string>
     <string name="fragment_app_conversations_package">Please contact the admin of %1$s. The conversation plugin could not be found.</string>
     <string name="activity_app_token_null">A critical error occurred. Please login again.</string>
+    <string name="default_notification_channel">WSC-Connect Notifications</string>
+    <string name="fragment_app_forum_empty_boards">No boards found.</string>
+    <string name="fragment_app_forum_empty_threads">No threads found.</string>
+    <string name="fragment_app_forum_empty_posts">No posts found.</string>
+    <string name="list_post_header_author">Author: %1$s</string>
 
     <array name="list_my_apps_dialog_items">
         <item>Logout</item>

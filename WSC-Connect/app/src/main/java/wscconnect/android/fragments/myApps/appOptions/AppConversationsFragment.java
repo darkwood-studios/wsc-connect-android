@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,7 +68,6 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     private String host;
     private ConversationMessageAdapter conversationMessageAdapter;
     private RecyclerView conversationMessageListView;
-    private LinearLayout conversationMessageListContainer;
     private ConversationModel activeConversation;
     private boolean conversationsLoading;
     private boolean conversationsAllLoaded;
@@ -174,13 +172,12 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
             apiCall.cancel();
         }
 
-        apiCall = Utils.getAPI(activity, host, token.getToken()).getConversations(RequestBody.create(MediaType.parse("text/plain"), "getConversations"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset)));
+        apiCall = Utils.getAPI(activity, host, token.getToken()).getConversations(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getConversations"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset)));
         apiCall.enqueue(new RetroCallback<List<ConversationModel>>(activity) {
             @Override
             public void onResponse(Call<List<ConversationModel>> call, Response<List<ConversationModel>> response) {
                 super.onResponse(call, response);
 
-                Log.i("asdioj", "code: " + response.code());
 
                 if (response.isSuccessful()) {
                     loadingView.setVisibility(GONE);
@@ -290,7 +287,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     public void getConversationMessages(final ConversationModel conversation, final int limit, final int offset, final SimpleCallback callback) {
         activeConversation = conversation;
 
-        Utils.getAPI(activity, host, token.getToken()).getConversationMessages(RequestBody.create(MediaType.parse("text/plain"), "getConversationMessages"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversation.getConversationID())), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset))).enqueue(new RetroCallback<List<ConversationMessageModel>>(activity) {
+        Utils.getAPI(activity, host, token.getToken()).getConversationMessages(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getConversationMessages"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversation.getConversationID())), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset))).enqueue(new RetroCallback<List<ConversationMessageModel>>(activity) {
             @Override
             public void onResponse(Call<List<ConversationMessageModel>> call, Response<List<ConversationMessageModel>> response) {
                 super.onResponse(call, response);
@@ -349,10 +346,10 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     private void showConversationMessages(boolean show) {
         if (show) {
             conversationListView.setVisibility(View.GONE);
-            conversationMessageListContainer.setVisibility(View.VISIBLE);
+            conversationMessageListView.setVisibility(View.VISIBLE);
         } else {
             activeConversation = null;
-            conversationMessageListContainer.setVisibility(View.GONE);
+            conversationMessageListView.setVisibility(View.GONE);
             conversationListView.setVisibility(View.VISIBLE);
         }
     }
@@ -385,7 +382,6 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
 
         conversationListView = view.findViewById(R.id.fragment_app_conversations_list);
         conversationMessageListView = view.findViewById(R.id.fragment_app_conversations_message_list);
-        conversationMessageListContainer = view.findViewById(R.id.fragment_app_conversations_message_list_container);
         loadingView = view.findViewById(R.id.fragment_app_conversations_loading);
         loadingTextView = view.findViewById(R.id.fragment_app_conversations_loading_info);
         emptyView = view.findViewById(R.id.fragment_app_conversations_empty);
@@ -405,11 +401,11 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     }
 
     private boolean messageListVisible() {
-        return conversationMessageListContainer.getVisibility() == View.VISIBLE;
+        return conversationMessageListView.getVisibility() == View.VISIBLE;
     }
 
     public void addConversationMessage(final int conversationID, final String message, final SimpleJSONCallback callback) {
-        Utils.getAPI(activity, host, token.getToken()).addConversationMessage(RequestBody.create(MediaType.parse("text/plain"), "addConversationMessage"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversationID)), RequestBody.create(MediaType.parse("text/plain"), message)).enqueue(new RetroCallback<ConversationMessageModel>(activity) {
+        Utils.getAPI(activity, host, token.getToken()).addConversationMessage(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "addConversationMessage"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversationID)), RequestBody.create(MediaType.parse("text/plain"), message)).enqueue(new RetroCallback<ConversationMessageModel>(activity) {
             @Override
             public void onResponse(Call<ConversationMessageModel> call, Response<ConversationMessageModel> response) {
                 super.onResponse(call, response);

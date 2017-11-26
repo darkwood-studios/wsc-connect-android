@@ -12,6 +12,7 @@ apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    google()
 }
 
 
@@ -21,8 +22,8 @@ android {
     defaultConfig {
         applicationId "wscconnect.android"
         minSdkVersion 17
-        targetSdkVersion 25
-        versionCode 16
+        targetSdkVersion 27
+        versionCode 17
         versionName "1.0.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

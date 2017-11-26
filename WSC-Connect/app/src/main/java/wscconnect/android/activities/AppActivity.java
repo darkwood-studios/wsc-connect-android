@@ -22,6 +22,7 @@ import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.callbacks.SimpleCallback;
 import wscconnect.android.fragments.myApps.appOptions.AppConversationsFragment;
+import wscconnect.android.fragments.myApps.appOptions.AppForumFragment;
 import wscconnect.android.fragments.myApps.appOptions.AppMessagesFragment;
 import wscconnect.android.fragments.myApps.appOptions.AppNotificationsFragment;
 import wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment;
@@ -32,6 +33,7 @@ import wscconnect.android.models.AccessTokenModel;
 import static wscconnect.android.activities.MainActivity.EXTRA_OPTION_TYPE;
 
 public class AppActivity extends AppCompatActivity {
+    public final static String FRAGMENT_FORUM = "forum";
     public final static String FRAGMENT_WEBVIEW = "webview";
     public final static String FRAGMENT_NOTIFICATIONS = "notifications";
     public final static String FRAGMENT_CONVERSATIONS = "conversations";
@@ -117,7 +119,7 @@ public class AppActivity extends AppCompatActivity {
         tabLayout.setVisibility(View.VISIBLE);
         fragmentAdapter = new AppFragmentAdapter(getSupportFragmentManager(), this, token);
         viewPager.setAdapter(fragmentAdapter);
-        viewPager.setOffscreenPageLimit(3);
+        viewPager.setOffscreenPageLimit(5);
         tabLayout.setupWithViewPager(viewPager, true);
         setCustomTabView();
         determineCurrentPage(optionType, eventName, eventID);
@@ -215,6 +217,9 @@ public class AppActivity extends AppCompatActivity {
 
             // do not use Class.newInstance because of https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#newInstance()
             switch (tabName) {
+                case FRAGMENT_FORUM:
+                    f = new AppForumFragment();
+                    break;
                 case FRAGMENT_WEBVIEW:
                     f = new AppWebviewFragment();
                     break;

@@ -44,6 +44,7 @@
     <string name="action_sort_users">Nach Benutzer sortieren</string>
     <string name="action_sort_name">Nach Name sortieren</string>
     <string name="fragment_my_apps_username">Eingeloggt als %1$s</string>
+    <string name="activity_app_tab_forum">Forum</string>
     <string name="activity_app_tab_webview">Website</string>
     <string name="activity_app_tab_messages">Nachrichten</string>
     <string name="activity_app_tab_notifications">Benachrichtigungen</string>
@@ -59,6 +60,12 @@
     <string name="list_conversation_message_form_error_length">Deine Nachricht ist mit %1$d Zeichen zu lang. Maximal erlaubte Zeichen: %2$d</string>
     <string name="fragment_app_conversations_package">Bitte kontaktiere den Administrator von %1$s. Das Konversations-Plugin wurde nicht gefunden.</string>
     <string name="activity_app_token_null">Ein kritischer Fehler ist aufgetreten. Bitte logge dich erneut ein.</string>
+    <string name="fragment_app_forum_loading_info">Lade Foren für %1$s…</string>
+    <string name="default_notification_channel">WSC-Connect Benachrichtigungen</string>
+    <string name="fragment_app_forum_empty_boards">Es wurden keine -Foren gefunden.</string>
+    <string name="fragment_app_forum_empty_threads">Es wurden keine Themen gefunden.</string>
+    <string name="fragment_app_forum_empty_posts">Es wurden keine Beiträge gefunden.</string>
+    <string name="list_post_header_author">Autor: %1$s</string>
 
     <array name="list_my_apps_dialog_items">
         <item>Logout</item>

@@ -12,11 +12,14 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import wscconnect.android.models.AppModel;
+import wscconnect.android.models.BoardModel;
 import wscconnect.android.models.ConversationMessageModel;
 import wscconnect.android.models.ConversationModel;
 import wscconnect.android.models.LoginModel;
 import wscconnect.android.models.MessageModel;
 import wscconnect.android.models.NotificationModel;
+import wscconnect.android.models.PostModel;
+import wscconnect.android.models.ThreadModel;
 
 /**
  * Created by chris on 18.07.17.
@@ -42,26 +45,38 @@ public interface API {
     Call<ResponseBody> getAccessToken();
 
     @Multipart
-    @POST("index.php?wsc-connect-api")
-    Call<List<NotificationModel>> getNotifications(@Part("type") RequestBody type);
+    @POST("{apiUrlExtension}")
+    Call<List<NotificationModel>> getNotifications(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type);
 
     @Deprecated
     @GET("notifications/{app}")
     Call<List<NotificationModel>> getNotifications(@Path("app") String app);
 
     @Multipart
-    @POST("index.php?wsc-connect-api")
-    Call<List<ConversationModel>> getConversations(@Part("type") RequestBody type, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
+    @POST("{apiUrlExtension}")
+    Call<List<ConversationModel>> getConversations(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
 
     @Multipart
-    @POST("index.php?wsc-connect-api")
-    Call<List<ConversationMessageModel>> getConversationMessages(@Part("type") RequestBody type, @Part("id") RequestBody conversationID, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
+    @POST("{apiUrlExtension}")
+    Call<List<ConversationMessageModel>> getConversationMessages(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type, @Part("id") RequestBody conversationID, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
 
     @Multipart
-    @POST("index.php?wsc-connect-api")
-    Call<ConversationMessageModel> getConversationMessage(@Part("type") RequestBody type, @Part("id") RequestBody messageID);
+    @POST("{apiUrlExtension}")
+    Call<ConversationMessageModel> getConversationMessage(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type, @Part("id") RequestBody messageID);
 
     @Multipart
-    @POST("index.php?wsc-connect-api")
-    Call<ConversationMessageModel> addConversationMessage(@Part("type") RequestBody type, @Part("id") RequestBody conversationID, @Part("message") RequestBody message);
+    @POST("{apiUrlExtension}")
+    Call<ConversationMessageModel> addConversationMessage(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type, @Part("id") RequestBody conversationID, @Part("message") RequestBody message);
+
+    @Multipart
+    @POST("{apiUrlExtension}")
+    Call<List<BoardModel>> getBoards(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type, @Part("id") RequestBody boardID);
+
+    @Multipart
+    @POST("{apiUrlExtension}")
+    Call<List<ThreadModel>> getThreads(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type, @Part("id") RequestBody boardID, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
+
+    @Multipart
+    @POST("{apiUrlExtension}")
+    Call<List<PostModel>> getPosts(@Path("apiUrlExtension") String apiUrlExtension, @Part("type") RequestBody type, @Part("id") RequestBody boardID, @Part("limit") RequestBody limit, @Part("offset") RequestBody offset);
 }

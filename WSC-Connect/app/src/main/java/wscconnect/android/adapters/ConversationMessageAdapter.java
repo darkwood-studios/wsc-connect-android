@@ -29,8 +29,10 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import wscconnect.android.GlideApp;
+import wscconnect.android.HeaderViewHolder;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
+import wscconnect.android.ViewHolder;
 import wscconnect.android.activities.AppActivity;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
@@ -44,7 +46,7 @@ import wscconnect.android.models.ConversationModel;
  * Created by chris on 18.07.17.
  */
 
-public class ConversationMessageAdapter extends RecyclerView.Adapter<ConversationMessageAdapter.ViewHolder> {
+public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder> {
     private static final int TYPE_HEADER = 1;
     private static final int TYPE_MESSAGE = 2;
     private static final int TYPE_FORM = 3;
@@ -83,15 +85,15 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<Conversatio
         switch (viewType) {
             case TYPE_HEADER:
                 v = new HeaderViewHolder(LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_conversation_message_header, parent, false));
+                        .inflate(R.layout.list_header, parent, false));
                 break;
             case TYPE_MESSAGE:
                 v = new MessageViewHolder(LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_conversation_message, parent, false));
+                        .inflate(R.layout.list_generic_message, parent, false));
                 break;
             case TYPE_FORM:
                 v = new FormViewHolder(LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_conversation_message_form, parent, false));
+                        .inflate(R.layout.list_generic_message_form, parent, false));
                 break;
         }
 
@@ -105,7 +107,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<Conversatio
                 HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
 
                 headerViewHolder.title.setText(conversation.getTitle());
-                headerViewHolder.participants.setText(activity.getString(R.string.list_conversation_message_header_participants, conversation.getParticipants()));
+                headerViewHolder.subtitle.setText(activity.getString(R.string.list_conversation_message_header_participants, conversation.getParticipants()));
                 break;
             case TYPE_MESSAGE:
                 MessageViewHolder messageViewHolder = (MessageViewHolder) holder;
@@ -148,30 +150,14 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<Conversatio
         return messageList.size() + 2;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public ViewHolder(View v) {
-            super(v);
-        }
-    }
-
-    public class HeaderViewHolder extends ViewHolder {
-        public TextView title, participants;
-
-        public HeaderViewHolder(View view) {
-            super(view);
-            title = view.findViewById(R.id.list_conversation_message_header_title);
-            participants = view.findViewById(R.id.list_conversation_message_header_participants);
-        }
-    }
-
     public class FormViewHolder extends ViewHolder {
         public EditText text;
         public Button submit;
 
         public FormViewHolder(View view) {
             super(view);
-            text = view.findViewById(R.id.list_conversation_message_form_text);
-            submit = view.findViewById(R.id.list_conversation_message_form_submit);
+            text = view.findViewById(R.id.list_generic_message_form_text);
+            submit = view.findViewById(R.id.list_generic_message_form_submit);
 
             submit.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -258,7 +244,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<Conversatio
 
                         private void getDetailedConversationMessage() {
                             final ProgressBar progressBar = Utils.showProgressView(activity, message, android.R.attr.progressBarStyle);
-                            Utils.getAPI(activity, Utils.prepareApiUrl(token.getAppApiUrl()), token.getToken()).getConversationMessage(RequestBody.create(MediaType.parse("text/plain"), "getConversationMessage"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversationMessage.getMessageID()))).enqueue(new RetroCallback<ConversationMessageModel>(activity) {
+                            Utils.getAPI(activity, Utils.prepareApiUrl(token.getAppApiUrl()), token.getToken()).getConversationMessage(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getConversationMessage"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversationMessage.getMessageID()))).enqueue(new RetroCallback<ConversationMessageModel>(activity) {
                                 @Override
                                 public void onResponse(Call<ConversationMessageModel> call, Response<ConversationMessageModel> response) {
                                     super.onResponse(call, response);

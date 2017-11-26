@@ -120,6 +120,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
 
                 refreshView.setRefreshing(false);
                 Log.i("asduhd", "lgeacy cold: " + response.code());
+                Log.i("asduhd", "call: " + call.request().toString());
 
                 if (response.isSuccessful()) {
                     loadingView.setVisibility(GONE);
@@ -199,7 +200,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
 
         String host = Utils.prepareApiUrl(token.getAppApiUrl());
 
-        apiCall = Utils.getAPI(activity, host, token.getToken()).getNotifications(RequestBody.create(MediaType.parse("text/plain"), "getNotifications"));
+        apiCall = Utils.getAPI(activity, host, token.getToken()).getNotifications(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getNotifications"));
         apiCall.enqueue(new RetroCallback<List<NotificationModel>>(activity) {
             @Override
             public void onResponse(Call<List<NotificationModel>> call, Response<List<NotificationModel>> response) {
@@ -207,6 +208,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
 
                 refreshView.setRefreshing(false);
                 Log.i("asduhd", "getNotifications code: " + response.code());
+                Log.i("asduhd", "call: " + call.request().toString());
 
                 if (response.isSuccessful()) {
                     loadingView.setVisibility(GONE);
@@ -290,7 +292,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
                     getNotificationsLegacy(new SimpleCallback() {
                         @Override
                         public void onReady(boolean success) {
-                            if (!success) {
+                            if (!success && isAdded()) {
                                 Utils.logout(activity, token.getAppID());
                                 Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
                             }

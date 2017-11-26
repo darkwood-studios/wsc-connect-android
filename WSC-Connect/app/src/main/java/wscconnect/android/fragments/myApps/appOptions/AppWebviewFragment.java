@@ -12,6 +12,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -77,6 +78,19 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
                 return true;
             }
         });
+
+        webview.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent,
+                                        String contentDisposition, String mimetype,
+                                        long contentLength) {
+                // handle download, here we use browser to download, also you can try other approach.
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            }
+        });
+
         webview.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -121,7 +135,7 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
     @Override
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent intent) {
-        if (requestCode == PICKFILE_REQUEST_CODE && intent != null && resultCode == RESULT_OK) {
+        if (requestCode == PICKFILE_REQUEST_CODE && intent != null && mFilePathCallback != null && resultCode == RESULT_OK) {
             if (intent.getData() != null) {
                 //If uploaded with Android Gallery (max 1 image)
                 Uri selectedFile = intent.getData();

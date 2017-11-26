@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import static wscconnect.android.activities.AppActivity.FRAGMENT_CONVERSATIONS;
+import static wscconnect.android.activities.AppActivity.FRAGMENT_FORUM;
 import static wscconnect.android.activities.AppActivity.FRAGMENT_MESSAGES;
 import static wscconnect.android.activities.AppActivity.FRAGMENT_NOTIFICATIONS;
 import static wscconnect.android.activities.AppActivity.FRAGMENT_WEBVIEW;
@@ -185,6 +186,10 @@ public class AccessTokenModel implements Parcelable {
         // order of the tabs should be: forum|webview, notifications, conversations, messages
         if (orderedTabs == null) {
             orderedTabs = new ArrayList<>();
+
+            if (appTabs.contains(FRAGMENT_FORUM)) {
+                orderedTabs.add(FRAGMENT_FORUM);
+            }
 
             if (appTabs.contains(FRAGMENT_WEBVIEW)) {
                 orderedTabs.add(FRAGMENT_WEBVIEW);
