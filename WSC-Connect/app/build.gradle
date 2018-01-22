@@ -23,8 +23,8 @@ android {
         applicationId "wscconnect.android"
         minSdkVersion 17
         targetSdkVersion 27
-        versionCode 17
-        versionName "1.0.9"
+        versionCode 18
+        versionName "1.0.10"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
