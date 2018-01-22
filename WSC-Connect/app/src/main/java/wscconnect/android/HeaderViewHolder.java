@@ -4,7 +4,9 @@ import android.view.View;
 import android.widget.TextView;
 
 /**
- * Created by chris on 20.11.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class HeaderViewHolder extends ViewHolder {

@@ -63,7 +63,8 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.AppActivity"
+        <activity
+            android:name=".activities.AppActivity"
             android:parentActivityName=".activities.MainActivity" />
     </application>
 

@@ -47,8 +47,8 @@
                 android:id="@+id/list_conversation_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_subtitle"
                 android:layout_alignParentEnd="true"
+                android:layout_marginStart="@dimen/margin_subtitle"
                 android:textColor="@drawable/text_list_accent"
                 android:textSize="@dimen/list_subtitle" />
         </RelativeLayout>

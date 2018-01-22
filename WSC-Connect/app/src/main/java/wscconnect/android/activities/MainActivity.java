@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_NOTIFICATION = "extraNotification";
     public final static String EXTRA_OPTION_TYPE = "extraOptionType";
     public static boolean IS_VISIBLE = true;
+    public Toolbar toolbar;
     private Fragment currentFragment;
     private BottomNavigationView navigation;
     private String appsFragmentTag;
@@ -64,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     };
-    public Toolbar toolbar;
 
     @Override
     public void onBackPressed() {

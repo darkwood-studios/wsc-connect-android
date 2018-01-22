@@ -16,8 +16,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:elevation="10dp"
             android:background="@drawable/background_tab"
+            android:elevation="10dp"
             app:tabBackground="@drawable/background_tab"
             app:tabIndicatorColor="#ffffff"
             app:tabMode="scrollable" />

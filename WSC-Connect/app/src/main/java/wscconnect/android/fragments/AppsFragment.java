@@ -70,6 +70,7 @@ import static wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment.
  * A simple {@link Fragment} subclass.
  */
 public class AppsFragment extends Fragment implements OnBackPressedListener {
+    private static final int WEBVIEW_TIMEOUT = 8000;
     private RecyclerView recyclerView;
     private MainActivity activity;
     private List<AppModel> appList;
@@ -83,7 +84,6 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
     private LinearLayout detailsContainer;
     private AppModel detailApp;
     private boolean webviewFinishedLoading;
-    private static final int WEBVIEW_TIMEOUT = 8000;
     private EditText usernameView;
     private EditText passwordView;
     private Button submitView;
@@ -340,7 +340,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
 
             if (app.isLoggedIn(activity) && !forceLogin) {
                 loggedInAs.setText(getString(R.string.fragment_apps_details_logged_in_as, Utils.getAccessToken(activity, app.getAppID()).getUsername()
-));
+                ));
                 showAccountButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -519,7 +519,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                 super.onResponse(call, response);
 
                 Log.i(MainActivity.TAG, "onResponse " + response.code());
-                    Log.i(MainActivity.TAG, "onResponse " + response.raw().message());
+                Log.i(MainActivity.TAG, "onResponse " + response.raw().message());
 
                 if (response.isSuccessful()) {
                     try {

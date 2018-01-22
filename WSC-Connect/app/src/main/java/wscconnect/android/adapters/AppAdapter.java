@@ -1,5 +1,6 @@
 package wscconnect.android.adapters;
 
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,9 @@ import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.models.AppModel;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
@@ -97,11 +100,26 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    final AppModel app = appList.get(getAdapterPosition());
-
-                    fragment.switchToDetailView(true, false, app);
+                    switchToDetailView();
                 }
             });
+        }
+
+        private void switchToDetailView() {
+            int position = getAdapterPosition();
+
+            // RecyclerView.NO_POSITION is returned, if notifyDataSetChanged() has been called just now
+            if (position != RecyclerView.NO_POSITION) {
+                final AppModel app = appList.get(position);
+                fragment.switchToDetailView(true, false, app);
+            } else {
+                // wait a short time and try again.
+                new Handler().postDelayed(new Runnable() {
+                    public void run() {
+                        switchToDetailView();
+                    }
+                }, 200);
+            }
         }
     }
 }

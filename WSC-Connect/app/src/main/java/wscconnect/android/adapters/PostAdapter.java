@@ -24,15 +24,17 @@ import wscconnect.android.models.PostModel;
 import wscconnect.android.models.ThreadModel;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
     private static final int TYPE_HEADER = 1;
     private static final int TYPE_POST = 2;
     private static final int TYPE_FORM = 3;
-    private AccessTokenModel token;
     private final AppForumFragment fragment;
+    private AccessTokenModel token;
     private ThreadModel thread;
     private AppActivity activity;
     private List<PostModel> postList;
@@ -123,7 +125,7 @@ public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
     }
 
     private int getActualPosition(int position) {
-        return position - 1 ;
+        return position - 1;
     }
 
     @Override

@@ -48,7 +48,9 @@ import static wscconnect.android.activities.AppActivity.EXTRA_EVENT_NAME;
 import static wscconnect.android.activities.AppActivity.EXTRA_FORCE_LOAD;
 
 /**
- * Created by chris on 18.07.17.
+ * @author  Christopher Walz
+ * @copyright	2017-2018 Christopher Walz
+ * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppConversationsFragment extends Fragment implements OnBackPressedListener, OnFragmentUpdateListener {
@@ -178,7 +180,6 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
             public void onResponse(Call<List<ConversationModel>> call, Response<List<ConversationModel>> response) {
                 super.onResponse(call, response);
 
-
                 if (response.isSuccessful()) {
                     loadingView.setVisibility(GONE);
                     conversationListView.setVisibility(View.VISIBLE);
@@ -191,7 +192,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
 
                     // if we receive less data then we requested, there is no more available
                     if (response.body().size() < limit) {
-                       conversationsAllLoaded = true;
+                        conversationsAllLoaded = true;
                     }
 
                     conversationList.addAll(response.body());

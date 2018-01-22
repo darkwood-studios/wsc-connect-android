@@ -22,7 +22,9 @@ import wscconnect.android.models.PostModel;
 import wscconnect.android.models.ThreadModel;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public interface API {

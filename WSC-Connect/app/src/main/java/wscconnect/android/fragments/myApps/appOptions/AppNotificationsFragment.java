@@ -37,7 +37,9 @@ import static wscconnect.android.activities.AppActivity.EXTRA_EVENT_NAME;
 import static wscconnect.android.activities.AppActivity.EXTRA_FORCE_LOAD;
 
 /**
- * Created by chris on 18.07.17.
+ * @author  Christopher Walz
+ * @copyright	2017-2018 Christopher Walz
+ * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppNotificationsFragment extends Fragment implements OnFragmentUpdateListener {

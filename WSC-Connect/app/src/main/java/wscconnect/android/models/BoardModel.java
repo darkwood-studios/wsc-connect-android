@@ -3,10 +3,15 @@ package wscconnect.android.models;
 import wscconnect.android.R;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class BoardModel {
+    public static final int TYPE_BOARD = 0;
+    public static final int TYPE_CATEGORY = 1;
+    public static final int TYPE_LINK = 2;
     private int boardID;
     private String title;
     private int unreadThreads;
@@ -15,10 +20,6 @@ public class BoardModel {
     private int type;
     private int parentBoardID;
     private int depth;
-
-    public static final int TYPE_BOARD = 0;
-    public static final int TYPE_CATEGORY = 1;
-    public static final int TYPE_LINK = 2;
 
     public Integer getIcon() {
         switch (type) {
@@ -89,12 +90,12 @@ public class BoardModel {
         return depth;
     }
 
-    public int getFixedDepth() {
-        return (depth > 4) ? 4 : depth;
-    }
-
     public void setDepth(int depth) {
         this.depth = depth;
+    }
+
+    public int getFixedDepth() {
+        return (depth > 4) ? 4 : depth;
     }
 
     public int getUnreadThreads() {

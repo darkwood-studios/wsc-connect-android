@@ -37,9 +37,9 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/fragment_app_forum_list"
@@ -48,21 +48,21 @@
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/fragment_app_forum_category_list"
-                android:visibility="gone"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/fragment_app_forum_thread_list"
-                android:visibility="gone"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/fragment_app_forum_post_list"
-                android:visibility="gone"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/fragment_app_forum_empty_view"
@@ -74,7 +74,6 @@
                 android:visibility="gone" />
         </LinearLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
-
 
 
 </LinearLayout>

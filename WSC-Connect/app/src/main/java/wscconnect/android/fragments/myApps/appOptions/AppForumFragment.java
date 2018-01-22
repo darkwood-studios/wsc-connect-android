@@ -36,7 +36,9 @@ import wscconnect.android.models.PostModel;
 import wscconnect.android.models.ThreadModel;
 
 /**
- * Created by chris on 18.07.17.
+ * @author  Christopher Walz
+ * @copyright	2017-2018 Christopher Walz
+ * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppForumFragment extends Fragment implements OnBackPressedListener, OnFragmentUpdateListener {
@@ -57,17 +59,12 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
     private RecyclerView postListView;
     private ThreadAdapter threadAdapter;
     private TextView emptyView;
-
-    public enum ActiveView {
-        BOARD_LIST, CATEGORY_LIST, THREAD_LIST, POST_LIST
-    }
     private ActiveView activeView;
     private LinearLayout loadingView;
     private TextView loadingTextView;
     private SwipeRefreshLayout refreshView;
     private String host;
     private BoardModel activeBoard;
-
     public AppForumFragment() {
     }
 
@@ -89,7 +86,7 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
         threadAdapter = new ThreadAdapter(activity, this, threadList, token);
         postAdapter = new PostAdapter(activity, this, postList, token);
 
-        boardListView.setLayoutManager( new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        boardListView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         boardListView.setAdapter(boardAdapter);
 
         categoryListView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
@@ -335,5 +332,9 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
         categoryListView.setVisibility(View.GONE);
         threadListView.setVisibility(View.GONE);
         postListView.setVisibility(View.VISIBLE);
+    }
+
+    public enum ActiveView {
+        BOARD_LIST, CATEGORY_LIST, THREAD_LIST, POST_LIST
     }
 }

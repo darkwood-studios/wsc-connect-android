@@ -79,7 +79,9 @@ import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static wscconnect.android.activities.MainActivity.EXTRA_OPTION_TYPE;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class Utils {
@@ -488,6 +490,8 @@ public class Utils {
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     Request newRequest = chain.request().newBuilder()
                             .addHeader("Authorization", "Bearer " + token)
+                            // necessary, because some Apache webservers discard the auth headers
+                            .addHeader("X-Authorization", "Bearer " + token)
                             .build();
                     return chain.proceed(newRequest);
                 }
@@ -587,7 +591,7 @@ public class Utils {
             return;
         }
 
-        ViewGroup rootView = (ViewGroup) window.getDecorView().findViewById(android.R.id.content);
+        ViewGroup rootView = window.getDecorView().findViewById(android.R.id.content);
         LayoutInflater li = LayoutInflater.from(activity);
         View loadingView = li.inflate(R.layout.loading_overlay_view, null);
 

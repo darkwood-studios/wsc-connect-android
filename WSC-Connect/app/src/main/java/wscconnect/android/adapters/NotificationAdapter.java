@@ -20,7 +20,9 @@ import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.NotificationModel;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.MyViewHolder> {
@@ -28,7 +30,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     private AppActivity activity;
     private List<NotificationModel> notificationList;
 
-    public NotificationAdapter(AppActivity  activity, List<NotificationModel> notificationList, AccessTokenModel token) {
+    public NotificationAdapter(AppActivity activity, List<NotificationModel> notificationList, AccessTokenModel token) {
         this.activity = activity;
         this.notificationList = notificationList;
         this.token = token;
