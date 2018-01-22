@@ -6,18 +6,20 @@ import android.text.format.DateUtils;
 import wscconnect.android.R;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
-public class ConversationModel implements APIModel {
+public class ConversationModel {
     private int conversationID;
     private String title;
-    private String logo;
-    private boolean unread;
+    private boolean isNew;
+    private boolean isClosed;
     private String link;
     private String participants;
     private String avatar;
-    private long time;
+    private int time;
 
     public int getConversationID() {
         return conversationID;
@@ -35,20 +37,12 @@ public class ConversationModel implements APIModel {
         this.title = title;
     }
 
-    public String getLogo() {
-        return logo;
+    public boolean isNew() {
+        return isNew;
     }
 
-    public void setLogo(String logo) {
-        this.logo = logo;
-    }
-
-    public boolean isUnread() {
-        return unread;
-    }
-
-    public void setUnread(boolean unread) {
-        this.unread = unread;
+    public void setNew(boolean aNew) {
+        this.isNew = aNew;
     }
 
     public String getLink() {
@@ -68,6 +62,11 @@ public class ConversationModel implements APIModel {
     }
 
     public String getAvatar() {
+        // glide can't properly handle .svg
+        if (avatar == null || avatar.endsWith(".svg")) {
+            return "";
+        }
+
         return avatar;
     }
 
@@ -75,11 +74,11 @@ public class ConversationModel implements APIModel {
         this.avatar = avatar;
     }
 
-    public long getTime() {
+    public int getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(int time) {
         this.time = time;
     }
 
@@ -88,11 +87,21 @@ public class ConversationModel implements APIModel {
             return "";
         }
 
+        long timeInMillis = (long) time * 1000;
+
         // less than a minute ago
-        if (System.currentTimeMillis() - time <= 60000) {
+        if (System.currentTimeMillis() - timeInMillis <= 60000) {
             return context.getString(R.string.just_now);
         }
 
-        return DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
+        return DateUtils.getRelativeTimeSpanString(timeInMillis, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
+    }
+
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    public void setClosed(boolean closed) {
+        isClosed = closed;
     }
 }

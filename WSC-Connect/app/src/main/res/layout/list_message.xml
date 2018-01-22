@@ -13,21 +13,30 @@
         android:id="@+id/list_message_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textSize="@dimen/list_title" />
 
-    <TextView
-        android:id="@+id/list_message_message"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autoLink="email|web"
-        android:textSize="14sp" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/list_message_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/textColorAccent"
-        android:textSize="11sp" />
+        <TextView
+            android:id="@+id/list_message_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/list_message_time"
+            android:autoLink="email|web"
+            android:textSize="@dimen/list_subtitle" />
+
+        <TextView
+            android:id="@+id/list_message_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="@dimen/margin_subtitle"
+            android:textColor="@color/textColorAccent"
+            android:textSize="@dimen/list_subtitle" />
+
+    </RelativeLayout>
 
 </LinearLayout>

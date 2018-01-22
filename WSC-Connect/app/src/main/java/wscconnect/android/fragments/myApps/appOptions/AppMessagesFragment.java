@@ -1,8 +1,10 @@
 package wscconnect.android.fragments.myApps.appOptions;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -21,7 +23,6 @@ import retrofit2.Response;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.activities.MainActivity;
-import wscconnect.android.adapters.AppOptionAdapter;
 import wscconnect.android.adapters.MessageAdapter;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
@@ -31,12 +32,14 @@ import wscconnect.android.models.MessageModel;
 import static android.view.View.GONE;
 
 /**
- * Created by chris on 18.07.17.
+ * @author  Christopher Walz
+ * @copyright	2017-2018 Christopher Walz
+ * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppMessagesFragment extends Fragment {
     public AccessTokenModel token;
-    private MainActivity activity;
+    private Activity activity;
     private RecyclerView recyclerView;
     private List<MessageModel> messageList;
     private MessageAdapter messageAdapter;
@@ -44,7 +47,7 @@ public class AppMessagesFragment extends Fragment {
     private TextView loadingTextView;
     private TextView emptyView;
     private boolean loading;
-    private boolean loadData;
+    private SwipeRefreshLayout refreshView;
 
     public AppMessagesFragment() {
 
@@ -55,9 +58,8 @@ public class AppMessagesFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
-        loadData = getArguments().getBoolean(AppOptionAdapter.EXTRA_LOAD_DATA, true);
 
-        activity = (MainActivity) getActivity();
+        activity = getActivity();
         messageList = new ArrayList<>();
         messageAdapter = new MessageAdapter(activity, messageList);
 
@@ -65,41 +67,21 @@ public class AppMessagesFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(messageAdapter);
 
-        if (loadData) {
-            loadingTextView.setText(getString(R.string.fragment_app_messagess_loading_info, token.getAppName()));
-            Log.i(MainActivity.TAG, "AppMessagesFragment onActivityCreated loadMessages()");
-            loadMessages(null);
-        }
+        loadingTextView.setText(getString(R.string.fragment_app_messagess_loading_info, token.getAppName()));
+        loadMessages(null);
 
-        // TODO use this to get the conversations
-        /*Log.i(MainActivity.TAG, "token.getAppApiUrl(): " + token.getAppApiUrl());
-        Uri uri = Uri.parse(token.getAppApiUrl());
-        String host = uri.getScheme() + "://" + uri.getHost();
-
-        if (!host.endsWith("/")) {
-            host = host + "/";
-        }
-        Log.i(MainActivity.TAG, "host: " + host);
-        host = host.replace("localhost", "192.168.2.114");
-        Log.i(MainActivity.TAG, "host2: " + host);
-
-        activity.getAPI(host, token.getToken()).getConversations(RequestBody.create(MediaType.parse("text/plain"), "getConversations")).enqueue(new RetroCallback<List<ConversationModel>>(activity) {
+        refreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public void onResponse(Call<List<ConversationModel>> call, Response<List<ConversationModel>> response) {
-                super.onResponse(call, response);
-
-                Log.i(MainActivity.TAG, "success: " + response.isSuccessful());
-                Log.i(MainActivity.TAG, "response: " + response.body().toString());
-                Log.i(MainActivity.TAG, "response call:" + call.request().headers().toString());
+            public void onRefresh() {
+                refreshView.setRefreshing(true);
+                loadMessages(new SimpleCallback() {
+                    @Override
+                    public void onReady(boolean success) {
+                        refreshView.setRefreshing(false);
+                    }
+                });
             }
-
-            @Override
-            public void onFailure(Call<List<ConversationModel>> call, Throwable t) {
-                super.onFailure(call, t);
-
-                Log.i(MainActivity.TAG, "error: " + t.getMessage());
-            }
-        });*/
+        });
     }
 
     public void setToken(AccessTokenModel token) {
@@ -107,7 +89,6 @@ public class AppMessagesFragment extends Fragment {
     }
 
     public void loadMessages(final SimpleCallback callback) {
-        token = Utils.getAccessToken(activity, token.getAppID());
         if (token == null) {
             Log.i(MainActivity.TAG, "AppMessagesFragment token is null");
             setEmptyView();
@@ -127,15 +108,15 @@ public class AppMessagesFragment extends Fragment {
         Log.i(MainActivity.TAG, "AppMessagesFragment loading messages");
 
         final AccessTokenModel finalToken = token;
-        activity.getAPI(token.getToken()).getMessages(token.getAppID()).enqueue(new RetroCallback<List<MessageModel>>(activity) {
+        Utils.getAPI(activity, token.getToken()).getMessages(token.getAppID()).enqueue(new RetroCallback<List<MessageModel>>(activity) {
             @Override
             public void onResponse(Call<List<MessageModel>> call, Response<List<MessageModel>> response) {
                 super.onResponse(call, response);
 
                 loading = false;
+                refreshView.setRefreshing(false);
 
                 if (response.isSuccessful()) {
-                    Log.i(MainActivity.TAG, "AppMessagesFragment success loading");
                     loadingView.setVisibility(GONE);
                     recyclerView.setVisibility(View.VISIBLE);
 
@@ -150,6 +131,7 @@ public class AppMessagesFragment extends Fragment {
                         @Override
                         public void onReady(boolean success) {
                             if (success) {
+                                token = Utils.getAccessToken(activity, token.getAppID());
                                 loadMessages(callback);
                             } else {
                                 // TODO show info to refresh manually
@@ -159,8 +141,8 @@ public class AppMessagesFragment extends Fragment {
                 } else if (response.code() == 404) {
                     // app has not been found in the database, remove
                     Utils.logout(activity, token.getAppID());
-                    activity.updateAllFragments();
-                    Toast.makeText(activity, activity.getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
+                    //activity.updateAllFragments();
+                    Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
                 } else {
                     loadingView.setVisibility(GONE);
                     recyclerView.setVisibility(View.VISIBLE);
@@ -175,6 +157,7 @@ public class AppMessagesFragment extends Fragment {
                 super.onFailure(call, t);
 
                 loading = false;
+                refreshView.setRefreshing(false);
 
                 loadingView.setVisibility(GONE);
                 recyclerView.setVisibility(View.VISIBLE);
@@ -208,6 +191,7 @@ public class AppMessagesFragment extends Fragment {
         loadingView = view.findViewById(R.id.fragment_app_messages_loading);
         loadingTextView = view.findViewById(R.id.fragment_app_messages_loading_info);
         emptyView = view.findViewById(R.id.fragment_app_messages_empty);
+        refreshView = view.findViewById(R.id.fragment_app_messages_refresh);
 
         return view;
     }

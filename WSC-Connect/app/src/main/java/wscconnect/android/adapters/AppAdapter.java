@@ -1,5 +1,6 @@
 package wscconnect.android.adapters;
 
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,9 @@ import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.models.AppModel;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
@@ -61,11 +64,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             holder.url.setText(app.getUrl());
         }
 
-        GlideApp.with(activity).load(app.getLogo()).error(R.drawable.ic_apps_black_24dp).into(holder.logo);
+        GlideApp.with(activity).load(app.getLogo()).into(holder.logo);
         holder.users.setText(String.valueOf(app.getUserCount()));
 
         int unreadNotifications = Utils.getUnreadNotifications(activity, app.getAppID());
-        if (unreadNotifications > 0) {
+        if (unreadNotifications > 0 && Utils.getAccessTokenString(activity, app.getAppID()) != null) {
             holder.unreadNotifications.setText(String.valueOf(unreadNotifications));
             holder.unreadNotificationsContainer.setVisibility(View.VISIBLE);
         } else {
@@ -97,14 +100,26 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    try {
-                        final AppModel app = appList.get(getAdapterPosition());
-                        fragment.switchToDetailView(true, false, app);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        activity.getString(R.string.error_general);
-                    }
+                    switchToDetailView();
                 }
             });
+        }
+
+        private void switchToDetailView() {
+            int position = getAdapterPosition();
+
+            // RecyclerView.NO_POSITION is returned, if notifyDataSetChanged() has been called just now
+            if (position != RecyclerView.NO_POSITION) {
+                final AppModel app = appList.get(position);
+                fragment.switchToDetailView(true, false, app);
+            } else {
+                // wait a short time and try again.
+                new Handler().postDelayed(new Runnable() {
+                    public void run() {
+                        switchToDetailView();
+                    }
+                }, 200);
+            }
         }
     }
 }

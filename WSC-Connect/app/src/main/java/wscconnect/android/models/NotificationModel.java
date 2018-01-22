@@ -7,7 +7,9 @@ import wscconnect.android.R;
 import wscconnect.android.Utils;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class NotificationModel {
@@ -68,14 +70,14 @@ public class NotificationModel {
             return "";
         }
 
-        long time = this.time;
+        long timeInMillis = (long) time * 1000;
 
         // less than a minute ago
-        if (System.currentTimeMillis() - (time * 1000) <= 60000) {
+        if (System.currentTimeMillis() - timeInMillis <= 60000) {
             return context.getString(R.string.just_now);
         }
 
-        return DateUtils.getRelativeTimeSpanString(time * 1000, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
+        return DateUtils.getRelativeTimeSpanString(timeInMillis, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
     }
 
     public String getAvatar() {

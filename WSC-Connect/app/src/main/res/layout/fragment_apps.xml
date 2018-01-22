@@ -38,24 +38,24 @@
 
     <LinearLayout
         android:id="@+id/fragment_apps_details"
-        android:visibility="gone"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/fragment_apps_details_logo"
-            android:scaleType="centerCrop"
             android:layout_width="match_parent"
-            android:layout_height="150dp" />
+            android:layout_height="150dp"
+            android:scaleType="centerCrop" />
 
         <LinearLayout
             android:id="@+id/fragment_apps_details_root_logged_in"
-            android:visibility="gone"
-            android:padding="@dimen/layout_padding"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="@dimen/layout_padding"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/fragment_apps_details_logged_in_as"
@@ -67,11 +67,11 @@
             <Button
                 android:id="@+id/fragment_apps_details_logged_in_show"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:textSize="16sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/layout_margin_small"
-                android:text="@string/fragment_apps_details_logged_in_show" />
+                android:text="@string/fragment_apps_details_logged_in_show"
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/fragment_apps_details_logged_in_switch"
@@ -79,24 +79,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/fragment_apps_details_logged_in_switch"
-                android:textSize="16sp"
-                android:textColor="@color/textColor" />
+                android:textColor="@color/textColor"
+                android:textSize="16sp" />
+
             <Button
                 android:id="@+id/fragment_apps_details_logged_in_logout"
                 style="@style/Widget.AppCompat.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/logout"
-                android:textSize="16sp"
-                android:textColor="@color/textColor" />
+                android:textColor="@color/textColor"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/fragment_apps_details_root"
-            android:padding="@dimen/layout_padding"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="@dimen/layout_padding">
 
             <EditText
                 android:id="@+id/fragment_apps_details_username"
@@ -130,10 +131,10 @@
             <Button
                 android:id="@+id/fragment_apps_details_login_submit"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:textSize="16sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/login" />
+                android:text="@string/login"
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/fragment_apps_details_login_third_party_submit"
@@ -141,8 +142,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/dialog_login_third_party"
-                android:textSize="16sp"
-                android:textColor="@color/textColor" />
+                android:textColor="@color/textColor"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/fragment_apps_details_login_third_party_info"

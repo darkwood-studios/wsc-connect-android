@@ -10,14 +10,14 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/activity_main_toolbar"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:minHeight="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:subtitleTextAppearance="@style/MyActionBarSubTitleText"
         app:contentInsetStartWithNavigation="0dp"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:subtitleTextAppearance="@style/MyActionBarSubTitleText" />
 
     <FrameLayout
         android:id="@+id/activity_main_content"

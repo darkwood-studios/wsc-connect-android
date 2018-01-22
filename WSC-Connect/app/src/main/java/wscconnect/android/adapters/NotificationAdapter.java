@@ -1,6 +1,7 @@
 package wscconnect.android.adapters;
 
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,25 +14,25 @@ import java.util.List;
 import wscconnect.android.GlideApp;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
-import wscconnect.android.activities.MainActivity;
-import wscconnect.android.fragments.myApps.AppOptionsFragment;
+import wscconnect.android.activities.AppActivity;
+import wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment;
 import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.NotificationModel;
 
 /**
- * Created by chris on 18.07.17.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.MyViewHolder> {
-    private final AppOptionsFragment fragment;
     private final AccessTokenModel token;
-    private MainActivity activity;
+    private AppActivity activity;
     private List<NotificationModel> notificationList;
 
-    public NotificationAdapter(MainActivity activity, List<NotificationModel> notificationList, AccessTokenModel token, AppOptionsFragment fragment) {
+    public NotificationAdapter(AppActivity activity, List<NotificationModel> notificationList, AccessTokenModel token) {
         this.activity = activity;
         this.notificationList = notificationList;
-        this.fragment = fragment;
         this.token = token;
     }
 
@@ -78,16 +79,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 public void onClick(View view) {
                     int position = getAdapterPosition();
                     NotificationModel n = notificationList.get(position);
-                    fragment.showOption(AppOptionsFragment.OPTION_TYPE_WEBVIEW, n.getLink());
 
                     if (!n.isConfirmed()) {
                         n.setConfirmed(true);
                         notifyItemChanged(position);
                         Utils.saveUnreadNotifications(activity, token.getAppID(), Utils.getUnreadNotifications(activity, token.getAppID()) - 1);
-                        activity.updateAppsFragment();
-                        fragment.resetAdapter();
-                        fragment.setCustomTabView();
+                        activity.setCustomTabView();
                     }
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString(AppWebviewFragment.URL, n.getLink());
+                    activity.setCurrentPage(AppActivity.FRAGMENT_WEBVIEW, bundle);
                 }
             });
         }

@@ -12,6 +12,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -19,19 +20,22 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import wscconnect.android.R;
-import wscconnect.android.activities.MainActivity;
+import wscconnect.android.listeners.OnBackPressedListener;
+import wscconnect.android.listeners.OnFragmentUpdateListener;
 import wscconnect.android.models.AccessTokenModel;
 
 import static android.app.Activity.RESULT_OK;
 
 /**
- * Created by chris on 18.07.17.
+ * @author  Christopher Walz
+ * @copyright	2017-2018 Christopher Walz
+ * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
-public class AppWebviewFragment extends Fragment {
+public class AppWebviewFragment extends Fragment implements OnBackPressedListener, OnFragmentUpdateListener {
     public final static String USER_AGENT = "WSC-Connect Mobile Browser 1.0";
+    public final static String URL = "webviewUrl";
     private static final int PICKFILE_REQUEST_CODE = 1337;
-    private MainActivity activity;
     private AccessTokenModel token;
     private WebView webview;
     private String webviewUrl;
@@ -46,10 +50,11 @@ public class AppWebviewFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        token = getArguments().getParcelable(AccessTokenModel.EXTRA);
-        webviewUrl = getArguments().getString("webviewUrl");
+        if (getArguments() != null) {
+            token = getArguments().getParcelable(AccessTokenModel.EXTRA);
+            webviewUrl = getArguments().getString(URL);
+        }
 
-        activity = (MainActivity) getActivity();
         prepareWebview();
     }
 
@@ -75,6 +80,19 @@ public class AppWebviewFragment extends Fragment {
                 return true;
             }
         });
+
+        webview.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent,
+                                        String contentDisposition, String mimetype,
+                                        long contentLength) {
+                // handle download, here we use browser to download, also you can try other approach.
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            }
+        });
+
         webview.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -119,7 +137,7 @@ public class AppWebviewFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent intent) {
-        if (requestCode == PICKFILE_REQUEST_CODE && intent != null && resultCode == RESULT_OK) {
+        if (requestCode == PICKFILE_REQUEST_CODE && intent != null && mFilePathCallback != null && resultCode == RESULT_OK) {
             if (intent.getData() != null) {
                 //If uploaded with Android Gallery (max 1 image)
                 Uri selectedFile = intent.getData();
@@ -173,5 +191,24 @@ public class AppWebviewFragment extends Fragment {
 
     public void setUrl(String webviewUrl) {
         this.webviewUrl = webviewUrl;
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (webview != null && webview.canGoBack()) {
+            webview.goBack();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void onUpdate(Bundle bundle) {
+        String url = bundle.getString(URL);
+        if (url != null) {
+            setUrl(url);
+            loadWebview();
+        }
     }
 }
