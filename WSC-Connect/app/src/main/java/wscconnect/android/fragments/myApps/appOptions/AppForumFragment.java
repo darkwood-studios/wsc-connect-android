@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,9 +35,9 @@ import wscconnect.android.models.PostModel;
 import wscconnect.android.models.ThreadModel;
 
 /**
- * @author  Christopher Walz
- * @copyright	2017-2018 Christopher Walz
- * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppForumFragment extends Fragment implements OnBackPressedListener, OnFragmentUpdateListener {
@@ -65,6 +64,7 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
     private SwipeRefreshLayout refreshView;
     private String host;
     private BoardModel activeBoard;
+
     public AppForumFragment() {
     }
 

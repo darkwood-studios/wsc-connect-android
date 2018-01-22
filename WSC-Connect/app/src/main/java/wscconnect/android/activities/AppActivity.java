@@ -31,6 +31,12 @@ import wscconnect.android.models.AccessTokenModel;
 
 import static wscconnect.android.activities.MainActivity.EXTRA_OPTION_TYPE;
 
+/**
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
+ */
+
 public class AppActivity extends AppCompatActivity {
     public final static String FRAGMENT_FORUM = "forum";
     public final static String FRAGMENT_WEBVIEW = "webview";

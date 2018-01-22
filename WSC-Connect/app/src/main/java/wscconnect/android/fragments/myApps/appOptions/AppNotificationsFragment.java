@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +36,9 @@ import static wscconnect.android.activities.AppActivity.EXTRA_EVENT_NAME;
 import static wscconnect.android.activities.AppActivity.EXTRA_FORCE_LOAD;
 
 /**
- * @author  Christopher Walz
- * @copyright	2017-2018 Christopher Walz
- * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppNotificationsFragment extends Fragment implements OnFragmentUpdateListener {

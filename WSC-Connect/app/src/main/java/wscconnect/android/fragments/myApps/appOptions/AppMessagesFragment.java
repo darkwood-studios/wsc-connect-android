@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +21,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
-import wscconnect.android.activities.MainActivity;
 import wscconnect.android.adapters.MessageAdapter;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.callbacks.SimpleCallback;
@@ -32,9 +30,9 @@ import wscconnect.android.models.MessageModel;
 import static android.view.View.GONE;
 
 /**
- * @author  Christopher Walz
- * @copyright	2017-2018 Christopher Walz
- * @license	GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
 public class AppMessagesFragment extends Fragment {

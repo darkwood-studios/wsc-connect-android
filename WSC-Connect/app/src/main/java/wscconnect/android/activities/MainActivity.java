@@ -11,7 +11,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +27,11 @@ import wscconnect.android.listeners.OnBackPressedListener;
 
 import static wscconnect.android.Utils.getAllAccessTokens;
 
+/**
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
+ */
 
 public class MainActivity extends AppCompatActivity {
     public final static String TAG = "WSC-Connect";

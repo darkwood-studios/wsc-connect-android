@@ -10,13 +10,15 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
-import android.support.v4.app.Fragment;
 
 import wscconnect.android.R;
 
 /**
- * A simple {@link Fragment} subclass.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
+
 public class SettingsFragment extends PreferenceFragment {
 
 

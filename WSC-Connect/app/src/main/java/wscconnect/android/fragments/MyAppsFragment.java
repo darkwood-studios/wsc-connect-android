@@ -22,8 +22,11 @@ import wscconnect.android.adapters.MyAppsAdapter;
 import wscconnect.android.models.AccessTokenModel;
 
 /**
- * A simple {@link Fragment} subclass.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
+
 public class MyAppsFragment extends Fragment {
     private MainActivity activity;
     private ArrayList<AccessTokenModel> myApps;

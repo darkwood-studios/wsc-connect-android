@@ -6,7 +6,6 @@ package wscconnect.android;
  * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
 
-
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.module.AppGlideModule;
 

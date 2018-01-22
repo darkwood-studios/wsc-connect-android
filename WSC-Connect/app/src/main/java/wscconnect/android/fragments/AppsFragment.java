@@ -15,7 +15,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -67,8 +66,11 @@ import wscconnect.android.models.LoginModel;
 import static wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment.USER_AGENT;
 
 /**
- * A simple {@link Fragment} subclass.
+ * @author Christopher Walz
+ * @copyright 2017-2018 Christopher Walz
+ * @license GNU General Public License v3.0 <https://opensource.org/licenses/LGPL-3.0>
  */
+
 public class AppsFragment extends Fragment implements OnBackPressedListener {
     private static final int WEBVIEW_TIMEOUT = 8000;
     private RecyclerView recyclerView;
