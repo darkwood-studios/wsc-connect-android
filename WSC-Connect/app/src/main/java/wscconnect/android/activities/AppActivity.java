@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,8 +78,6 @@ public class AppActivity extends AppCompatActivity {
         final String eventName = intent.getStringExtra(EXTRA_EVENT_NAME);
         final int eventID = intent.getIntExtra(EXTRA_EVENT_ID, 0);
 
-        Log.i("uohsda", token.getAppTabs().toString());
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setElevation(0);
         getSupportActionBar().setTitle(token.getAppName());
@@ -92,7 +89,6 @@ public class AppActivity extends AppCompatActivity {
         // check if token has to be refreshed
         JWT jwt = new JWT(token.getToken());
         if (jwt.isExpired(0)) {
-            Log.i("asduhd", "jwt expired on " + jwt.getExpiresAt());
             tabLayout.setVisibility(View.GONE);
             Utils.showLoadingOverlay(this, true);
             Utils.refreshAccessToken(this, token.getAppID(), new SimpleCallback() {

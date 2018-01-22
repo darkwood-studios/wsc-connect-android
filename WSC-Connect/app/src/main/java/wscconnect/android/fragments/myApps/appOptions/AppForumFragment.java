@@ -224,8 +224,6 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
 
                 refreshView.setRefreshing(false);
 
-                Log.i("oiahsdod", "code: " + response.code());
-
                 if (response.isSuccessful()) {
                     threadList.clear();
                     threadList.addAll(response.body());

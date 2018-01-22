@@ -90,7 +90,6 @@ public class AppMessagesFragment extends Fragment {
 
     public void loadMessages(final SimpleCallback callback) {
         if (token == null) {
-            Log.i(MainActivity.TAG, "AppMessagesFragment token is null");
             setEmptyView();
             return;
         }
@@ -105,7 +104,6 @@ public class AppMessagesFragment extends Fragment {
         if (callback == null) {
             loadingView.setVisibility(View.VISIBLE);
         }
-        Log.i(MainActivity.TAG, "AppMessagesFragment loading messages");
 
         final AccessTokenModel finalToken = token;
         Utils.getAPI(activity, token.getToken()).getMessages(token.getAppID()).enqueue(new RetroCallback<List<MessageModel>>(activity) {

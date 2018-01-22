@@ -505,7 +505,6 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         final ProgressBar progressBar = Utils.showProgressView(activity, loadingButton, android.R.attr.progressBarStyle);
         disableButton.setEnabled(false);
 
-        Log.i(MainActivity.TAG, "starting login");
         final LoginModel loginModel = new LoginModel();
         loginModel.setUsername(username);
         loginModel.setPassword(password);
@@ -517,9 +516,6 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 super.onResponse(call, response);
-
-                Log.i(MainActivity.TAG, "onResponse " + response.code());
-                Log.i(MainActivity.TAG, "onResponse " + response.raw().message());
 
                 if (response.isSuccessful()) {
                     try {

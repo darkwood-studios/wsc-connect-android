@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_my_apps:
                     if (!(currentFragment instanceof MyAppsFragment)) {
-                        Log.i(TAG, "OnNavigationItemSelectedListener !(currentFragment instanceof MyAppsFragment))");
                         currentFragment = changeFragment(1);
                     }
                     return true;
@@ -179,16 +178,10 @@ public class MainActivity extends AppCompatActivity {
                 if (newFragment != null) {
                     if (!newFragment.isStateSaved()) {
                         fManager.beginTransaction().show(newFragment).commitNow();
-                        if (notificationAppID != null) {
-                            Log.i(TAG, "changeFragment newFragment != null ");
-                        }
                     }
                 } else {
                     newFragment = new MyAppsFragment();
                     fManager.beginTransaction().add(R.id.activity_main_content, newFragment, myAppsFragmentTag).commitNow();
-                    if (notificationAppID != null) {
-                        Log.i(TAG, "changeFragment newFragment === null ");
-                    }
                 }
 
                 hideFragments(appsFragmentTag);

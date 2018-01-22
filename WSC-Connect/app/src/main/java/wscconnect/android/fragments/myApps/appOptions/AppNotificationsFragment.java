@@ -73,7 +73,6 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
         recyclerView.setAdapter(notificationAdapter);
 
         loadingTextView.setText(getString(R.string.fragment_app_notifications_loading_info, token.getAppName()));
-        Log.i("asduhd", "onActivityCreated AppNotific");
 
         getNotifications(null);
 
@@ -96,8 +95,6 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
     }
 
     public void getNotificationsLegacy(final SimpleCallback callback) {
-        Log.i("asduhd", "use legacy");
-
         if (token == null) {
             setEmptyView();
             return;
@@ -121,8 +118,6 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
-                Log.i("asduhd", "lgeacy cold: " + response.code());
-                Log.i("asduhd", "call: " + call.request().toString());
 
                 if (response.isSuccessful()) {
                     loadingView.setVisibility(GONE);
@@ -171,8 +166,6 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
 
             @Override
             public void onFailure(Call<List<NotificationModel>> call, Throwable t) {
-                Log.i("asduhd", "lgeacy cold: onFailure");
-
                 refreshView.setRefreshing(false);
                 loadingView.setVisibility(GONE);
                 recyclerView.setVisibility(View.VISIBLE);
@@ -187,7 +180,6 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
             setEmptyView();
             return;
         }
-        Log.i("asduhd", "getNotifications");
 
         if (callback == null) {
             loadingView.setVisibility(View.VISIBLE);
@@ -209,8 +201,6 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
-                Log.i("asduhd", "getNotifications code: " + response.code());
-                Log.i("asduhd", "call: " + call.request().toString());
 
                 if (response.isSuccessful()) {
                     loadingView.setVisibility(GONE);

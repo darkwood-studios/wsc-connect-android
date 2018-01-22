@@ -255,14 +255,11 @@ public class Utils {
 
     public static void refreshAccessToken(final Activity activity, final String appID, final SimpleCallback callback) {
         String refreshToken = Utils.getRefreshTokenString(activity, appID);
-        Log.i("uohsda", "refreshAccessToken");
 
         if (accessTokenRefreshing) {
-            Log.i("uohsda", "accessTokenRefreshing is true");
             setOnRefreshAccessTokenFinishCallback(new SimpleCallback() {
                 @Override
                 public void onReady(boolean success) {
-                    Log.i("uohsda", "setOnRefreshAccessTokenFinishCallback");
                     setOnRefreshAccessTokenFinishCallback(null);
                     callback.onReady(success);
                 }
@@ -284,7 +281,6 @@ public class Utils {
                     try {
                         obj = new JSONObject(response.body().string());
                         String accessToken = obj.getString("accessToken");
-                        Log.i("uohsda", "new token: " + accessToken);
 
                         saveAccessToken(activity, appID, accessToken);
                         callback.onReady(true);
@@ -295,8 +291,6 @@ public class Utils {
                         callOnRefreshAccessTokenFinishCallback(false);
                     }
                 } else {
-                    Log.i("uohsda", "new token failed: " + response.code());
-
                     callback.onReady(false);
                     callOnRefreshAccessTokenFinishCallback(false);
                 }
