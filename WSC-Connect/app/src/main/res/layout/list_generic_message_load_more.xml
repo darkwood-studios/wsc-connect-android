@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_generic_message_load_more_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/border_top"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/layout_margin"
+    android:paddingLeft="@dimen/layout_padding"
+    android:paddingRight="@dimen/layout_padding"
+    android:paddingTop="@dimen/layout_margin">
+
+    <Button
+        android:id="@+id/list_generic_message_load_more"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:textColor="@color/textColor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/load_more" />
+
+</LinearLayout>

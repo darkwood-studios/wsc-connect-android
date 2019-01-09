@@ -25,9 +25,15 @@
     <string name="apps_search">Apps durchsuchen…</string>
     <string name="apps_sort">Apps sortieren…</string>
     <string name="action_about">Über</string>
+    <string name="action_account">Mein Account</string>
     <string name="action_settings">Einstellungen</string>
     <string name="close">Schließen</string>
-    <string name="dialog_about_text">WSC-Connect verbindet alle deine Lieblingsseiten, die auf dem WSC (WoltLab&#174; Suite Core) basieren, in einer App. Erhalte Push-Nachrichten für neue Benachrichtigungen und vieles mehr.\n\n<b>Du besitzt eine WSC basierte Website?</b> Besuche <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> und registriere deine Seite jetzt!\n\nWSC-Connect steht in keiner Verbindung mit der WoltLab&#174; GmbH.\n\n<b>Kontakt</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Impressum</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nDeutschland</string>
+    <string name="load_more">Mehr laden</string>
+    <string name="dialog_about_text">WSC-Connect verbindet alle deine Lieblingsseiten, die auf dem WSC (WoltLab&#174; Suite Core) basieren, in einer App. Erhalte Push-Nachrichten für neue Benachrichtigungen und vieles mehr.\n\nz<b>Du besitzt eine WSC basierte Website?</b> Besuche <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> und registriere deine Seite jetzt!\n\nWSC-Connect steht in keiner Verbindung mit der WoltLab&#174; GmbH.\n\n<b>Kontakt</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Impressum</b>\nChristopher Walz\nNeuköllner Straße 2\n71229 Leonberg\nDeutschland</string>
+    <string name="dialog_action_text">Dein Instanz-Token hilft zur Identifizierung deines Gerätes, damit wir dir Push-Nachrichten senden können:\n\n%1$s</string>
+    <string name="dialog_action_no_token">Noch kein Instanz-Token generiert.</string>
+    <string name="dialog_action_copy_token">Instanz-Token kopieren</string>
+    <string name="dialog_action_token_copied">Instanz-Token in die Zwischenablage kopiert</string>
     <string name="fragment_app_messagess_empty">Keine Push-Nachrichten gefunden</string>
     <string name="fragment_app_messagess_loading_info">Lade Push-Nachrichten für %1$s…</string>
     <string name="error_request_api_not_available">Unser Server ist gerade beschäftigt. Versuche es in wenigen Minuten erneut.</string>
@@ -39,6 +45,8 @@
     <string name="pref_notifications_vibration_summary">Vibration für neue Benachrichtigungen</string>
     <string name="pref_notifications_ringtone_title">Ton</string>
     <string name="pref_notifications_ringtone_summary">Ton für neue Benachrichtigungen</string>
+    <string name="pref_notifications_enabled_title">Benachrichtigungen aktivieren</string>
+    <string name="pref_notifications_enabled_summary">Erhalte Benachrichtigungen über Push-Nachrichten</string>
     <string name="pref_others">Sonstiges</string>
     <string name="pref_others_open_in_webview">Webseiten in der App öffnen</string>
     <string name="action_sort_users">Nach Benutzer sortieren</string>
@@ -88,4 +96,11 @@
     <string name="fragment_apps_details_logged_in_switch">Mit einem anderen Account einloggen</string>
     <string name="fragment_apps_details_logged_in_show">In \"Meine Apps\" öffnen</string>
     <string name="fragment_apps_details_logged_in_as">Eingeloggt als %1$s</string>
+    <string name="login_privacy">Mit der Anmeldung akzeptiere ich die <a href="https://www.wsc-connect.com/privacy">Datenschutzbestimmungen</a> von WSC-Connect</string>
+    <string name="dialog_privacy_title">Datenschutz-Update</string>
+    <string name="dialog_privacy_text1">Aufgrund der neuen Datenschutzverordnung der EU haben wir unsere Datenschutzbestimmungen aktualisiert.\nDu findest diese auf <a href="https://www.wsc-connect.com/privacy">unserer Website</a>.\n\n<b>Welche Änderungen ergeben sich dadurch für mich?</b>\n\n- Wir speichern noch weniger Daten von dir auf unseren Servern\n- Der Inhalt der Push-Benachrichtigungen, die du von deinen angemeldeten Apps erhälst, sind nun verschlüsselt\n\nDamit diese Änderungen aktiv werden, wurdest du aus allen Apps automatisch ausgeloggt. Bitte logge dich erneut ein.</string>
+    <string name="dialog_privacy_text2">Weiterhin viel Spaß mit WSC-Connect!</string>
+    <string name="dialog_privacy_insecure"><b>Ungesicherter Login</b>: Deine Push-Nachrichten sind nicht verschlüsselt. Bitte logge dich erneut ein. Falls es dann immer noch nicht funktioniert, muss die Website auf der du dich versuchst einzuloggen, das WSC-Connect-Plugin aktualisieren.</string>
+    <string name="dialog_privacy_secure"><b>Gesicherter Login</b>: Deine Push-Nachrichten sind verschlüsselt.</string>
+    <string name="dialog_privacy_accept">Alles klar, verstanden!</string>
 </resources>

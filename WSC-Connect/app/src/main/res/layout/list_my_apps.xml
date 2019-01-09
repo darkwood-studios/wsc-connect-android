@@ -35,14 +35,38 @@
                 android:textStyle="bold" />
 
             <RelativeLayout
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/list_my_apps_secure_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/list_my_apps_secure"
+                        app:srcCompat="@drawable/ic_secure_blue_12dp"
+                        android:layout_marginTop="3dp"
+                        android:layout_marginEnd="2dp"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <ImageView
+                        android:id="@+id/list_my_apps_insecure"
+                        app:srcCompat="@drawable/ic_insecure_red_12dp"
+                        android:layout_marginTop="3dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/list_my_apps_username"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
+                    android:layout_toEndOf="@+id/list_my_apps_secure_container"
                     android:layout_toStartOf="@+id/list_my_apps_notifications"
                     android:ellipsize="end"
                     android:maxLines="1"

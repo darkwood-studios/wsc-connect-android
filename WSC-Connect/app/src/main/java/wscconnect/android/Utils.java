@@ -27,6 +27,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,17 +52,24 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -165,6 +173,16 @@ public class Utils {
         prefs.edit().putInt("unreadNotifications-" + appID, count).apply();
     }
 
+    public static void saveWscConnectToken(Context context, String appID, String wscConnectToken) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putString("wscConnectToken-" + appID, wscConnectToken).apply();
+    }
+
+    public static void saveUsername(Context context, String appID, String username) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putString("username-" + appID, username).apply();
+    }
+
     public static int getUnreadNotifications(Context context, String appID) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
         return prefs.getInt("unreadNotifications-" + appID, 0);
@@ -180,6 +198,16 @@ public class Utils {
         return prefs.getInt("unreadConversations-" + appID, 0);
     }
 
+    public static String getWscConnectToken(Context context, String appID) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        return prefs.getString("wscConnectToken-" + appID, "");
+    }
+
+    public static String getUsername(Context context, String appID) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        return prefs.getString("username-" + appID, "");
+    }
+
     public static String getAccessTokenString(Context context, String appID) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
         return prefs.getString("accessToken-" + appID, null);
@@ -193,6 +221,16 @@ public class Utils {
     public static String getRefreshTokenString(Context context, String appID) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
         return prefs.getString("refreshToken-" + appID, null);
+    }
+
+    public static void saveInstallPluginVersion(String appID, String pluginVersion, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putString("installPluginVersion-" + appID, pluginVersion).apply();
+    }
+
+    public static String getInstallPluginVersion(Context context, String appID) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        return prefs.getString("installPluginVersion-" + appID, "1.0.0");
     }
 
     public static AccessTokenModel getAccessToken(Context context, String appID) {
@@ -331,9 +369,11 @@ public class Utils {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, "default");
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
+            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher_transparent); // TODO
+        } else {
+            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
         }
 
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
 
         if (largeIcon != null) {
             notificationBuilder.setLargeIcon(largeIcon);
@@ -522,6 +562,13 @@ public class Utils {
             }
         });
 
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+// set your desired log level
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+// add your other interceptors …
+// add logging as last interceptor
+        clientBuilder.addInterceptor(logging);  // <-- this is the important line!
+
         Retrofit retrofit = new Retrofit.Builder()
                 .client(clientBuilder.build())
                 .baseUrl(url)
@@ -605,5 +652,36 @@ public class Utils {
     public static int dpToPx(int dp, Context context) {
         Resources r = context.getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    }
+
+    public static String decodeBase64(String string) {
+        try {
+            byte[] base = Base64.decode(string, Base64.DEFAULT);
+            return new String(base, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return string;
+    }
+
+    public static String decryptString(String encryptedText, String secret, String initVector) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+
+            byte[] ivv = initVector.getBytes("UTF-8");
+            IvParameterSpec iv = new IvParameterSpec(Arrays.copyOf(ivv, ivv.length), 0, cipher.getBlockSize());
+            SecretKeySpec skeySpec = new SecretKeySpec(secret.getBytes("UTF-8"), "AES");
+
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+
+            byte[] original = cipher.doFinal(Base64.decode(encryptedText, Base64.DEFAULT));
+
+            return new String(original, "UTF-8");
+        } catch (Exception e) {
+            //Crashlytics.logException(e);
+        }
+
+        return encryptedText;
     }
 }

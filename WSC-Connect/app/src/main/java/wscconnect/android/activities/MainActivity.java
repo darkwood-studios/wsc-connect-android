@@ -1,26 +1,39 @@
 package wscconnect.android.activities;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import io.fabric.sdk.android.Fabric;
 import wscconnect.android.R;
+import wscconnect.android.Utils;
 import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.fragments.MyAppsFragment;
 import wscconnect.android.listeners.OnBackPressedListener;
@@ -38,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_NOTIFICATION = "extraNotification";
     public final static String EXTRA_OPTION_TYPE = "extraOptionType";
     public static boolean IS_VISIBLE = true;
+
     public Toolbar toolbar;
     private Fragment currentFragment;
     private BottomNavigationView navigation;
@@ -135,6 +149,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_about:
                 showAboutDialog();
                 return true;
+            case R.id.action_account:
+                showAccountDialog();
+                return true;
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
@@ -153,6 +170,42 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = builder.show();
 
         ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
+    private void showAccountDialog() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                String token;
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle(R.string.action_account);
+
+                if (!task.isSuccessful()) {
+                    token = getString(R.string.dialog_action_no_token);
+                } else {
+                    token = task.getResult().getToken();
+                }
+
+                final String finalToken = token;
+                builder.setNeutralButton(R.string.dialog_action_copy_token, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("wsc-connect-token", finalToken);
+                        if (clipboard != null) {
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(MainActivity.this, R.string.dialog_action_token_copied, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                builder.setMessage(getString(R.string.dialog_action_text, token));
+                builder.setPositiveButton(R.string.close, null);
+
+                builder.show();
+            };
+        });
     }
 
     public void setOnBackPressedListener(OnBackPressedListener callback) {
@@ -238,6 +291,8 @@ public class MainActivity extends AppCompatActivity {
 
         notificationAppID = getIntent().getStringExtra(EXTRA_NOTIFICATION);
 
+        showPrivacyDialog();
+
         if (notificationAppID != null) {
             navigation.setSelectedItemId(R.id.navigation_my_apps);
         } else {
@@ -249,12 +304,50 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void showPrivacyDialog() {
+        SharedPreferences prefs = getSharedPreferences(Utils.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        // not logged in anywhere
+        if (Utils.getAllAccessTokens(this).isEmpty() && !prefs.getBoolean("privacyDialogShown", false)) {
+            prefs.edit().putBoolean("privacyDialogShown", true).apply();
+            return;
+        }
+
+        if (!prefs.getBoolean("privacyDialogShown", false)) {
+            // log out of all apps
+            Utils.removeAllAccessTokens(this);
+
+            // don't show this dialog again
+            prefs.edit().putBoolean("privacyDialogShown", true).apply();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_NoActionBar_Fullscreen);
+
+            builder.setTitle(R.string.dialog_privacy_title);
+            builder.setPositiveButton(R.string.dialog_privacy_accept, null);
+            builder.setCancelable(false);
+
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_privacy, null);
+
+            builder.setView(dialogView);
+
+            AlertDialog dialog = builder.show();
+
+            ((TextView) dialog.findViewById(R.id.privacy_part_1)).setMovementMethod(LinkMovementMethod.getInstance());
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.textColor));
+        }
+
+    }
+
     private void setupCrashlyrics() {
         Fabric.with(this, new Crashlytics());
-
-        if (FirebaseInstanceId.getInstance().getToken() != null) {
-            Crashlytics.setUserIdentifier(FirebaseInstanceId.getInstance().getToken());
-        }
+        FirebaseInstanceId.getInstance().getInstanceId()
+        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+           @Override
+           public void onComplete(@NonNull Task<InstanceIdResult> task) {
+               if (task.isSuccessful()) {
+                   Crashlytics.setUserIdentifier(task.getResult().getToken());
+               }
+           }
+       });
     }
 
     public void setActiveMenuItem(int id) {

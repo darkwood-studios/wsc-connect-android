@@ -4,7 +4,6 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -72,13 +71,13 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
                 // Launch Intent for picking file
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("*/*");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                }
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 startActivityForResult(intent, PICKFILE_REQUEST_CODE);
 
                 return true;
             }
+
+
         });
 
         webview.setDownloadListener(new DownloadListener() {
@@ -87,6 +86,9 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
                                         String contentDisposition, String mimetype,
                                         long contentLength) {
                 // handle download, here we use browser to download, also you can try other approach.
+                if (url.startsWith("blob:")) {
+                    url = url.substring(5);
+                }
                 Uri uri = Uri.parse(url);
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
@@ -103,6 +105,22 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
             @Override
             public void onPageFinished(WebView view, String url) {
                 refreshView.setRefreshing(false);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if(url.startsWith("http:") || url.startsWith("https:")) {
+                    return false;
+                }
+
+                // Otherwise allow the OS to handle things like tel, mailto, etc.
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                    return true;
+                }
+
+                return false;
             }
         });
 

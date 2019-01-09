@@ -48,6 +48,9 @@ public class AppModel {
     }
 
     public String getLogo() {
+        if (!logo.contains("images.weserv")) {
+            logo = "https://images.weserv.nl/?url=" + logo.replaceFirst("^https?://", "");
+        }
         return logo;
     }
 

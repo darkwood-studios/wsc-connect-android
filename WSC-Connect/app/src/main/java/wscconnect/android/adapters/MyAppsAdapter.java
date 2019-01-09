@@ -16,6 +16,7 @@ import java.util.List;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
+import wscconnect.android.ComparableVersion;
 import wscconnect.android.GlideApp;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
@@ -55,7 +56,11 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
         AccessTokenModel app = appList.get(position);
 
         holder.name.setText(app.getAppName());
-        holder.username.setText(activity.getString(R.string.fragment_my_apps_username, app.getUsername()));
+        String username = app.getUsername();
+        if (username == null || username.isEmpty()) {
+            username = Utils.getUsername(activity, app.getAppID());
+        }
+        holder.username.setText(activity.getString(R.string.fragment_my_apps_username, username));
 
         int unreadNotifications = Utils.getUnreadNotifications(activity, app.getAppID());
         unreadNotifications += Utils.getUnreadConversations(activity, app.getAppID());
@@ -65,6 +70,24 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
             holder.notifications.setVisibility(View.VISIBLE);
         } else {
             holder.notifications.setVisibility(View.GONE);
+        }
+
+        String version = Utils.getInstallPluginVersion(activity, app.getAppID());
+        ComparableVersion currentVersion = new ComparableVersion(version);
+        ComparableVersion minVersion;
+
+        if (version.startsWith("2.")) {
+            minVersion = new ComparableVersion("2.0.10");
+        } else {
+            minVersion = new ComparableVersion("3.0.11");
+        }
+
+        if (currentVersion.compareTo(minVersion) >= 0) {
+            holder.secure.setVisibility(View.VISIBLE);
+            holder.insecure.setVisibility(View.GONE);
+        } else {
+            holder.secure.setVisibility(View.GONE);
+            holder.insecure.setVisibility(View.VISIBLE);
         }
 
         GlideApp.with(activity).load(app.getAppLogo()).circleCrop().error(R.drawable.ic_apps_black_50dp).into(holder.logo);
@@ -78,7 +101,7 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView name, username, notifications;
-        public ImageView logo;
+        public ImageView logo, secure, insecure;
 
         public MyViewHolder(View view) {
             super(view);
@@ -86,6 +109,8 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
             username = view.findViewById(R.id.list_my_apps_username);
             notifications = view.findViewById(R.id.list_my_apps_notifications);
             logo = view.findViewById(R.id.list_my_apps_logo);
+            secure = view.findViewById(R.id.list_my_apps_secure);
+            insecure = view.findViewById(R.id.list_my_apps_insecure);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

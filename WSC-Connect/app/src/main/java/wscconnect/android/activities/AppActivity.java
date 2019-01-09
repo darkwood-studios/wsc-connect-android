@@ -84,10 +84,20 @@ public class AppActivity extends AppCompatActivity {
         final String eventName = intent.getStringExtra(EXTRA_EVENT_NAME);
         final int eventID = intent.getIntExtra(EXTRA_EVENT_ID, 0);
 
+        if (token == null) {
+            finish();
+            return;
+        }
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setElevation(0);
         getSupportActionBar().setTitle(token.getAppName());
-        getSupportActionBar().setSubtitle(getString(R.string.fragment_my_apps_username, token.getUsername()));
+
+        String username = token.getUsername();
+        if (username == null || username.isEmpty()) {
+            username = Utils.getUsername(this, token.getAppID());
+        }
+        getSupportActionBar().setSubtitle(getString(R.string.fragment_my_apps_username, username));
 
         viewPager = findViewById(R.id.activity_app_pager);
         tabLayout = findViewById(R.id.activity_app_tabs);

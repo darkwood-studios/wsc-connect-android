@@ -3,11 +3,18 @@
     <PreferenceCategory android:title="@string/pref_notifications">
         <CheckBoxPreference
             android:defaultValue="true"
+            android:key="pref_notifications_enabled"
+            android:summary="@string/pref_notifications_enabled_summary"
+            android:title="@string/pref_notifications_enabled_title" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="pref_notifications_enabled"
             android:key="pref_notifications_vibration"
             android:summary="@string/pref_notifications_vibration_summary"
             android:title="@string/pref_notifications_vibration_title" />
         <RingtonePreference
             android:key="pref_notifications_ringtone"
+            android:dependency="pref_notifications_enabled"
             android:ringtoneType="notification"
             android:summary="@string/pref_notifications_ringtone_summary"
             android:title="@string/pref_notifications_ringtone_title" />

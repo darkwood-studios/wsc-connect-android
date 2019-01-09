@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -15,6 +16,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.InputType;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +30,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,13 +40,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,6 +62,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import wscconnect.android.GlideApp;
+import wscconnect.android.KeyUtils;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.activities.AppActivity;
@@ -98,6 +109,8 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
     private Button switchAccountButton;
     private Button logoutAccountButton;
     private TextView loggedInAs;
+    private TextView privacy;
+    private CheckBox privacyCheckbox;
 
     public AppsFragment() {
         // Required empty public constructor
@@ -123,6 +136,14 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             @Override
             public void onRefresh() {
                 loadApps();
+            }
+        });
+        privacy.setMovementMethod(LinkMovementMethod.getInstance());
+        privacyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    privacyCheckbox.setError(null);
+                }
             }
         });
 
@@ -341,8 +362,12 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             GlideApp.with(activity).load(app.getLogo()).into(detailsLogo);
 
             if (app.isLoggedIn(activity) && !forceLogin) {
-                loggedInAs.setText(getString(R.string.fragment_apps_details_logged_in_as, Utils.getAccessToken(activity, app.getAppID()).getUsername()
-                ));
+                String username = Utils.getAccessToken(activity, app.getAppID()).getUsername();
+                if (username == null || username.isEmpty()) {
+                    username = Utils.getUsername(activity, app.getAppID());
+                }
+
+                loggedInAs.setText(getString(R.string.fragment_apps_details_logged_in_as, username));
                 showAccountButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -475,7 +500,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         }
     }
 
-    public void login(final AppModel app, EditText usernameView, EditText passwordView, final Button submitView, Button thirdPartySubmitView, boolean thirdParty) {
+    public void login(final AppModel app, EditText usernameView, EditText passwordView, final Button submitView, final Button thirdPartySubmitView, final boolean thirdParty) {
         final String username = usernameView.getText().toString().trim();
         final String password = passwordView.getText().toString().trim();
 
@@ -492,133 +517,161 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             return;
         }
 
+        if (!privacyCheckbox.isChecked()) {
+            privacyCheckbox.setError("");
+            return;
+        }
+
         if (!Utils.hasInternetConnection(activity)) {
             Toast.makeText(activity, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (FirebaseInstanceId.getInstance().getToken() == null) {
-            Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        final Button loadingButton = (thirdParty) ? thirdPartySubmitView : submitView;
-        final Button disableButton = (thirdParty) ? submitView : thirdPartySubmitView;
-        final ProgressBar progressBar = Utils.showProgressView(activity, loadingButton, android.R.attr.progressBarStyle);
-        disableButton.setEnabled(false);
-
-        final LoginModel loginModel = new LoginModel();
-        loginModel.setUsername(username);
-        loginModel.setPassword(password);
-        loginModel.setFirebaseToken(FirebaseInstanceId.getInstance().getToken());
-        loginModel.setThirdPartyLogin(thirdParty);
-        loginModel.setDevice(Build.MODEL);
-
-        Utils.getAPI(activity).login(app.getAppID(), loginModel).enqueue(new RetroCallback<ResponseBody>(activity) {
+        FirebaseInstanceId.getInstance().getInstanceId()
+        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                super.onResponse(call, response);
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
 
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject obj = new JSONObject(response.body().string());
-                        final String accessToken = obj.getString("accessToken");
-                        final String refreshToken = obj.getString("refreshToken");
-                        final String wscConnectToken = obj.getString("wscConnectToken");
-
-                        // no auto login on thirdparty
-                        if (loginModel.isThirdPartyLogin()) {
-                            saveLogin(accessToken, refreshToken);
-                        } else {
-                            final WebView webview = new WebView(activity);
-                            final WebSettings webSettings = webview.getSettings();
-                            webSettings.setUserAgentString(USER_AGENT);
-                            final String postData = "type=loginCookie&username=" + URLEncoder.encode(loginModel.getUsername(), "UTF-8") + "&password=" + URLEncoder.encode(loginModel.getPassword(), "UTF-8") + "&wscConnectToken=" + URLEncoder.encode(wscConnectToken, "UTF-8");
-
-                            webview.setWebViewClient(new WebViewClient() {
-                                @Override
-                                public void onPageFinished(WebView view, String url) {
-                                    super.onPageFinished(view, url);
-
-                                    hideLoading();
-                                    saveLogin(accessToken, refreshToken);
-                                }
-
-                                @Override
-                                public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                                    //Handle the error
-                                    super.onReceivedError(view, errorCode, description, failingUrl);
-
-                                    // also redirect on error, user will just not be logged in
-                                    hideLoading();
-                                    saveLogin(accessToken, refreshToken);
-                                }
-
-                                @Override
-                                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                                    super.onReceivedError(view, request, error);
-
-                                    // also redirect on error, user will just not be logged in
-                                    hideLoading();
-                                    saveLogin(accessToken, refreshToken);
-                                }
-                            });
-                            webview.postUrl(app.getApiUrl(), postData.getBytes());
-
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // in case the webview login is not finished after the timeout, cancel it manually
-                                    if (!webviewFinishedLoading) {
-                                        if (webview != null) {
-                                            webview.stopLoading();
-                                        }
-                                        webviewFinishedLoading = true;
-                                        saveLogin(accessToken, refreshToken);
-                                    }
-                                }
-                            }, WEBVIEW_TIMEOUT);
-                        }
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else if (response.code() == 401) {
-                    Utils.hideProgressView(loadingButton, progressBar);
-                    disableButton.setEnabled(true);
-                    Toast.makeText(activity, R.string.login_failed, Toast.LENGTH_SHORT).show();
-                } else {
-                    hideLoading();
-                    Toast.makeText(activity, R.string.login_failed_global, Toast.LENGTH_SHORT).show();
+                if (!task.isSuccessful()) {
+                    Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
+                    return;
                 }
-            }
 
-            private void saveLogin(String accessToken, String refreshToken) {
-                Utils.saveAccessToken(activity, app.getAppID(), accessToken);
-                Utils.saveRefreshToken(activity, app.getAppID(), refreshToken);
+                // Get new Instance ID token
+                String token = task.getResult().getToken();
 
-                activity.setNotificationAppID(app.getAppID());
-                activity.updateMyAppsFragment();
+                final Button loadingButton = (thirdParty) ? thirdPartySubmitView : submitView;
+                final Button disableButton = (thirdParty) ? submitView : thirdPartySubmitView;
+                final ProgressBar progressBar = Utils.showProgressView(activity, loadingButton, android.R.attr.progressBarStyle);
+                disableButton.setEnabled(false);
 
-                webviewFinishedLoading = true;
+                final KeyPair keyPair = KeyUtils.generateKeyPair();
 
-                Utils.hideKeyboard(activity);
+                final LoginModel loginModel = new LoginModel();
+                loginModel.setUsername(username);
+                loginModel.setPassword(password);
+                loginModel.setFirebaseToken(token);
+                loginModel.setThirdPartyLogin(thirdParty);
+                loginModel.setDevice(Build.MODEL);
+                loginModel.setPublicKey(KeyUtils.getPublicPemKey(keyPair));
 
-                Intent appDetail = new Intent(activity, AppActivity.class);
-                appDetail.putExtra(AccessTokenModel.EXTRA, Utils.getAccessToken(activity, app.getAppID()));
+                Utils.getAPI(activity).login(app.getAppID(), loginModel).enqueue(new RetroCallback<ResponseBody>(activity) {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        super.onResponse(call, response);
 
-                switchToDetailView(false, false, null);
-                activity.startActivity(appDetail);
-            }
+                        if (response.isSuccessful()) {
+                            try {
+                                JSONObject obj = new JSONObject(response.body().string());
+                                final String accessToken = obj.getString("accessToken");
+                                final String refreshToken = obj.getString("refreshToken");
+                                final String wscConnectToken = obj.getString("wscConnectToken");
+                                final String username = obj.optString("username");
+                                final String pluginVersion = obj.optString("pluginVersion", "1.0.0");
 
-            private void hideLoading() {
-                Utils.hideProgressView(loadingButton, progressBar);
-                disableButton.setEnabled(true);
-            }
+                                // login successful, save keys
+                                KeyUtils.saveKeyPair(app.getAppID(), keyPair, activity);
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                hideLoading();
-                Toast.makeText(activity, R.string.login_failed_global, Toast.LENGTH_SHORT).show();
+                                // save plugin version at point of login
+                                Utils.saveInstallPluginVersion(app.getAppID(), pluginVersion, activity);
+
+                                // no auto login on thirdparty
+                                if (loginModel.isThirdPartyLogin()) {
+                                    saveLogin(accessToken, refreshToken, wscConnectToken, username);
+                                } else {
+                                    final WebView webview = new WebView(activity);
+                                    final WebSettings webSettings = webview.getSettings();
+                                    webSettings.setUserAgentString(USER_AGENT);
+                                    final String postData = "type=loginCookie&username=" + URLEncoder.encode(loginModel.getUsername(), "UTF-8") + "&password=" + URLEncoder.encode(loginModel.getPassword(), "UTF-8") + "&wscConnectToken=" + URLEncoder.encode(wscConnectToken, "UTF-8");
+
+                                    webview.setWebViewClient(new WebViewClient() {
+                                        @Override
+                                        public void onPageFinished(WebView view, String url) {
+                                            super.onPageFinished(view, url);
+
+                                            hideLoading();
+                                            saveLogin(accessToken, refreshToken, wscConnectToken, username);
+                                        }
+
+                                        @Override
+                                        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                                            //Handle the error
+                                            super.onReceivedError(view, errorCode, description, failingUrl);
+
+                                            // also redirect on error, user will just not be logged in
+                                            hideLoading();
+                                            saveLogin(accessToken, refreshToken, wscConnectToken, username);
+                                        }
+
+                                        @Override
+                                        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                                            super.onReceivedError(view, request, error);
+
+                                            // also redirect on error, user will just not be logged in
+                                            hideLoading();
+                                            saveLogin(accessToken, refreshToken, wscConnectToken, username);
+                                        }
+                                    });
+                                    webview.postUrl(app.getApiUrl(), postData.getBytes());
+
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            // in case the webview login is not finished after the timeout, cancel it manually
+                                            if (!webviewFinishedLoading) {
+                                                if (webview != null) {
+                                                    webview.stopLoading();
+                                                }
+                                                webviewFinishedLoading = true;
+                                                saveLogin(accessToken, refreshToken, wscConnectToken, username);
+                                            }
+                                        }
+                                    }, WEBVIEW_TIMEOUT);
+                                }
+                            } catch (IOException | JSONException e) {
+                                e.printStackTrace();
+                            }
+                        } else if (response.code() == 401) {
+                            Utils.hideProgressView(loadingButton, progressBar);
+                            disableButton.setEnabled(true);
+                            Toast.makeText(activity, R.string.login_failed, Toast.LENGTH_SHORT).show();
+                        } else {
+                            hideLoading();
+                            Toast.makeText(activity, R.string.login_failed_global, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    private void saveLogin(String accessToken, String refreshToken, String wscConnectToken, String username) {
+                        Utils.saveAccessToken(activity, app.getAppID(), accessToken);
+                        Utils.saveRefreshToken(activity, app.getAppID(), refreshToken);
+                        Utils.saveWscConnectToken(activity, app.getAppID(), wscConnectToken);
+                        Utils.saveUsername(activity, app.getAppID(), username);
+
+                        activity.setNotificationAppID(app.getAppID());
+                        activity.updateMyAppsFragment();
+
+                        webviewFinishedLoading = true;
+
+                        Utils.hideKeyboard(activity);
+
+                        Intent appDetail = new Intent(activity, AppActivity.class);
+                        appDetail.putExtra(AccessTokenModel.EXTRA, Utils.getAccessToken(activity, app.getAppID()));
+
+                        switchToDetailView(false, false, null);
+                        activity.startActivity(appDetail);
+                    }
+
+                    private void hideLoading() {
+                        Utils.hideProgressView(loadingButton, progressBar);
+                        disableButton.setEnabled(true);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        hideLoading();
+                        Toast.makeText(activity, R.string.login_failed_global, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }
@@ -656,6 +709,8 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         switchAccountButton = view.findViewById(R.id.fragment_apps_details_logged_in_switch);
         logoutAccountButton = view.findViewById(R.id.fragment_apps_details_logged_in_logout);
         loggedInAs = view.findViewById(R.id.fragment_apps_details_logged_in_as);
+        privacy = view.findViewById(R.id.fragment_apps_details_privacy);
+        privacyCheckbox = view.findViewById(R.id.fragment_apps_details_privacy_checkbox);
 
         return view;
     }

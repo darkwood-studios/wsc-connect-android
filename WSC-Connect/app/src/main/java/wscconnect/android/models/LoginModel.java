@@ -12,6 +12,7 @@ public class LoginModel {
     private String firebaseToken;
     private boolean thirdPartyLogin;
     private String device;
+    private String publicKey;
 
     public String getUsername() {
         return username;
@@ -51,5 +52,13 @@ public class LoginModel {
 
     public void setDevice(String device) {
         this.device = device;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
     }
 }

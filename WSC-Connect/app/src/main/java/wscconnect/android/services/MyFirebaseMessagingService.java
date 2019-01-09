@@ -1,10 +1,13 @@
 package wscconnect.android.services;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -14,6 +17,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
+import wscconnect.android.KeyUtils;
 import wscconnect.android.Utils;
 import wscconnect.android.models.AccessTokenModel;
 
@@ -25,14 +29,32 @@ import wscconnect.android.models.AccessTokenModel;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final String GCM_SENDER_ID = "771743622546";
+    private AccessTokenModel token;
+
+    @Override
+    public void onNewToken(String s) {
+        super.onNewToken(s);
+
+        // force user to login again
+        Utils.removeAllAccessTokens(this);
+    }
 
     @Override
     public void onMessageReceived(RemoteMessage message) {
         String from = message.getFrom();
         Map<String, String> data = message.getData();
 
+        // check if notifications are enabled
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean notificationsEnabled = prefs.getBoolean("pref_notifications_enabled", true);
+
+        if (!notificationsEnabled) {
+            return;
+        }
+
         // only accept messages from the correct sender
         if (from != null && from.equals(GCM_SENDER_ID)) {
+
             String action = data.get("action");
 
             if (action == null) {
@@ -40,7 +62,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
 
             String appID = data.get("appID");
-            AccessTokenModel token = Utils.getAccessToken(this, appID);
+            token = Utils.getAccessToken(this, appID);
 
             // we are logged out in the app, but still available on the sever. Just ignore this one.
             if (token == null) {
@@ -73,7 +95,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void handleNotification(Map<String, String> data) {
-        String message = data.get("message");
+        boolean encrypted = Boolean.parseBoolean(data.get("encrypted"));
+        String message = (encrypted) ? decryptString(data.get("message"), data.get("messageSecret"), data.get("messageIv")) : data.get("message");
         String logo = data.get("logo");
         String appName = data.get("appName");
         String appID = data.get("appID");
@@ -86,6 +109,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String tag = appID + eventHash;
 
         createNotification(tag, authorID, appID, "notification", appName, message, eventName, eventID, logo);
+    }
+
+    private String decryptString(String encryptedString, String encryptedSecret, String encryptedIv) {
+        String decodedSecret = KeyUtils.decodeString(encryptedSecret, token.getAppID(), this);
+        String decodedIv = KeyUtils.decodeString(encryptedIv, token.getAppID(), this);
+
+        return Utils.decryptString(encryptedString, decodedSecret, decodedIv);
     }
 
     private void createNotification(final String notificationTag, final int notificationID, final String appID, final String optionType, final String title, final String message, final String eventName, final int eventID, final String largeIcon) {

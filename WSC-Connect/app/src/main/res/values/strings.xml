@@ -25,9 +25,15 @@
     <string name="apps_search">Search apps…</string>
     <string name="apps_sort">Sort apps…</string>
     <string name="action_about">About</string>
+    <string name="action_account">My account</string>
     <string name="action_settings">Settings</string>
     <string name="close">Close</string>
-    <string name="dialog_about_text">WSC-Connect connects all your favorite WSC (WoltLab&#174; Suite Core)-Apps in one place. Receive notifications via push message and much more.\n\n<b>You own a WSC-App</b>? Visit <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> and register your App now!\n\nWSC-Connect is not associated with the WoltLab&#174; GmbH.\n\n<b>Contact</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Legal Notice</b>\nChristopher Walz\nVesoulerstraße 5\n70839 Gerlingen\nGermany</string>
+    <string name="load_more">Load more</string>
+    <string name="dialog_about_text">WSC-Connect connects all your favorite WSC (WoltLab&#174; Suite Core)-Apps in one place. Receive notifications via push message and much more.\n\n<b>You own a WSC-App</b>? Visit <a href="https://www.wsc-connect.com">www.wsc-connect.com</a> and register your App now!\n\nWSC-Connect is not associated with the WoltLab&#174; GmbH.\n\n<b>Contact</b>\n<a href="mailto:hello@wsc-connect.com">hello@wsc-connect.com</a>\n\n<b>Legal Notice</b>\nChristopher Walz\nNeuköllner Straße 2\n71229 Leonberg\nGermany</string>
+    <string name="dialog_action_text">Your instance token helps us to identify you, so we can send you push messages:\n\n%1$s</string>
+    <string name="dialog_action_no_token">No instance token generated yet.</string>
+    <string name="dialog_action_copy_token">Copy instance token</string>
+    <string name="dialog_action_token_copied">Instance token copied to clipboard</string>
     <string name="fragment_app_messagess_empty">No push messages found</string>
     <string name="fragment_app_messagess_loading_info">Loading push messages for %1$s…</string>
     <string name="fragment_app_forum_loading_info">Loading boards for %1$s…</string>
@@ -40,6 +46,8 @@
     <string name="pref_notifications_vibration_summary">Vibration for new notifications</string>
     <string name="pref_notifications_ringtone_title">Sound</string>
     <string name="pref_notifications_ringtone_summary">Sound for new notifications</string>
+    <string name="pref_notifications_enabled_title">Enable notifications</string>
+    <string name="pref_notifications_enabled_summary">Receive notifications via push message</string>
     <string name="pref_others">Other</string>
     <string name="pref_others_open_in_webview">Open websites in app</string>
     <string name="action_sort_users">Sort by users</string>
@@ -69,6 +77,14 @@
     <string name="fragment_app_forum_empty_threads">No threads found.</string>
     <string name="fragment_app_forum_empty_posts">No posts found.</string>
     <string name="list_post_header_author">Author: %1$s</string>
+    <string name="login_privacy">By logging in I accept the <a href="https://www.wsc-connect.com/privacy">privacy policy</a> of WSC-Connect</string>
+    <string name="dialog_privacy_title">Privacy policy update</string>
+    <string name="dialog_privacy_accept">Accept</string>
+
+    <string name="dialog_privacy_text1">Due to the new data protection regulation of the EU we have updated our privacy policy.\nYou can find them on <a href="https://www.wsc-connect.com/privacy">our website</a>.\n\n<b>What do the changes mean for me?</b>\n\n- We store even less of your data on our servers\n- The content of the push notifications you receive from your registered apps is now encrypted\n\nIn order for these changes to take effect, you have been automatically logged out of all apps. Please log in again.</string>
+    <string name="dialog_privacy_text2">Continue having fun with WSC-Connect!</string>
+    <string name="dialog_privacy_insecure"><b>Insecure login</b>: The push messages you are receiving are not encrypted. Please log in again. If it still doesn\'t work, the website you\'re trying to log in has an outdated WSC-Connect plugin installed.</string>
+    <string name="dialog_privacy_secure"><b>Secure login</b>: The push messages you are receiving are encrypted.</string>
 
     <array name="list_my_apps_dialog_items">
         <item>Logout</item>

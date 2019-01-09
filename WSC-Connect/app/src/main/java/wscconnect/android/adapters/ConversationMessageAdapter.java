@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,11 +53,13 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
     private static final int TYPE_HEADER = 1;
     private static final int TYPE_MESSAGE = 2;
     private static final int TYPE_FORM = 3;
+    private static final int TYPE_LOAD_MORE = 4;
     private final AppConversationsFragment fragment;
     private AccessTokenModel token;
     private ConversationModel conversation;
     private AppActivity activity;
     private List<ConversationMessageModel> messageList;
+    private boolean conversationMessagesAutoLoad = false;
 
     public ConversationMessageAdapter(AppActivity activity, AppConversationsFragment fragment, List<ConversationMessageModel> messageList, AccessTokenModel token) {
         this.activity = activity;
@@ -66,6 +69,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     public void setConversation(ConversationModel conversation) {
+        conversationMessagesAutoLoad = false;
         this.conversation = conversation;
     }
 
@@ -75,6 +79,8 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
             return TYPE_HEADER;
         } else if (getItemCount() == position + 1) {
             return TYPE_FORM;
+        } else if (getItemCount() == position + 2 && !conversationMessagesAutoLoad) {
+            return TYPE_LOAD_MORE;
         } else {
             return TYPE_MESSAGE;
         }
@@ -96,6 +102,10 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
             case TYPE_FORM:
                 v = new FormViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.list_generic_message_form, parent, false));
+                break;
+            case TYPE_LOAD_MORE:
+                v = new LoadMoreViewHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.list_generic_message_load_more, parent, false));
                 break;
         }
 
@@ -144,12 +154,23 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     private int getActualPosition(int position) {
-        return position - 1;
+        return position - 1 ;
     }
 
     @Override
     public int getItemCount() {
-        return messageList.size() + 2;
+        int add = 2;
+        if (!conversationMessagesAutoLoad) {
+            add++;
+        }
+        return messageList.size() + add;
+    }
+
+    public boolean isConversationMessagesAutoLoad() {
+        return conversationMessagesAutoLoad;
+    }
+    public void setConversationMessagesAutoLoad(boolean conversationMessagesAutoLoad) {
+        this.conversationMessagesAutoLoad = conversationMessagesAutoLoad;
     }
 
     public class FormViewHolder extends ViewHolder {
@@ -203,6 +224,36 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
                                 }
                             }
                             Utils.hideProgressView(submit, progressBar);
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    public class LoadMoreViewHolder extends ViewHolder {
+        public LinearLayout loadMoreContainer;
+        public Button loadMore;
+
+        public LoadMoreViewHolder(View view) {
+            super(view);
+            loadMoreContainer = view.findViewById(R.id.list_generic_message_load_more_container);
+            loadMore = view.findViewById(R.id.list_generic_message_load_more);
+
+            loadMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    final ProgressBar progressBar = Utils.showProgressView(activity, loadMore, android.R.attr.progressBarStyle);
+
+                    fragment.onLoadMoreConversationMessages(new SimpleCallback() {
+                        @Override
+                        public void onReady(boolean success) {
+                            if (success) {
+                                conversationMessagesAutoLoad = true;
+                            } else {
+                                Toast.makeText(activity, R.string.error_general, Toast.LENGTH_SHORT).show();
+                            }
+                            Utils.hideProgressView(loadMore, progressBar);
                         }
                     });
                 }

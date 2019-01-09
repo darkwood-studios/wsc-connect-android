@@ -45,3 +45,5 @@
 -keepattributes *Annotation*
 -keep class wscconnect.android.models.** { *; }
 -printmapping mapping.txt
+
+-ignorewarnings

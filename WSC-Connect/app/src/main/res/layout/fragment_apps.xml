@@ -128,12 +128,33 @@
                     android:layout_marginStart="@dimen/layout_margin_small" />
             </LinearLayout>
 
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/layout_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <CheckBox
+                    android:id="@+id/fragment_apps_details_privacy_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/fragment_apps_details_privacy"
+                    style="@style/TextSmall"
+                    android:layout_marginStart="@dimen/layout_margin_small"
+                    android:text="@string/login_privacy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+            </LinearLayout>
+
             <Button
                 android:id="@+id/fragment_apps_details_login_submit"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/login"
+                android:layout_marginTop="@dimen/layout_margin"
                 android:textSize="16sp" />
 
             <Button
@@ -141,6 +162,7 @@
                 style="@style/Widget.AppCompat.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/layout_margin_small"
                 android:text="@string/dialog_login_third_party"
                 android:textColor="@color/textColor"
                 android:textSize="16sp" />
@@ -148,6 +170,7 @@
             <TextView
                 android:id="@+id/fragment_apps_details_login_third_party_info"
                 style="@style/TextSmall"
+                android:layout_marginTop="@dimen/layout_margin_small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center" />

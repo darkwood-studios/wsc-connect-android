@@ -2,6 +2,7 @@ package wscconnect.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
 
@@ -45,6 +46,8 @@ public class AccessTokenModel implements Parcelable {
     private String appLogo;
     private String appApiUrl;
     private List<String> appTabs = new ArrayList<String>();
+
+    private String secretToken;
     private transient List<String> orderedTabs;
 
     protected AccessTokenModel(Parcel in) {
@@ -59,6 +62,7 @@ public class AccessTokenModel implements Parcelable {
         uniqueID = in.readLong();
         appApiUrl = in.readString();
         in.readList(appTabs, null);
+        secretToken = in.readString();
     }
 
     public AccessTokenModel() {
@@ -79,6 +83,7 @@ public class AccessTokenModel implements Parcelable {
         token.setAppLogo(jwt.getClaim("appLogo").asString());
         token.setAppApiUrl(jwt.getClaim("appApiUrl").asString());
         token.setAppTabs(jwt.getClaim("appTabs").asList(String.class));
+        token.setSecretToken(jwt.getClaim("secretToken").asString());
 
         return token;
     }
@@ -91,10 +96,12 @@ public class AccessTokenModel implements Parcelable {
         this.userID = userID;
     }
 
+    @Deprecated
     public String getUsername() {
         return username;
     }
 
+    @Deprecated
     public void setUsername(String username) {
         this.username = username;
     }
@@ -154,6 +161,7 @@ public class AccessTokenModel implements Parcelable {
         parcel.writeLong(uniqueID);
         parcel.writeString(appApiUrl);
         parcel.writeList(appTabs);
+        parcel.writeString(secretToken);
     }
 
     public String getAppUrl() {
@@ -215,5 +223,13 @@ public class AccessTokenModel implements Parcelable {
 
     public void setAppTabs(List<String> appTabs) {
         this.appTabs = appTabs;
+    }
+
+    public String getSecretToken() {
+        return secretToken;
+    }
+
+    public void setSecretToken(String secretToken) {
+        this.secretToken = secretToken;
     }
 }

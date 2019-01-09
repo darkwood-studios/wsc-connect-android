@@ -29,7 +29,7 @@ import wscconnect.android.models.ThreadModel;
 
 public interface API {
     String ENDPOINT = "https://api.wsc-connect.com/";
-    //String ENDPOINT = "http://192.168.2.114:1337/";
+    //String ENDPOINT = "http://192.168.178.31:1337/";
 
     @GET("apps")
     Call<List<AppModel>> getApps();
