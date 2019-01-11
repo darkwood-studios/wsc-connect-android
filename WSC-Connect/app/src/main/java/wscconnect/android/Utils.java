@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -28,6 +29,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Base64;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.Cipher;
@@ -233,6 +236,16 @@ public class Utils {
         return prefs.getString("installPluginVersion-" + appID, "1.0.0");
     }
 
+    public static void setNotificationChannel(Context context, String name) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putString("notificationChannel", name).apply();
+    }
+
+    public static String getNotificationChannel(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        return prefs.getString("notificationChannel", null);
+    }
+
     public static AccessTokenModel getAccessToken(Context context, String appID) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
         String token = prefs.getString("accessToken-" + appID, null);
@@ -346,34 +359,66 @@ public class Utils {
         });
     }
 
-    @TargetApi(26)
-    private static void initChannels(Context context) {
-        if (Build.VERSION.SDK_INT < 26) {
-            return;
+    public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, String eventName, int eventID, Bitmap largeIcon) {
+        // get preferences
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String ringtone = prefs.getString("pref_notifications_ringtone", null);
+        boolean vibrate = prefs.getBoolean("pref_notifications_vibration", false);
+        Vibrator v = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
+        long pattern[] = new long[]{0, 300, 100, 300};
+
+        String notificationChannelName = getNotificationChannel(context);
+        if (notificationChannelName == null) {
+            Random r = new Random();
+            notificationChannelName = "default" + r.nextInt();
+            setNotificationChannel(context, notificationChannelName);
         }
 
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel channel = new NotificationChannel("default",
-                context.getString(R.string.default_notification_channel),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        notificationManager.createNotificationChannel(channel);
-    }
-
-    public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, String eventName, int eventID, Bitmap largeIcon) {
-
-        initChannels(context);
         NotificationManager mNotificationManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, notificationChannelName);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, "default");
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
-            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher_transparent); // TODO
+        // specific stuff for higher android versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = new NotificationChannel(notificationChannelName,
+                    context.getString(R.string.default_notification_channel),
+                    NotificationManager.IMPORTANCE_HIGH);
+
+            // sound
+            if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+                AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .build();
+                notificationChannel.setSound(Uri.parse(ringtone), audioAttributes);
+            }
+
+            if (vibrate && audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
+                v.vibrate(VibrationEffect.createWaveform(pattern, -1));
+            }
+
+            // create channel
+            mNotificationManager.createNotificationChannel(notificationChannel);
         } else {
-            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
+            if (vibrate && audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
+                v.vibrate(pattern, -1);
+            }
+
         }
 
+
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
+            notificationBuilder.setSmallIcon(R.drawable.ic_notification_transparent);
+        } else {
+            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher_new);
+        }
+
+        if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+            notificationBuilder.setSound(Uri.parse(ringtone), AudioManager.STREAM_NOTIFICATION);
+        }
 
         if (largeIcon != null) {
             notificationBuilder.setLargeIcon(largeIcon);
@@ -396,27 +441,6 @@ public class Utils {
         message = Utils.fromHtml(message).toString();
         notificationBuilder.setContentText(message);
         notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
-
-        // get preferences
-        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String ringtone = prefs.getString("pref_notifications_ringtone", null);
-        boolean vibrate = prefs.getBoolean("pref_notifications_vibration", false);
-
-        if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-            notificationBuilder.setSound(Uri.parse(ringtone), AudioManager.STREAM_NOTIFICATION);
-        }
-
-        if (vibrate && audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
-            Vibrator v = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
-            long pattern[] = new long[]{0, 300, 100, 300};
-
-            if (Build.VERSION.SDK_INT >= 26) {
-                v.vibrate(VibrationEffect.createWaveform(pattern, -1));
-            } else {
-                v.vibrate(pattern, -1);
-            }
-        }
 
         mNotificationManager.notify(tag, id, notificationBuilder.build());
     }
@@ -451,10 +475,6 @@ public class Utils {
                 dialog.dismiss();
             }
         });
-    }
-
-    private static boolean isLollipop() {
-        return (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP);
     }
 
     @SuppressWarnings("deprecation")

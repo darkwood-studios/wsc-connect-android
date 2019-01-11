@@ -3,6 +3,9 @@ package wscconnect.android.fragments.myApps.appOptions;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -71,12 +74,15 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     private SwipeRefreshLayout refreshView;
     private String host;
     private ConversationMessageAdapter conversationMessageAdapter;
+    private CoordinatorLayout conversationMessageListContainer;
+    private FloatingActionButton conversationMessageFab;
     private RecyclerView conversationMessageListView;
     private ConversationModel activeConversation;
     private boolean conversationsLoading;
     private boolean conversationsAllLoaded;
     private boolean conversationMessagesLoading;
     private boolean conversationMessagesAllLoaded;
+    private boolean conversationMessagesShouldLoad;
 
     public AppConversationsFragment() {
 
@@ -146,12 +152,24 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                 totalItemCount = conversationMessagesLayoutManger.getItemCount();
                 lastVisibleItem = conversationMessagesLayoutManger.findLastVisibleItemPosition();
                 if (totalItemCount <= (lastVisibleItem + VISIBLE_THRESHOLD)) {
-                    if (conversationMessageAdapter.isConversationMessagesAutoLoad() && !conversationMessagesLoading && !conversationMessagesAllLoaded) {
+                    conversationMessageFab.hide();
+                    if (conversationMessagesShouldLoad && conversationMessageAdapter.isConversationMessagesAutoLoad() && !conversationMessagesLoading && !conversationMessagesAllLoaded) {
                         conversationMessagesLoading = true;
                         refreshView.setRefreshing(true);
                         onLoadMoreConversationMessages();
                     }
+                } else {
+                    conversationMessagesShouldLoad = true;
+                    conversationMessageFab.show();
                 }
+            }
+        });
+
+        conversationMessageFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                conversationMessagesShouldLoad = false;
+                conversationMessageListView.scrollToPosition(conversationMessagesLayoutManger.getItemCount() - 1);
             }
         });
     }
@@ -358,10 +376,10 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     private void showConversationMessages(boolean show) {
         if (show) {
             conversationListView.setVisibility(View.GONE);
-            conversationMessageListView.setVisibility(View.VISIBLE);
+            conversationMessageListContainer.setVisibility(View.VISIBLE);
         } else {
             activeConversation = null;
-            conversationMessageListView.setVisibility(View.GONE);
+            conversationMessageListContainer.setVisibility(View.GONE);
             conversationListView.setVisibility(View.VISIBLE);
         }
     }
@@ -394,6 +412,8 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
 
         conversationListView = view.findViewById(R.id.fragment_app_conversations_list);
         conversationMessageListView = view.findViewById(R.id.fragment_app_conversations_message_list);
+        conversationMessageListContainer = view.findViewById(R.id.fragment_app_conversations_message_container);
+        conversationMessageFab = view.findViewById(R.id.fragment_app_conversations_message_fab);
         loadingView = view.findViewById(R.id.fragment_app_conversations_loading);
         loadingTextView = view.findViewById(R.id.fragment_app_conversations_loading_info);
         emptyView = view.findViewById(R.id.fragment_app_conversations_empty);
@@ -413,7 +433,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     }
 
     private boolean messageListVisible() {
-        return conversationMessageListView.getVisibility() == View.VISIBLE;
+        return conversationMessageListContainer.getVisibility() == View.VISIBLE;
     }
 
     public void addConversationMessage(final int conversationID, final String message, final SimpleJSONCallback callback) {
@@ -438,7 +458,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                     }
 
                     // scroll to top
-                    ((LinearLayoutManager) conversationMessageListView.getLayoutManager()).smoothScrollToPosition(conversationMessageListView, null, 0);
+                    (conversationMessageListView.getLayoutManager()).smoothScrollToPosition(conversationMessageListView, null, 0);
 
                     callJSONCallback(callback, null, true);
                 } else if (response.code() == 409) {

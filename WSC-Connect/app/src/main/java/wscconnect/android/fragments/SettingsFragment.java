@@ -1,10 +1,13 @@
 package wscconnect.android.fragments;
 
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -12,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 
 import wscconnect.android.R;
+import wscconnect.android.Utils;
 
 /**
  * @author Christopher Walz
@@ -45,6 +49,14 @@ public class SettingsFragment extends PreferenceFragment {
         ringtonePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object o) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+                    String channelName = Utils.getNotificationChannel(getActivity());
+                    if (channelName != null) {
+                        mNotificationManager.deleteNotificationChannel(channelName);
+                    }
+                    Utils.setNotificationChannel(getActivity(), null);
+                }
                 String value = (String) o;
                 if (!value.isEmpty() && !getRingtoneName(value).isEmpty()) {
                     ringtonePref.setSummary(getRingtoneName(value));
