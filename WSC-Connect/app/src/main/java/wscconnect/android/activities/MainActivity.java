@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -37,6 +38,7 @@ import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.fragments.MyAppsFragment;
+import wscconnect.android.fragments.SettingsFragment;
 import wscconnect.android.listeners.OnBackPressedListener;
 
 import static wscconnect.android.Utils.getAllAccessTokens;

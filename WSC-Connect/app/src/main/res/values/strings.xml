@@ -22,6 +22,8 @@
     <string name="no_internet_connection">You are not connected to the internet.</string>
     <string name="fragment_apps_empty">No active apps found</string>
     <string name="error_general">An error occurred. Try again.</string>
+    <string name="error_permission_external">Without external permission we cannot play sounds for notifications.</string>
+    <string name="error_permission_external_button">Change permissions</string>
     <string name="apps_search">Search apps…</string>
     <string name="apps_sort">Sort apps…</string>
     <string name="action_about">About</string>

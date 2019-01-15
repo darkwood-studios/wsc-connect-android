@@ -1,5 +1,6 @@
 package wscconnect.android;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NotificationChannel;
@@ -387,11 +388,15 @@ public class Utils {
 
             // sound
             if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-                AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .build();
-                notificationChannel.setSound(Uri.parse(ringtone), audioAttributes);
+                if (ContextCompat.checkSelfPermission(context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .build();
+                    notificationChannel.setSound(Uri.parse(ringtone), audioAttributes);
+                }
             }
 
             if (vibrate && audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
@@ -407,8 +412,6 @@ public class Utils {
 
         }
 
-
-
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
             notificationBuilder.setSmallIcon(R.drawable.ic_notification_transparent);
@@ -417,7 +420,11 @@ public class Utils {
         }
 
         if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-            notificationBuilder.setSound(Uri.parse(ringtone), AudioManager.STREAM_NOTIFICATION);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || ContextCompat.checkSelfPermission(context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                notificationBuilder.setSound(Uri.parse(ringtone), AudioManager.STREAM_NOTIFICATION);
+            }
         }
 
         if (largeIcon != null) {

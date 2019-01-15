@@ -22,6 +22,8 @@
     <string name="no_internet_connection">Du bist nicht mit dem Internet verbunden.</string>
     <string name="fragment_apps_empty">Es wurden keine aktiven Apps gefunden.</string>
     <string name="error_general">Es ist ein Fehler aufgetreten. Versuche es erneut.</string>
+    <string name="error_permission_external">Ohne Zugriff auf den externen Speicher können manche Töne nicht abgespielt werden.</string>
+    <string name="error_permission_external_button">Zugriff ändern</string>
     <string name="apps_search">Apps durchsuchen…</string>
     <string name="apps_sort">Apps sortieren…</string>
     <string name="action_about">Über</string>
