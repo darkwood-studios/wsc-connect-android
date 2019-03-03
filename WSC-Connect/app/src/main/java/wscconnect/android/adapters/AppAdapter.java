@@ -2,6 +2,7 @@ package wscconnect.android.adapters;
 
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,21 +29,28 @@ import wscconnect.android.models.AppModel;
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
     private final AppsFragment fragment;
+    private final int viewResource;
     private MainActivity activity;
     private List<AppModel> appList;
 
     public AppAdapter(MainActivity activity, AppsFragment fragment, List<AppModel> appList) {
+        this(activity, fragment, appList, R.layout.list_app);
+    }
+
+    public AppAdapter(MainActivity activity, AppsFragment fragment, List<AppModel> appList, Integer viewResource) {
         this.activity = activity;
         this.appList = appList;
         this.fragment = fragment;
+        this.viewResource = viewResource;
     }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_app, parent, false);
+                .inflate(viewResource, parent, false);
 
-        return new MyViewHolder(itemView);
+        MyViewHolder vh = new MyViewHolder(itemView);
+        return vh;
     }
 
     @Override
@@ -51,7 +59,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
 
         holder.name.setText(app.getName());
 
-        URI uri = null;
+       /*URI uri = null;
         try {
             uri = new URI(app.getUrl());
         } catch (URISyntaxException e) {
@@ -62,17 +70,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             holder.url.setText(uri.getHost().replace("www.", ""));
         } else {
             holder.url.setText(app.getUrl());
-        }
-
-        GlideApp.with(activity).load(app.getLogo()).into(holder.logo);
-        holder.users.setText(String.valueOf(app.getUserCount()));
-
-        int unreadNotifications = Utils.getUnreadNotifications(activity, app.getAppID());
-        if (unreadNotifications > 0 && Utils.getAccessTokenString(activity, app.getAppID()) != null) {
-            holder.unreadNotifications.setText(String.valueOf(unreadNotifications));
-            holder.unreadNotificationsContainer.setVisibility(View.VISIBLE);
+        }*/
+        //holder.setIsRecyclable(false);
+        if (app.isLogoAccessible()) {
+            GlideApp.with(activity).load(app.getLogo()).into(holder.logo);
         } else {
-            holder.unreadNotificationsContainer.setVisibility(View.GONE);
+            GlideApp.with(activity).load(R.drawable.logo_off).into(holder.logo);
         }
     }
 
@@ -82,19 +85,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public LinearLayout unreadNotificationsContainer;
-        public LinearLayout usersContainer;
-        public TextView name, url, users, unreadNotifications;
+        public TextView name;
         public ImageView logo;
 
         public MyViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.list_app_name);
-            url = view.findViewById(R.id.list_app_url);
-            users = view.findViewById(R.id.list_app_users);
-            usersContainer = view.findViewById(R.id.list_app_users_container);
-            unreadNotifications = view.findViewById(R.id.list_app_unread_notifications);
-            unreadNotificationsContainer = view.findViewById(R.id.list_app_unread_notifications_container);
+            //url = view.findViewById(R.id.list_app_url);
             logo = view.findViewById(R.id.list_app_logo);
 
             view.setOnClickListener(new View.OnClickListener() {

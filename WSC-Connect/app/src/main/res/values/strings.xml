@@ -82,11 +82,16 @@
     <string name="login_privacy">By logging in I accept the <a href="https://www.wsc-connect.com/privacy">privacy policy</a> of WSC-Connect</string>
     <string name="dialog_privacy_title">Privacy policy update</string>
     <string name="dialog_privacy_accept">Accept</string>
+    <string name="fragment_apps_search_empty">No apps found</string>
 
     <string name="dialog_privacy_text1">Due to the new data protection regulation of the EU we have updated our privacy policy.\nYou can find them on <a href="https://www.wsc-connect.com/privacy">our website</a>.\n\n<b>What do the changes mean for me?</b>\n\n- We store even less of your data on our servers\n- The content of the push notifications you receive from your registered apps is now encrypted\n\nIn order for these changes to take effect, you have been automatically logged out of all apps. Please log in again.</string>
     <string name="dialog_privacy_text2">Continue having fun with WSC-Connect!</string>
     <string name="dialog_privacy_insecure"><b>Insecure login</b>: The push messages you are receiving are not encrypted. Please log in again. If it still doesn\'t work, the website you\'re trying to log in has an outdated WSC-Connect plugin installed.</string>
     <string name="dialog_privacy_secure"><b>Secure login</b>: The push messages you are receiving are encrypted.</string>
+    <string name="all_apps">All Apps</string>
+    <string name="more">More</string>
+    <string name="top_apps">Top Apps</string>
+    <string name="new_apps">Newest Apps</string>
 
     <array name="list_my_apps_dialog_items">
         <item>Logout</item>

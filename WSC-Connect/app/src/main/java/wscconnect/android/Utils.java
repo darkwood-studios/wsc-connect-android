@@ -48,6 +48,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.GsonBuilder;
 
 import org.json.JSONException;
@@ -361,6 +362,10 @@ public class Utils {
     }
 
     public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, String eventName, int eventID, Bitmap largeIcon) {
+        Utils.showDataNotification(context, tag, id, appID, optionType, title, message, eventName, eventID, largeIcon, false);
+    }
+
+    public static void showDataNotification(Context context, String tag, int id, String appID, String optionType, String title, String message, String eventName, int eventID, Bitmap largeIcon, boolean ignoreSound) {
         // get preferences
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -368,6 +373,11 @@ public class Utils {
         boolean vibrate = prefs.getBoolean("pref_notifications_vibration", false);
         Vibrator v = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
         long pattern[] = new long[]{0, 300, 100, 300};
+
+        // reset ringtone if ignoreSound is true
+        if (ignoreSound) {
+            ringtone = null;
+        }
 
         String notificationChannelName = getNotificationChannel(context);
         if (notificationChannelName == null) {
@@ -449,7 +459,16 @@ public class Utils {
         notificationBuilder.setContentText(message);
         notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
 
-        mNotificationManager.notify(tag, id, notificationBuilder.build());
+        try {
+            mNotificationManager.notify(tag, id, notificationBuilder.build());
+        } catch (SecurityException e) {
+            // log & send without sound
+            Crashlytics.logException(e);
+
+            if (!ignoreSound) {
+                Utils.showDataNotification(context, tag, id, appID, optionType, title, message, eventName, eventID, largeIcon, true);
+            }
+        }
     }
 
     public static void showFullScreenPhotoDialog(final Activity activity, String photoURL) {

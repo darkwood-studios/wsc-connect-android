@@ -1,5 +1,7 @@
 package wscconnect.android;
 
+import com.google.gson.JsonObject;
+
 import java.util.List;
 
 import okhttp3.RequestBody;
@@ -29,10 +31,13 @@ import wscconnect.android.models.ThreadModel;
 
 public interface API {
     String ENDPOINT = "https://api.wsc-connect.com/";
-    //String ENDPOINT = "http://192.168.178.31:1337/";
+    //String ENDPOINT = "http://192.168.178.37:1337/";
 
     @GET("apps")
     Call<List<AppModel>> getApps();
+
+    @GET("apps-mixed")
+    Call<JsonObject> getMixedApps();
 
     @GET("messages/{app}")
     Call<List<MessageModel>> getMessages(@Path("app") String app);

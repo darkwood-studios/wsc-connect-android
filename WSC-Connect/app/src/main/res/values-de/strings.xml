@@ -21,6 +21,7 @@
     <string name="firebase_token_required">Dein Push-Token wurde noch nicht generiert. Versuche es erneut.</string>
     <string name="no_internet_connection">Du bist nicht mit dem Internet verbunden.</string>
     <string name="fragment_apps_empty">Es wurden keine aktiven Apps gefunden.</string>
+    <string name="fragment_apps_search_empty">Es wurden keine Apps gefunden</string>
     <string name="error_general">Es ist ein Fehler aufgetreten. Versuche es erneut.</string>
     <string name="error_permission_external">Ohne Zugriff auf den externen Speicher können manche Töne nicht abgespielt werden.</string>
     <string name="error_permission_external_button">Zugriff ändern</string>
@@ -105,4 +106,8 @@
     <string name="dialog_privacy_insecure"><b>Ungesicherter Login</b>: Deine Push-Nachrichten sind nicht verschlüsselt. Bitte logge dich erneut ein. Falls es dann immer noch nicht funktioniert, muss die Website auf der du dich versuchst einzuloggen, das WSC-Connect-Plugin aktualisieren.</string>
     <string name="dialog_privacy_secure"><b>Gesicherter Login</b>: Deine Push-Nachrichten sind verschlüsselt.</string>
     <string name="dialog_privacy_accept">Alles klar, verstanden!</string>
+    <string name="all_apps">Alle Apps</string>
+    <string name="more">Mehr</string>
+    <string name="top_apps">Top Apps</string>
+    <string name="new_apps">Neuste Apps</string>
 </resources>

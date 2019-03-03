@@ -2,8 +2,15 @@ package wscconnect.android.models;
 
 import android.content.Context;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import wscconnect.android.R;
 import wscconnect.android.Utils;
 
 /**
@@ -19,9 +26,8 @@ public class AppModel {
     private String url;
     private String apiUrl;
     private String logo;
-    @SerializedName("_users")
-    private int userCount;
     private boolean visible = true;
+    private boolean logoAccessible = true;
 
     public String getAppID() {
         return appID;
@@ -48,9 +54,6 @@ public class AppModel {
     }
 
     public String getLogo() {
-        if (!logo.contains("images.weserv")) {
-            logo = "https://images.weserv.nl/?url=" + logo.replaceFirst("^https?://", "");
-        }
         return logo;
     }
 
@@ -61,15 +64,6 @@ public class AppModel {
     public boolean isLoggedIn(Context context) {
         return (Utils.getAccessTokenString(context, appID) != null);
     }
-
-    public int getUserCount() {
-        return userCount;
-    }
-
-    public void setUserCount(int userCount) {
-        this.userCount = userCount;
-    }
-
     public String getApiUrl() {
         return apiUrl;
     }
@@ -84,5 +78,41 @@ public class AppModel {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public boolean isLogoAccessible() {
+        return logoAccessible;
+    }
+
+    public void setLogoAccessible(boolean logoAccessible) {
+        this.logoAccessible = logoAccessible;
+    }
+
+    public static ArrayList<AppModel> fromJSONArray(JsonArray jsonApps) {
+        ArrayList<AppModel> apps = new ArrayList<>();
+
+        for (int i = 0; i < jsonApps.size(); i++) {
+            apps.add(fromJSONObject(jsonApps.get(i).getAsJsonObject()));
+        }
+
+        return apps;
+    }
+
+    private static AppModel fromJSONObject(JsonObject jsonApp) {
+        AppModel app = new AppModel();
+        app.setAppID(jsonApp.get("_id").getAsString());
+        app.setName(jsonApp.get("name").getAsString());
+        app.setUrl(jsonApp.get("url").getAsString());
+        app.setLogo(jsonApp.get("logo").getAsString());
+        app.setApiUrl(jsonApp.get("apiUrl").getAsString());
+
+        boolean visible = true;
+        if (jsonApp.has("visible")) {
+            visible = jsonApp.get("visible").getAsInt() == 1;
+        }
+        app.setVisible(visible);
+        app.setLogoAccessible(jsonApp.get("logoAccessible").getAsInt() == 1);
+
+        return app;
     }
 }

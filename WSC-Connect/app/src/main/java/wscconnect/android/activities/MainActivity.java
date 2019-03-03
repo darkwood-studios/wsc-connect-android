@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_apps:
                     if (!(currentFragment instanceof AppsFragment)) {
                         currentFragment = changeFragment(0);
-                        ((AppsFragment) currentFragment).updateSubtitle();
                     }
                     return true;
                 case R.id.navigation_my_apps:

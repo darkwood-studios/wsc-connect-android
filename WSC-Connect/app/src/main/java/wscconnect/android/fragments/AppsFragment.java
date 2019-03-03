@@ -1,6 +1,7 @@
 package wscconnect.android.fragments;
 
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
@@ -13,6 +14,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.InputType;
@@ -36,15 +39,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,8 +57,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -84,14 +87,21 @@ import static wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment.
 
 public class AppsFragment extends Fragment implements OnBackPressedListener {
     private static final int WEBVIEW_TIMEOUT = 8000;
-    private RecyclerView recyclerView;
+    private RecyclerView allRecyclerView;
     private MainActivity activity;
+    List<AppModel> newestList;
+    List<AppModel> topList;
     private List<AppModel> appList;
-    private List<AppModel> originalAppList;
-    private SwipeRefreshLayout swipeRefreshView;
+    private List<AppModel> appListFull;
+    private List<AppModel> appListFullCopy;
+    private AppAdapter newestListAdapter;
+    private AppAdapter topListAdapter;
+    private AppAdapter appFullAdapter;
     private AppAdapter appAdapter;
-    private ProgressBar loadingView;
-    private TextView emptyView;
+    private ProgressBar topLoadingView;
+    private ProgressBar newestLoadingView;
+    private ProgressBar allLoadingView;
+    private TextView fullListEmpty;
     private Menu menu;
     private ImageView detailsLogo;
     private LinearLayout detailsContainer;
@@ -111,6 +121,15 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
     private TextView loggedInAs;
     private TextView privacy;
     private CheckBox privacyCheckbox;
+    private RecyclerView newestRecyclerView;
+    private RecyclerView topListRecyclerView;
+    private RecyclerView allFullRecyclerView;
+    private ScrollView scrollView;
+    private Button othersMore;
+    private LinearLayout appsContainer;
+    private LinearLayout allFullContainer;
+    private ArrayList<AppModel> allVisibleApps;
+    private boolean isFullAppListVisible = false;
 
     public AppsFragment() {
         // Required empty public constructor
@@ -123,21 +142,38 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         setHasOptionsMenu(true);
 
         activity = (MainActivity) getActivity();
+
+        newestList = new ArrayList<>();
+        newestListAdapter = new AppAdapter(activity, this, newestList);
+        newestRecyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false));
+        newestRecyclerView.setAdapter(newestListAdapter);
+        LinearSnapHelper newestLinearSnapHelper = new LinearSnapHelper();
+        newestLinearSnapHelper.attachToRecyclerView(newestRecyclerView);
+
+        topList = new ArrayList<>();
+        topListAdapter = new AppAdapter(activity, this, topList);
+        topListRecyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false));
+        topListRecyclerView.setAdapter(topListAdapter);
+        LinearSnapHelper topLinearSnapHelper = new LinearSnapHelper();
+        topLinearSnapHelper.attachToRecyclerView(topListRecyclerView);
+
         appList = new ArrayList<>();
-        originalAppList = new ArrayList<>();
+        appListFullCopy = new ArrayList<>();
         appAdapter = new AppAdapter(activity, this, appList);
+        allRecyclerView.setLayoutManager(new GridLayoutManager(activity, 2, LinearLayoutManager.HORIZONTAL, false));
+        allRecyclerView.setAdapter(appAdapter);
+
+        LinearSnapHelper allLinearSnapHelper = new LinearSnapHelper();
+        allLinearSnapHelper.attachToRecyclerView(allRecyclerView);
+
+        appListFull = new ArrayList<>();
+        allVisibleApps = new ArrayList<>();
+        appFullAdapter = new AppAdapter(activity, this, appListFull, R.layout.list_app_all);
+        allFullRecyclerView.setLayoutManager(new GridLayoutManager(activity, 4));
+        allFullRecyclerView.setAdapter(appFullAdapter);
 
         activity.setOnBackPressedListener(this);
-        GridLayoutManager layoutManager = new GridLayoutManager(activity, 3);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(appAdapter);
 
-        swipeRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                loadApps();
-            }
-        });
         privacy.setMovementMethod(LinkMovementMethod.getInstance());
         privacyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -147,50 +183,36 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             }
         });
 
-        loadingView.setVisibility(View.VISIBLE);
+        othersMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFullList(true);
+            }
+        });
+
+        showProgressBars(true);
         loadApps();
+    }
+
+    private void showProgressBars(boolean show) {
+        if (show) {
+            topLoadingView.setVisibility(View.VISIBLE);
+            newestLoadingView.setVisibility(View.VISIBLE);
+            allLoadingView.setVisibility(View.VISIBLE);
+        } else {
+            topLoadingView.setVisibility(View.GONE);
+            newestLoadingView.setVisibility(View.GONE);
+            allLoadingView.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_sort_name:
-                sortListByName();
-                appAdapter.notifyDataSetChanged();
-                this.menu.findItem(R.id.action_sort_name).setVisible(false);
-                this.menu.findItem(R.id.action_sort_users).setVisible(true);
-                break;
-            case R.id.action_sort_users:
-                Collections.sort(appList, new Comparator<AppModel>() {
-                    @Override
-                    public int compare(AppModel a1, AppModel a2) {
-                        return a2.getUserCount() - a1.getUserCount();
-                    }
-                });
-                appAdapter.notifyDataSetChanged();
-                this.menu.findItem(R.id.action_sort_users).setVisible(false);
-                this.menu.findItem(R.id.action_sort_name).setVisible(true);
-                break;
             case android.R.id.home:
-                switchToDetailView(false, false, null);
+                onBackPressed();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void sortListByName() {
-        sortListByName(null);
-    }
-
-    private void sortListByName(List<AppModel> list) {
-        Collections.sort((list == null) ? appList : list, new Comparator<AppModel>() {
-            @Override
-            public int compare(AppModel a1, AppModel a2) {
-                String app1Name = a1.getName().replaceAll("[^a-zA-Z]", "").toLowerCase();
-                String app2Name = a2.getName().replaceAll("[^a-zA-Z]", "").toLowerCase();
-
-                return app1Name.compareToIgnoreCase(app2Name);
-            }
-        });
     }
 
     @Override
@@ -202,6 +224,10 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
 
         if (detailApp != null) {
             setupToolbar(true, detailApp);
+        }
+
+        if (isFullAppListVisible) {
+            showFullList(true);
         }
 
         MenuItem menuSearch = menu.findItem(R.id.action_search);
@@ -254,101 +280,108 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
     }
 
     private void performSearch(String query) {
-        appList.clear();
-        appList.addAll(originalAppList);
-        appAdapter.notifyDataSetChanged();
-
-        if (!appList.isEmpty()) {
+        if (!appListFullCopy.isEmpty()) {
             if (query != null) {
-                Iterator<AppModel> i = appList.iterator();
+                showFullList(true);
+
+                appListFull.clear();
+                Iterator<AppModel> i = appListFullCopy.iterator();
                 query = query.toLowerCase();
                 while (i.hasNext()) {
                     AppModel app = i.next();
 
-                    if (!app.getName().toLowerCase().contains(query) && !app.getUrl().toLowerCase().contains(query)) {
-                        i.remove();
+                    if (app.getName().toLowerCase().contains(query) || app.getUrl().toLowerCase().contains(query)) {
+                        appListFull.add(app);
                     }
                 }
-                appAdapter.notifyDataSetChanged();
-
-                setEmptyView();
+                appFullAdapter.notifyDataSetChanged();
+                toggleIsEmptyForFullList();
             } else {
-                appList.clear();
-                for (AppModel app : originalAppList) {
-                    if (app.isVisible()) {
-                        appList.add(app);
-                    }
-                }
-                appAdapter.notifyDataSetChanged();
+                appListFull.clear();
+                appListFull.addAll(allVisibleApps);
+                appFullAdapter.notifyDataSetChanged();
+                toggleIsEmptyForFullList();
             }
+        }
+    }
+
+    private void toggleIsEmptyForFullList() {
+        if (appListFull.isEmpty()) {
+            fullListEmpty.setVisibility(View.VISIBLE);
+        } else {
+            fullListEmpty.setVisibility(View.GONE);
+        }
+    }
+
+    private void showFullList(boolean show) {
+        if (show) {
+            isFullAppListVisible = true;
+            scrollView.setVisibility(View.GONE);
+            allFullContainer.setVisibility(View.VISIBLE);
+
+            // toolbar
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            showSearchIcon(true);
+        } else {
+            isFullAppListVisible = false;
+            allFullContainer.setVisibility(View.GONE);
+            scrollView.setVisibility(View.VISIBLE);
+
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
     }
 
     private void loadApps() {
-        Utils.getAPI(activity).getApps().enqueue(new RetroCallback<List<AppModel>>(activity) {
+        Utils.getAPI(activity).getMixedApps().enqueue(new RetroCallback<JsonObject>(activity) {
             @Override
-            public void onResponse(Call<List<AppModel>> call, Response<List<AppModel>> response) {
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 super.onResponse(call, response);
 
-                loadingView.setVisibility(View.GONE);
-                swipeRefreshView.setRefreshing(false);
+                showProgressBars(false);
 
                 if (response.isSuccessful()) {
+                    newestList.clear();
+                    newestList.addAll(AppModel.fromJSONArray(response.body().getAsJsonArray("newest")));
+                    newestListAdapter.notifyDataSetChanged();
+
+                    topList.clear();
+                    topList.addAll(AppModel.fromJSONArray(response.body().getAsJsonArray("top")));
+                    topListAdapter.notifyDataSetChanged();
+
                     appList.clear();
-                    for (AppModel app : response.body()) {
+                    ArrayList<AppModel> allApps = new ArrayList<>(AppModel.fromJSONArray(response.body().getAsJsonArray("all")));
+                    for (AppModel app : allApps) {
                         if (app.isVisible()) {
-                            appList.add(app);
+                            allVisibleApps.add(app);
                         }
                     }
-                    sortListByName();
+                    appList.addAll(allVisibleApps);
                     appAdapter.notifyDataSetChanged();
-                    originalAppList.clear();
-                    originalAppList.addAll(response.body());
-                    sortListByName(originalAppList);
 
-                    // update actionbar
-                    updateSubtitle();
+                    appListFull.clear();
+                    appListFull.addAll(allVisibleApps);
+                    appListFullCopy.addAll(allApps);
+                    appFullAdapter.notifyDataSetChanged();
+                    othersMore.setVisibility(View.VISIBLE);
                 } else if (response.code() != 501 && response.code() != 502) {
                     RetroCallback.showRequestError(activity);
                 }
-
-                setEmptyView();
             }
 
             @Override
-            public void onFailure(Call<List<AppModel>> call, Throwable t) {
+            public void onFailure(Call<JsonObject> call, Throwable t) {
                 super.onFailure(call, t);
 
-                swipeRefreshView.setRefreshing(false);
-                loadingView.setVisibility(View.GONE);
+                showProgressBars(false);
             }
         });
-    }
-
-    public void updateSubtitle() {
-        if (activity != null && activity.getCurrentFragment() instanceof AppsFragment && appList != null && appList.size() > 0 && isAdded()) {
-            int users = 0;
-
-            for (AppModel app : appList) {
-                users += app.getUserCount();
-            }
-            activity.getSupportActionBar().setSubtitle(getResources().getQuantityString(R.plurals.fragment_apps_subtitle_apps, appList.size(), appList.size()) + ", " + getResources().getQuantityString(R.plurals.fragment_apps_subtitle_users, users, users));
-        }
-    }
-
-    private void setEmptyView() {
-        if (appList.isEmpty()) {
-            emptyView.setVisibility(View.VISIBLE);
-        } else {
-            emptyView.setVisibility(View.GONE);
-        }
     }
 
     public void switchToDetailView(boolean detail, boolean forceLogin, final AppModel app) {
         detailApp = app;
 
         if (detail) {
-            swipeRefreshView.setVisibility(View.GONE);
+            appsContainer.setVisibility(View.GONE);
             detailsContainer.setVisibility(View.VISIBLE);
 
             if (menu != null) {
@@ -359,7 +392,12 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             }
 
             setupToolbar(true, app);
-            GlideApp.with(activity).load(app.getLogo()).into(detailsLogo);
+            if (app.isLogoAccessible()) {
+                GlideApp.with(activity).load(app.getLogo()).into(detailsLogo);
+            } else {
+                GlideApp.with(activity).load(R.drawable.logo_off).into(detailsLogo);
+
+            }
 
             if (app.isLoggedIn(activity) && !forceLogin) {
                 String username = Utils.getAccessToken(activity, app.getAppID()).getUsername();
@@ -456,9 +494,15 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             }
         } else {
             detailsContainer.setVisibility(View.GONE);
-            swipeRefreshView.setVisibility(View.VISIBLE);
+            appsContainer.setVisibility(View.VISIBLE);
             setupToolbar(false, null);
-            updateSubtitle();
+
+            if (isFullAppListVisible) {
+                showFullList(true);
+            } else {
+                showFullList(false);
+            }
+
             Utils.hideKeyboard(activity);
 
             // reset edittext values
@@ -474,28 +518,20 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             activity.getSupportActionBar().setTitle(app.getName());
             activity.getSupportActionBar().setSubtitle(app.getUrl());
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            if (menu != null) {
-                MenuItem actionSort = menu.findItem(R.id.action_sort);
-                if (actionSort != null) {
-                    actionSort.setVisible(false);
-                }
-                MenuItem actionSearch = menu.findItem(R.id.action_search);
-                if (actionSearch != null) {
-                    actionSearch.setVisible(false);
-                }
-            }
+            showSearchIcon(false);
         } else {
             activity.getSupportActionBar().setTitle(R.string.app_name);
+            activity.getSupportActionBar().setSubtitle(null);
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            if (menu != null) {
-                MenuItem actionSort = menu.findItem(R.id.action_sort);
-                if (actionSort != null) {
-                    actionSort.setVisible(true);
-                }
-                MenuItem actionSearch = menu.findItem(R.id.action_search);
-                if (actionSearch != null) {
-                    actionSearch.setVisible(true);
-                }
+            showSearchIcon(true);
+        }
+    }
+
+    private void showSearchIcon(boolean show) {
+        if (menu != null) {
+            MenuItem actionSearch = menu.findItem(R.id.action_search);
+            if (actionSearch != null) {
+                actionSearch.setVisible(show);
             }
         }
     }
@@ -681,6 +717,9 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         if (detailApp != null) {
             switchToDetailView(false, false, null);
             return true;
+        } else if (allFullContainer.getVisibility() == View.VISIBLE) {
+            showFullList(false);
+            return true;
         }
 
         return false;
@@ -691,11 +730,16 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_apps, container, false);
 
-        recyclerView = view.findViewById(R.id.fragment_apps_list);
-        swipeRefreshView = view.findViewById(R.id.fragment_apps_refresh);
-        loadingView = view.findViewById(R.id.fragment_apps_loading);
-        emptyView = view.findViewById(R.id.fragment_apps_empty);
+        allRecyclerView = view.findViewById(R.id.fragment_apps_all_list);
+        newestRecyclerView = view.findViewById(R.id.fragment_apps_newest_list);
+        topListRecyclerView = view.findViewById(R.id.fragment_apps_top_list);
+        topLoadingView = view.findViewById(R.id.fragment_apps_top_loading);
+        newestLoadingView = view.findViewById(R.id.fragment_apps_newest_loading);
+        allFullRecyclerView = view.findViewById(R.id.fragment_apps_all_full_list);
+        allLoadingView = view.findViewById(R.id.fragment_apps_all_loading);
+        fullListEmpty = view.findViewById(R.id.fragment_apps_all_full_list_empty);
         detailsContainer = view.findViewById(R.id.fragment_apps_details);
+        appsContainer = view.findViewById(R.id.fragment_apps);
         detailsLogo = view.findViewById(R.id.fragment_apps_details_logo);
         usernameView = view.findViewById(R.id.fragment_apps_details_username);
         passwordView = view.findViewById(R.id.fragment_apps_details_password);
@@ -711,6 +755,9 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         loggedInAs = view.findViewById(R.id.fragment_apps_details_logged_in_as);
         privacy = view.findViewById(R.id.fragment_apps_details_privacy);
         privacyCheckbox = view.findViewById(R.id.fragment_apps_details_privacy_checkbox);
+        scrollView = view.findViewById(R.id.fragment_apps_scrollview);
+        othersMore = view.findViewById(R.id.fragment_apps_all_more);
+        allFullContainer = view.findViewById(R.id.fragment_apps_all_full_list_container);
 
         return view;
     }
