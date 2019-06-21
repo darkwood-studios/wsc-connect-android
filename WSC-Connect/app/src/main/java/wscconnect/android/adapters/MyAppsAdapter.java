@@ -2,6 +2,7 @@ package wscconnect.android.adapters;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.List;
 
@@ -25,6 +32,8 @@ import wscconnect.android.activities.MainActivity;
 import wscconnect.android.callbacks.RetroCallback;
 import wscconnect.android.fragments.MyAppsFragment;
 import wscconnect.android.models.AccessTokenModel;
+import wscconnect.android.models.LoginModel;
+import wscconnect.android.models.LogoutModel;
 
 /**
  * @author Christopher Walz
@@ -133,24 +142,37 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
                         public void onClick(DialogInterface dialog, int which) {
                             switch (which) {
                                 case 0:
-                                    final ProgressBar progress = Utils.showProgressView(activity, notifications, android.R.attr.progressBarStyleSmall);
-                                    Utils.getAPI(activity, app.getToken()).logout(app.getAppID()).enqueue(new RetroCallback<ResponseBody>(activity) {
+                                    FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                                         @Override
-                                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                            super.onResponse(call, response);
+                                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                            if (!task.isSuccessful()) {
+                                                Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
+                                                return;
+                                            }
 
-                                            Utils.hideProgressView(notifications, progress, false);
+                                            final LogoutModel logoutModel = new LogoutModel();
+                                            logoutModel.setFirebaseToken(task.getResult().getToken());
 
-                                            // we ignore errors and just log the user out
-                                            Utils.logout(activity, app.getAppID());
-                                            fragment.updateData();
-                                        }
+                                            final ProgressBar progress = Utils.showProgressView(activity, notifications, android.R.attr.progressBarStyleSmall);
+                                            Utils.getAPI(activity, app.getToken()).logout(app.getAppID(), logoutModel).enqueue(new RetroCallback<ResponseBody>(activity) {
+                                                @Override
+                                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                                    super.onResponse(call, response);
 
-                                        @Override
-                                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                            super.onFailure(call, t);
+                                                    Utils.hideProgressView(notifications, progress, false);
 
-                                            Utils.hideProgressView(notifications, progress, false);
+                                                    // we ignore errors and just log the user out
+                                                    Utils.logout(activity, app.getAppID());
+                                                    fragment.updateData();
+                                                }
+
+                                                @Override
+                                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                    super.onFailure(call, t);
+
+                                                    Utils.hideProgressView(notifications, progress, false);
+                                                }
+                                            });
                                         }
                                     });
                                     break;

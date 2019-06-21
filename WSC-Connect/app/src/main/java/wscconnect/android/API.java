@@ -18,6 +18,7 @@ import wscconnect.android.models.BoardModel;
 import wscconnect.android.models.ConversationMessageModel;
 import wscconnect.android.models.ConversationModel;
 import wscconnect.android.models.LoginModel;
+import wscconnect.android.models.LogoutModel;
 import wscconnect.android.models.MessageModel;
 import wscconnect.android.models.NotificationModel;
 import wscconnect.android.models.PostModel;
@@ -32,6 +33,7 @@ import wscconnect.android.models.ThreadModel;
 public interface API {
     String ENDPOINT = "https://api.wsc-connect.com/";
     //String ENDPOINT = "http://192.168.178.37:1337/";
+    //String ENDPOINT = "https://dev.api.wsc-connect.com/";
 
     @GET("apps")
     Call<List<AppModel>> getApps();
@@ -46,7 +48,7 @@ public interface API {
     Call<ResponseBody> login(@Path("app") String app, @Body LoginModel body);
 
     @POST("logout/{app}")
-    Call<ResponseBody> logout(@Path("app") String app);
+    Call<ResponseBody> logout(@Path("app") String app, @Body LogoutModel body);
 
     @POST("token")
     Call<ResponseBody> getAccessToken();

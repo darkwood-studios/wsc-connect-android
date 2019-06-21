@@ -311,6 +311,10 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     }
 
     public void getConversationMessages(final ConversationModel conversation, final int limit, final int offset, final SimpleCallback callback) {
+        if (conversation == null) {
+            return;
+        }
+
         activeConversation = conversation;
 
         Utils.getAPI(activity, host, token.getToken()).getConversationMessages(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getConversationMessages"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversation.getConversationID())), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset))).enqueue(new RetroCallback<List<ConversationMessageModel>>(activity) {

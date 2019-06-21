@@ -76,6 +76,7 @@ import wscconnect.android.listeners.OnBackPressedListener;
 import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.AppModel;
 import wscconnect.android.models.LoginModel;
+import wscconnect.android.models.LogoutModel;
 
 import static wscconnect.android.fragments.myApps.appOptions.AppWebviewFragment.USER_AGENT;
 
@@ -427,31 +428,44 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                         showAccountButton.setEnabled(false);
                         switchAccountButton.setEnabled(false);
                         final ProgressBar progressBar = Utils.showProgressView(activity, logoutAccountButton, android.R.attr.progressBarStyle);
-                        String token = Utils.getAccessTokenString(activity, app.getAppID());
-                        Utils.getAPI(activity, token).logout(app.getAppID()).enqueue(new RetroCallback<ResponseBody>(activity) {
+
+                        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                             @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                super.onResponse(call, response);
+                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                if (!task.isSuccessful()) {
+                                    Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
+                                    return;
+                                }
 
-                                showAccountButton.setEnabled(true);
-                                switchAccountButton.setEnabled(true);
-                                Utils.hideProgressView(logoutAccountButton, progressBar);
+                                final LogoutModel logoutModel = new LogoutModel();
+                                logoutModel.setFirebaseToken(task.getResult().getToken());
 
-                                // we ignore errors and just log the user out
-                                Utils.logout(activity, app.getAppID());
-                                activity.updateMyAppsFragment();
-                                switchToDetailView(false, false, null);
-                            }
+                                String token = Utils.getAccessTokenString(activity, app.getAppID());
+                                Utils.getAPI(activity, token).logout(app.getAppID(), logoutModel).enqueue(new RetroCallback<ResponseBody>(activity) {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        super.onResponse(call, response);
 
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                super.onFailure(call, t);
+                                        showAccountButton.setEnabled(true);
+                                        switchAccountButton.setEnabled(true);
+                                        Utils.hideProgressView(logoutAccountButton, progressBar);
 
-                                showAccountButton.setEnabled(true);
-                                switchAccountButton.setEnabled(true);
-                                Utils.hideProgressView(logoutAccountButton, progressBar);
-                            }
-                        });
+                                        // we ignore errors and just log the user out
+                                        Utils.logout(activity, app.getAppID());
+                                        activity.updateMyAppsFragment();
+                                        switchToDetailView(false, false, null);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        super.onFailure(call, t);
+
+                                        showAccountButton.setEnabled(true);
+                                        switchAccountButton.setEnabled(true);
+                                        Utils.hideProgressView(logoutAccountButton, progressBar);
+                                    }
+                                });
+                        }});
                     }
                 });
                 detailsContainerLoggedOut.setVisibility(View.GONE);

@@ -61,6 +61,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name=".activities.AppActivity"
             android:parentActivityName=".activities.MainActivity" />
     </application>
