@@ -1,8 +1,0 @@
-<resources>
-    <dimen name="layout_padding">15dp</dimen>
-    <dimen name="layout_margin">12dp</dimen>
-    <dimen name="layout_margin_small">5dp</dimen>
-    <dimen name="list_title">14.5sp</dimen>
-    <dimen name="list_subtitle">11sp</dimen>
-    <dimen name="margin_subtitle">5dp</dimen>
-</resources>

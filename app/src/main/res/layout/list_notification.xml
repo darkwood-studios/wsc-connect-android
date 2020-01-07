@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_list"
+    android:clickable="true"
+    android:paddingBottom="@dimen/layout_margin"
+    android:paddingLeft="@dimen/layout_padding"
+    android:paddingRight="@dimen/layout_padding"
+    android:paddingTop="@dimen/layout_margin">
+
+    <ImageView
+        android:id="@+id/list_notification_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/layout_margin"
+        android:layout_toEndOf="@id/list_notification_avatar"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/list_notification_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@drawable/text_list"
+            android:textSize="@dimen/list_title" />
+
+        <TextView
+            android:id="@+id/list_notification_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@drawable/text_list_accent"
+            android:textSize="@dimen/list_subtitle" />
+
+    </LinearLayout>
+
+</RelativeLayout>
