@@ -3,6 +3,7 @@ This is the unofficial repository for the Android App of https://www.wsc-connect
 
 # Founder
 The Founder of this app is ChristopherWalz
+
 Visit https://github.com/ChristopherWalz
 
 # License 
