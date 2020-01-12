@@ -1,44 +1,31 @@
 package wscconnect.android.activities;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
-import io.fabric.sdk.android.Fabric;
 import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.fragments.AppsFragment;
 import wscconnect.android.fragments.MyAppsFragment;
-import wscconnect.android.fragments.SettingsFragment;
 import wscconnect.android.listeners.OnBackPressedListener;
 
 import static wscconnect.android.Utils.getAllAccessTokens;
@@ -148,66 +135,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.action_about:
-                showAboutDialog();
-                return true;
-            case R.id.action_account:
-                showAccountDialog();
-                return true;
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void showAboutDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setTitle(R.string.action_about);
-        builder.setMessage(R.string.dialog_about_text);
-        builder.setPositiveButton(R.string.close, null);
-
-        AlertDialog dialog = builder.show();
-
-        ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
-    }
-
-    private void showAccountDialog() {
-        FirebaseInstanceId.getInstance().getInstanceId()
-        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                String token;
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle(R.string.action_account);
-
-                if (!task.isSuccessful()) {
-                    token = getString(R.string.dialog_action_no_token);
-                } else {
-                    token = task.getResult().getToken();
-                }
-
-                final String finalToken = token;
-                builder.setNeutralButton(R.string.dialog_action_copy_token, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("wsc-connect-token", finalToken);
-                        if (clipboard != null) {
-                            clipboard.setPrimaryClip(clip);
-                            Toast.makeText(MainActivity.this, R.string.dialog_action_token_copied, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-                builder.setMessage(getString(R.string.dialog_action_text, token));
-                builder.setPositiveButton(R.string.close, null);
-
-                builder.show();
-            };
-        });
     }
 
     public void setOnBackPressedListener(OnBackPressedListener callback) {
@@ -277,7 +210,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         FirebaseApp.initializeApp(this);
-        setupCrashlyrics();
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.activity_main_toolbar);
@@ -339,19 +271,6 @@ public class MainActivity extends AppCompatActivity {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.textColor));
         }
 
-    }
-
-    private void setupCrashlyrics() {
-        Fabric.with(this, new Crashlytics());
-        FirebaseInstanceId.getInstance().getInstanceId()
-        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-           @Override
-           public void onComplete(@NonNull Task<InstanceIdResult> task) {
-               if (task.isSuccessful()) {
-                   Crashlytics.setUserIdentifier(task.getResult().getToken());
-               }
-           }
-       });
     }
 
     public void setActiveMenuItem(int id) {

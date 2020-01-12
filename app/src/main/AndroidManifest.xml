@@ -12,8 +12,8 @@
         android:name=".MainApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
-        android:icon="@mipmap/ic_launcher_new"
-        android:roundIcon="@mipmap/ic_launcher_new_round"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppThemeActionBar">
@@ -38,10 +38,7 @@
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorPrimary" />
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="62e978fa2ba0c3afd20ec62743986b975d6359d4" />
+            android:resource="@color/NotificationIconColor" />
 
         <activity
             android:name=".activities.SettingsActivity"

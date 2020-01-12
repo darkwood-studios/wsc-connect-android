@@ -42,7 +42,7 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/fragment_app_conversations_refresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -52,12 +52,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/fragment_app_conversations_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <android.support.design.widget.CoordinatorLayout
+                <androidx.coordinatorlayout.widget.CoordinatorLayout
                     android:id="@+id/fragment_app_conversations_message_container"
                     xmlns:android="http://schemas.android.com/apk/res/android"
                     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -65,12 +65,12 @@
                     android:layout_height="match_parent"
                     android:visibility="gone">
 
-                    <android.support.v7.widget.RecyclerView
+                    <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/fragment_app_conversations_message_list"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
 
-                    <android.support.design.widget.FloatingActionButton
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/fragment_app_conversations_message_fab"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -79,10 +79,10 @@
                         android:layout_margin="16dp"
                         app:layout_anchor="@id/fragment_app_conversations_message_list"
                         app:layout_anchorGravity="bottom|right|end"/>
-                </android.support.design.widget.CoordinatorLayout>
+                </androidx.coordinatorlayout.widget.CoordinatorLayout>
         </LinearLayout>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
 </LinearLayout>

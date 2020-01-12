@@ -1,7 +1,7 @@
 package wscconnect.android;
 
 import android.app.Application;
-import android.support.v7.app.AppCompatDelegate;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import wscconnect.android.listeners.OnNewPushMessageListener;
 

@@ -2,7 +2,6 @@ package wscconnect.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
 

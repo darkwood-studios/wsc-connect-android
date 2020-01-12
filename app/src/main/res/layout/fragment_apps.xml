@@ -15,7 +15,7 @@
         android:visibility="gone" />
 
     <LinearLayout
-        android:background="#EEEEEE"
+        android:background="@color/colorPrimaryDark"
         android:id="@+id/fragment_apps"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -28,13 +28,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 card_view:cardUseCompatPadding="true">
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/fragment_apps_all_full_list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
@@ -48,58 +48,59 @@
                     android:layout_height="wrap_content"
                     android:text="@string/fragment_apps_search_empty"/>
 
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
 
-    <ScrollView
+        <ScrollView
             android:id="@+id/fragment_apps_scrollview"
-            android:background="#EEEEEE"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimaryDark">
 
             <LinearLayout
-                android:padding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="10dp">
 
-                <android.support.v7.widget.CardView
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    card_view:cardUseCompatPadding="true"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    card_view:cardBackgroundColor="@color/AppList"
+                    card_view:cardUseCompatPadding="true">
 
                     <LinearLayout
-                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
 
                         <RelativeLayout
-                            android:layout_marginStart="12dp"
-                            android:layout_marginEnd="12dp"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
                                 android:layout_toStartOf="@+id/fragment_apps_top_more"
-                                android:layout_alignParentStart="true"
-                                android:text="@string/top_apps"/>
+                                android:text="@string/top_apps"
+                                android:textStyle="bold" />
 
                             <Button
                                 android:id="@+id/fragment_apps_top_more"
-                                android:layout_width="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_height="wrap_content"
-                                android:textAllCaps="true"
-                                android:visibility="invisible"
-                                android:textColor="@color/colorAccent"
-                                android:layout_alignParentEnd="true"
                                 style="@style/Widget.AppCompat.Button.Borderless"
-                                android:text="@string/more"/>
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:text="@string/more"
+                                android:textAllCaps="true"
+                                android:textColor="@color/colorAccent"
+                                android:visibility="invisible" />
                         </RelativeLayout>
 
                         <ProgressBar
@@ -110,53 +111,54 @@
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="@dimen/layout_padding" />
 
-                        <android.support.v7.widget.RecyclerView
-                            android:paddingStart="12dp"
-                            android:layout_marginBottom="12dp"
+                        <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/fragment_apps_top_list"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:paddingStart="12dp" />
 
                     </LinearLayout>
 
-                </android.support.v7.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
-                <android.support.v7.widget.CardView
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    card_view:cardUseCompatPadding="true"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    card_view:cardBackgroundColor="@color/AppList"
+                    card_view:cardUseCompatPadding="true">
 
                     <LinearLayout
-                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
 
                         <RelativeLayout
-                            android:layout_marginStart="12dp"
-                            android:layout_marginEnd="12dp"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
                                 android:layout_toStartOf="@+id/fragment_apps_newest_more"
-                                android:layout_alignParentStart="true"
-                                android:text="@string/new_apps"/>
+                                android:text="@string/new_apps"
+                                android:textStyle="bold" />
 
                             <Button
                                 android:id="@+id/fragment_apps_newest_more"
-                                android:layout_width="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_height="wrap_content"
-                                android:textAllCaps="true"
-                                android:visibility="invisible"
-                                android:textColor="@color/colorAccent"
-                                android:layout_alignParentEnd="true"
                                 style="@style/Widget.AppCompat.Button.Borderless"
-                                android:text="@string/more"/>
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:text="@string/more"
+                                android:textAllCaps="true"
+                                android:textColor="@color/colorAccent"
+                                android:visibility="invisible" />
                         </RelativeLayout>
 
                         <ProgressBar
@@ -167,54 +169,55 @@
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="@dimen/layout_padding" />
 
-                        <android.support.v7.widget.RecyclerView
-                            android:paddingStart="12dp"
-                            android:layout_marginBottom="12dp"
+                        <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/fragment_apps_newest_list"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:paddingStart="12dp" />
 
                     </LinearLayout>
 
-                </android.support.v7.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
-                <android.support.v7.widget.CardView
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    card_view:cardUseCompatPadding="true"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    card_view:cardBackgroundColor="@color/AppList"
+                    card_view:cardUseCompatPadding="true">
 
                     <LinearLayout
-                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
 
                         <RelativeLayout
-                            android:layout_marginStart="12dp"
-                            android:layout_marginEnd="12dp"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
                                 android:layout_toStartOf="@+id/fragment_apps_all_more"
-                                android:layout_alignParentStart="true"
-                                android:text="@string/all_apps"/>
+                                android:text="@string/all_apps"
+                                android:textStyle="bold" />
 
                             <Button
                                 android:id="@+id/fragment_apps_all_more"
-                                android:layout_width="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_height="wrap_content"
-                                android:textAllCaps="true"
-                                android:textSize="12sp"
-                                android:visibility="invisible"
-                                android:textColor="@color/colorAccent"
-                                android:layout_alignParentEnd="true"
                                 style="@style/Widget.AppCompat.Button.Borderless"
-                                android:text="@string/more"/>
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:text="@string/more"
+                                android:textAllCaps="true"
+                                android:textColor="@color/colorAccent"
+                                android:textSize="12sp"
+                                android:visibility="invisible" />
                         </RelativeLayout>
 
                         <ProgressBar
@@ -225,17 +228,17 @@
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="@dimen/layout_padding" />
 
-                        <android.support.v7.widget.RecyclerView
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
-                            android:layout_marginBottom="12dp"
+                        <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/fragment_apps_all_list"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
 
                     </LinearLayout>
 
-                </android.support.v7.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
             </LinearLayout>
         </ScrollView>
@@ -311,7 +314,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/dialog_login_username"
                 android:inputType="textFilter|textNoSuggestions"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textColor="@android:color/white" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -324,7 +328,8 @@
                     android:layout_weight="1"
                     android:hint="@string/dialog_login_password"
                     android:inputType="textPassword"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:textColor="@android:color/white" />
 
                 <ImageView
                     android:id="@+id/fragment_apps_details_password_visible"

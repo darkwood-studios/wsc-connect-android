@@ -1,7 +1,6 @@
 package wscconnect.android;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,14 +22,13 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Base64;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,11 +42,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.auth0.android.jwt.JWT;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.crashlytics.android.Crashlytics;
+
 import com.google.gson.GsonBuilder;
 
 import org.json.JSONException;
@@ -56,7 +50,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -372,7 +366,7 @@ public class Utils {
         String ringtone = prefs.getString("pref_notifications_ringtone", null);
         boolean vibrate = prefs.getBoolean("pref_notifications_vibration", false);
         Vibrator v = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
-        long pattern[] = new long[]{0, 300, 100, 300};
+        long[] pattern = new long[]{0, 300, 100, 300};
 
         // reset ringtone if ignoreSound is true
         if (ignoreSound) {
@@ -426,7 +420,7 @@ public class Utils {
             notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
             notificationBuilder.setSmallIcon(R.drawable.ic_notification_transparent);
         } else {
-            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher_new);
+            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
         }
 
         if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
@@ -462,8 +456,6 @@ public class Utils {
         try {
             mNotificationManager.notify(tag, id, notificationBuilder.build());
         } catch (SecurityException e) {
-            // log & send without sound
-            Crashlytics.logException(e);
 
             if (!ignoreSound) {
                 Utils.showDataNotification(context, tag, id, appID, optionType, title, message, eventName, eventID, largeIcon, true);
@@ -481,19 +473,6 @@ public class Utils {
 
         builder.setView(dialogView);
         final AlertDialog dialog = builder.show();
-
-        GlideApp.with(activity).load(photoURL).listener(new RequestListener<Drawable>() {
-            @Override
-            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                dialog.dismiss();
-                return false;
-            }
-
-            @Override
-            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                return false;
-            }
-        }).into(photo);
 
         dialogView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -701,29 +680,24 @@ public class Utils {
     }
 
     public static String decodeBase64(String string) {
-        try {
-            byte[] base = Base64.decode(string, Base64.DEFAULT);
-            return new String(base, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        byte[] base = Base64.decode(string, Base64.DEFAULT);
+        return new String(base, StandardCharsets.UTF_8);
 
-        return string;
     }
 
     public static String decryptString(String encryptedText, String secret, String initVector) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 
-            byte[] ivv = initVector.getBytes("UTF-8");
+            byte[] ivv = initVector.getBytes(StandardCharsets.UTF_8);
             IvParameterSpec iv = new IvParameterSpec(Arrays.copyOf(ivv, ivv.length), 0, cipher.getBlockSize());
-            SecretKeySpec skeySpec = new SecretKeySpec(secret.getBytes("UTF-8"), "AES");
+            SecretKeySpec skeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "AES");
 
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
 
             byte[] original = cipher.doFinal(Base64.decode(encryptedText, Base64.DEFAULT));
 
-            return new String(original, "UTF-8");
+            return new String(original, StandardCharsets.UTF_8);
         } catch (Exception e) {
             //Crashlytics.logException(e);
         }

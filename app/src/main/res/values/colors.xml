@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3a6d9c</color>
-    <color name="colorPrimaryDark">#325c84</color>
-    <color name="colorAccent">#e65100</color>
-    <color name="textColor">#4e5560</color>
-    <color name="textColorAccent">#656d79</color>
-    <color name="textColorPressed">#ffffff</color>
-    <color name="buttonTextColor">#ffffff</color>
+    <color name="colorPrimary">#212121</color>
+    <color name="colorPrimaryDark">#212121</color>
+    <color name="colorAccent">#E53935</color>
+    <color name="textColor">#FFFFFF</color>
+    <color name="textColorAccent">#FFFFFF</color>
+    <color name="textColorPressed">#FFFFFF</color>
+    <color name="buttonTextColor">#212121</color>
+    <color name="NotificationIconColor">#656D79</color>
+    <color name="AppList">#252525</color>
 </resources>

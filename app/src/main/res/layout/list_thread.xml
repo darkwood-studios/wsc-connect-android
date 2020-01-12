@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/background_list"
@@ -22,7 +23,8 @@
         android:layout_marginStart="@dimen/layout_margin"
         android:layout_toEndOf="@id/list_thread_avatar"
         android:layout_toStartOf="@id/list_board_unread_threads"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:ignore="NotSibling">
 
         <TextView
             android:id="@+id/list_thread_title"

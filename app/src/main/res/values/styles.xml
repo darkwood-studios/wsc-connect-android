@@ -1,54 +1,78 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/textColor</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
         <item name="android:buttonStyle">@style/ButtonColor</item>
         <item name="buttonStyle">@style/ButtonColor</item>
         <item name="colorButtonNormal">@color/buttonTextColor</item>
         <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert</item>
+        <item name="android:itemBackground">@color/colorPrimaryDark</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="android:textColorHint">@android:color/white</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:isLightTheme">true</item>
     </style>
 
     <!-- Base application theme. -->
-    <style name="AppThemeActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppThemeActionBar" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/textColor</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
         <item name="android:buttonStyle">@style/ButtonColor</item>
         <item name="buttonStyle">@style/ButtonColor</item>
-        <item name="colorButtonNormal">@color/buttonTextColor</item>
+        <item name="colorButtonNormal">@color/colorPrimaryDark</item>
         <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert</item>
         <item name="android:actionBarStyle">@style/MyActionBar</item>
         <item name="actionBarStyle">@style/MyActionBar</item>
+        <item name="android:itemBackground">@color/colorPrimaryDark</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="android:textColorHint">@android:color/white</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:isLightTheme">true</item>
     </style>
 
     <style name="MyActionBar" parent="Widget.AppCompat.ActionBar">
         <item name="subtitleTextStyle">@style/MyActionBarSubTitleText</item>
         <item name="android:subtitleTextStyle">@style/MyActionBarSubTitleText</item>
-        <item name="background">@color/colorPrimary</item>
-        <item name="android:background">@color/colorPrimary</item>
+        <item name="background">@color/colorPrimaryDark</item>
+        <item name="android:background">@color/colorPrimaryDark</item>
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:isLightTheme">true</item>
     </style>
 
     <style name="MyActionBarSubTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
         <item name="android:textSize">12sp</item>
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:isLightTheme">true</item>
     </style>
 
     <style name="ButtonColor" parent="@android:style/Widget.Button">
-        <item name="android:textColor">@color/buttonTextColor</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:isLightTheme">true</item>
     </style>
 
     <style name="TextSmall">
         <item name="android:textColor">@color/textColorAccent</item>
         <item name="android:textSize">12sp</item>
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:isLightTheme">true</item>
     </style>
 
 </resources>

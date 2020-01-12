@@ -1,7 +1,7 @@
 package wscconnect.android.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import wscconnect.android.R;
 import wscconnect.android.fragments.SettingsFragment;

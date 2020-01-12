@@ -3,9 +3,6 @@ package wscconnect.android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
-import android.util.Log;
-
-import com.crashlytics.android.Crashlytics;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -15,7 +12,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Arrays;
 
 import javax.crypto.Cipher;
 
@@ -40,7 +36,6 @@ public class KeyUtils {
 
             return keyPairGenerator.genKeyPair();
         } catch (NoSuchAlgorithmException e) {
-            Crashlytics.logException(e);
             e.printStackTrace();
         }
 
@@ -77,10 +72,6 @@ public class KeyUtils {
             SharedPreferences prefs = context.getSharedPreferences(Utils.SHARED_PREF_KEY, Context.MODE_PRIVATE);
             String privateKey = prefs.getString("privateKey-" + appID, null);
 
-            if (privateKey == null) {
-                return null;
-            }
-
             return privateKey;
 
             //byte[] pivateKeyBytes = Base64.decode(privateKey, Base64.NO_WRAP);
@@ -109,7 +100,7 @@ public class KeyUtils {
             c.init(Cipher.DECRYPT_MODE, priv);
             byte[] decodedBytes = c.doFinal(Base64.decode(encodedString, Base64.DEFAULT));
 
-            return new String(decodedBytes, "UTF-8");
+            return new String(decodedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }
