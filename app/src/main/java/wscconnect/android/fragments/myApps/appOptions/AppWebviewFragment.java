@@ -63,6 +63,8 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
         webSettings.setDomStorageEnabled(true);
         webSettings.setUserAgentString(USER_AGENT);
         webSettings.setAllowFileAccess(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
 
         webview.setWebChromeClient(new WebChromeClient() {
             @Override
