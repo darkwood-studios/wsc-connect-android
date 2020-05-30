@@ -34,6 +34,7 @@
 -keepattributes Exceptions
 -dontwarn okio.**
 -dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public class * extends com.bumptech.glide.AppGlideModule
 -keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
@@ -41,9 +42,7 @@
   public *;
 }
 -keep class android.support.v7.widget.SearchView { *; }
-
 -keepattributes *Annotation*
 -keep class wscconnect.android.models.** { *; }
 -printmapping mapping.txt
-
 -ignorewarnings
