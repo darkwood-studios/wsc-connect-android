@@ -135,7 +135,7 @@ public class AppActivity extends AppCompatActivity {
     }
 
     private void setup(String optionType, String eventName, int eventID) {
-        tabLayout.setVisibility(View.VISIBLE);
+        tabLayout.setVisibility(View.GONE);
         fragmentAdapter = new AppFragmentAdapter(getSupportFragmentManager(), this, token);
         viewPager.setAdapter(fragmentAdapter);
         viewPager.setOffscreenPageLimit(5);
