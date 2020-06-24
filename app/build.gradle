@@ -6,8 +6,8 @@ repositories {
 
 android {
 
-    buildToolsVersion = '29.0.3'
-    compileSdkVersion 29
+    buildToolsVersion = '30.0.0'
+    compileSdkVersion 30
     android.buildFeatures.viewBinding true
 
     compileOptions {
@@ -17,9 +17,9 @@ android {
 
     defaultConfig {
         applicationId "wscconnect.android"
-        buildToolsVersion '29.0.3'
+        buildToolsVersion '30.0.0'
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 50
         versionName '3.2.0'
 
@@ -53,12 +53,12 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
-    implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
     implementation 'com.auth0.android:jwtdecode:1.4.0'
-    implementation 'com.google.firebase:firebase-messaging:20.2.0'
-    implementation 'com.google.firebase:firebase-core:17.4.2'
+    implementation 'com.google.firebase:firebase-messaging:20.2.1'
+    implementation 'com.google.firebase:firebase-core:17.4.3'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     testImplementation 'junit:junit:4.13'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
