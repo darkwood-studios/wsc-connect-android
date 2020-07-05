@@ -8,7 +8,7 @@ android {
 
     
     compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    buildToolsVersion '30.0.0'
     android.buildFeatures.viewBinding true
 
     compileOptions {
@@ -18,11 +18,11 @@ android {
 
     defaultConfig {
         applicationId "wscconnect.android"
-        buildToolsVersion '30.0.3'
+        buildToolsVersion '30.0.0'
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 70
-        versionName '3.4.0'
+        versionCode 60
+        versionName '3.3.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
