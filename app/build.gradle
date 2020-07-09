@@ -8,8 +8,7 @@ android {
 
     
     compileSdkVersion 30
-    buildToolsVersion '30.0.0'
-    android.buildFeatures.viewBinding true
+    buildToolsVersion '30.0.1'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -18,11 +17,10 @@ android {
 
     defaultConfig {
         applicationId "wscconnect.android"
-        buildToolsVersion '30.0.0'
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 60
-        versionName '3.3.0'
+        versionCode 80
+        versionName '3.5.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -36,6 +34,10 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     lintOptions {
@@ -58,8 +60,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
     implementation 'com.auth0.android:jwtdecode:1.4.0'
-    implementation 'com.google.firebase:firebase-messaging:20.2.1'
-    implementation 'com.google.firebase:firebase-core:17.4.3'
+    implementation 'com.google.firebase:firebase-messaging:20.2.3'
+    implementation 'com.google.firebase:firebase-core:17.4.4'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     testImplementation 'junit:junit:4.13'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
