@@ -9,4 +9,5 @@
     <color name="buttonTextColor">#212121</color>
     <color name="NotificationIconColor">#656D79</color>
     <color name="AppList">#252525</color>
+    <color name="Input">#191919</color>
 </resources>

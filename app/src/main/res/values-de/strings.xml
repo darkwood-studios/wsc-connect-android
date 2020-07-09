@@ -61,7 +61,7 @@
     <string name="list_conversation_message_header_participants">Teilnehmer: %1$s</string>
     <string name="list_conversation_message_dialog_copied">Nachricht kopiert</string>
     <string name="submit">Absenden</string>
-    <string name="list_conversation_message_form_hint">Auf Konversation antworten…</string>
+    <string name="list_conversation_message_form_hint">Antworten…</string>
     <string name="list_conversation_message_form_closed">Konversation geschlossen</string>
     <string name="list_conversation_message_form_error_censorship">Deine Nachricht erhält folgende zensierte Wörter: %1$s</string>
     <string name="list_conversation_message_form_error_length">Deine Nachricht ist mit %1$d Zeichen zu lang. Maximal erlaubte Zeichen: %2$d</string>
