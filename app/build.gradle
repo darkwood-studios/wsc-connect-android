@@ -25,6 +25,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         resConfigs "en", "de"
+        setProperty("archivesBaseName", "WSC-Reloaded_v" + versionName + "_Dark")
     }
 
     buildTypes {
