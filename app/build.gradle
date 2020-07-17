@@ -20,17 +20,17 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 100
-        versionName '3.7.0'
+        versionName '3.7.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         resConfigs "en", "de"
-        setProperty("archivesBaseName", "WSC-Reloaded_v" + versionName + "_Dark")
+        setProperty("archivesBaseName", "WSC-Reloaded_v" + versionName)
     }
 
     buildTypes {
 
-        release {
+        Dark {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
