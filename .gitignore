@@ -5,3 +5,6 @@
 /.idea
 /build
 /captures
+/app/google-services.json
+/app/Black/
+/app/Dark/
