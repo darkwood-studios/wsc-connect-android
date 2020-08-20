@@ -19,8 +19,8 @@ android {
         applicationId "wscconnect.android"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 130
-        versionName '3.10.0'
+        versionCode 140
+        versionName '3.11.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -62,7 +62,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.8.1'
     implementation 'com.auth0.android:jwtdecode:1.4.0'
     implementation 'com.google.firebase:firebase-messaging:20.2.4'
-    implementation 'com.google.firebase:firebase-core:17.4.4'
+    implementation 'com.google.firebase:firebase-core:17.5.0'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     testImplementation 'junit:junit:4.13'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
