@@ -40,6 +40,10 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/NotificationIconColor" />
 
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
+
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/action_settings"
