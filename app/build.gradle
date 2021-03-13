@@ -1,35 +1,21 @@
 apply plugin: 'com.android.application'
-
-repositories {
-    google()
-}
+apply plugin: 'com.google.gms.google-services'
 
 android {
-
-    
     compileSdkVersion 30
     buildToolsVersion '30.0.3'
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
     defaultConfig {
-        applicationId "wscconnect.android"
-        minSdkVersion 21
+        applicationId 'wscconnect.android'
+        minSdkVersion 23
         targetSdkVersion 30
-        versionCode 411
-        versionName '4.1.1'
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
-        resConfigs "en", "de"
-        setProperty("archivesBaseName", "WSC-Reloaded_v" + versionName)
+        versionCode 42
+        versionName '4.2.0'
+        resConfigs 'en', 'de'
+        setProperty('archivesBaseName', 'WSC-Reloaded_v' + versionName)
     }
 
     buildTypes {
-
         Dark {
             minifyEnabled true
             shrinkResources true
@@ -37,35 +23,44 @@ android {
         }
     }
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     lintOptions {
         disable 'MissingTranslation'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 }
 
 dependencies {
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.2.0', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    // AndroidX Stuff //
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // Material //
     implementation 'com.google.android.material:material:1.3.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
-    implementation 'com.auth0.android:jwtdecode:1.4.0'
+
+    // Google Stuff //
     implementation 'com.google.firebase:firebase-messaging:21.0.1'
     implementation 'com.google.firebase:firebase-core:18.0.2'
-    implementation 'com.github.bumptech.glide:glide:4.12.0'
-    testImplementation 'junit:junit:4.13.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
-}
 
-apply plugin: 'com.google.gms.google-services'
+    // Retrofit //
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    // Glide //
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+
+    // JWTDecode //
+    implementation 'com.auth0.android:jwtdecode:2.0.0'
+
+    // OkHttp3 //
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+}
