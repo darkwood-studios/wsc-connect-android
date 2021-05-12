@@ -9,8 +9,8 @@ android {
         applicationId 'wscconnect.android'
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 42
-        versionName '4.2.0'
+        versionCode 50
+        versionName '5.0.0'
         resConfigs 'en', 'de'
         setProperty('archivesBaseName', 'WSC-Reloaded_v' + versionName)
     }
@@ -41,7 +41,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // AndroidX Stuff //
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
     // Material //
