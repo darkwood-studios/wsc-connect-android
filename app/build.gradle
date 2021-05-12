@@ -9,7 +9,7 @@ android {
         applicationId 'wscconnect.android'
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 50
+        versionCode 500
         versionName '5.0.0'
         resConfigs 'en', 'de'
         setProperty('archivesBaseName', 'WSC-Reloaded_v' + versionName)
