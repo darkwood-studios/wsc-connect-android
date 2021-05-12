@@ -43,8 +43,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonObject;
 
 import org.json.JSONException;
@@ -426,16 +425,16 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                         switchAccountButton.setEnabled(false);
                         final ProgressBar progressBar = Utils.showProgressView(activity, logoutAccountButton, android.R.attr.progressBarStyle);
 
-                        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
                             @Override
-                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                            public void onComplete(@NonNull Task<String> task) {
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
                                     return;
                                 }
 
                                 final LogoutModel logoutModel = new LogoutModel();
-                                logoutModel.setFirebaseToken(task.getResult().getToken());
+                                logoutModel.setFirebaseToken(task.getResult());
 
                                 String token = Utils.getAccessTokenString(activity, app.getAppID());
                                 Utils.getAPI(activity, token).logout(app.getAppID(), logoutModel).enqueue(new RetroCallback<ResponseBody>(activity) {
@@ -574,10 +573,10 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             return;
         }
 
-        FirebaseInstanceId.getInstance().getInstanceId()
-        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+        FirebaseMessaging.getInstance().getToken()
+        .addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+            public void onComplete(@NonNull Task<String> task) {
 
                 if (!task.isSuccessful()) {
                     Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
@@ -585,7 +584,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                 }
 
                 // Get new Instance ID token
-                String token = task.getResult().getToken();
+                String token = task.getResult();
 
                 final Button loadingButton = (thirdParty) ? thirdPartySubmitView : submitView;
                 final Button disableButton = (thirdParty) ? submitView : thirdPartySubmitView;

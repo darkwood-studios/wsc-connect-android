@@ -15,8 +15,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.List;
 
@@ -141,16 +140,16 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
                         public void onClick(DialogInterface dialog, int which) {
                             switch (which) {
                                 case 0:
-                                    FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                                    FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
                                         @Override
-                                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                        public void onComplete(@NonNull Task<String> task) {
                                             if (!task.isSuccessful()) {
                                                 Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
                                                 return;
                                             }
 
                                             final LogoutModel logoutModel = new LogoutModel();
-                                            logoutModel.setFirebaseToken(task.getResult().getToken());
+                                            logoutModel.setFirebaseToken(task.getResult());
 
                                             final ProgressBar progress = Utils.showProgressView(activity, notifications, android.R.attr.progressBarStyleSmall);
                                             Utils.getAPI(activity, app.getToken()).logout(app.getAppID(), logoutModel).enqueue(new RetroCallback<ResponseBody>(activity) {
