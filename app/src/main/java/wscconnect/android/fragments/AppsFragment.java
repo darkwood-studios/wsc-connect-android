@@ -31,7 +31,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -458,16 +457,16 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                 passwordVisibleView.setOnClickListener(view -> {
                     if (passwordView.getInputType() == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
                         passwordView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                        Glide.with(activity).load(R.drawable.ic_visibility_black_36dp).into(passwordVisibleView);
+                        Glide.with(activity).load(R.drawable.ic_visibility).into(passwordVisibleView);
                     } else {
                         passwordView.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                        GlideApp.with(activity).load(R.drawable.ic_visibility_off_black_36dp).into(passwordVisibleView);
+                        GlideApp.with(activity).load(R.drawable.ic_visibility_off).into(passwordVisibleView);
                     }
 
                     passwordView.setSelection(passwordView.length());
                 });
 
-                GlideApp.with(activity).load(R.drawable.ic_visibility_black_36dp).into(passwordVisibleView);
+                GlideApp.with(activity).load(R.drawable.ic_visibility).into(passwordVisibleView);
 
                 thirdPartySubmitView.setOnClickListener(view -> login(app, usernameView, passwordView, submitView, thirdPartySubmitView, true));
 

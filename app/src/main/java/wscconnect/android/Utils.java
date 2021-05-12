@@ -406,7 +406,7 @@ public class Utils {
         }
 
         notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
-        notificationBuilder.setSmallIcon(R.drawable.ic_notification_transparent);
+        notificationBuilder.setSmallIcon(R.drawable.ic_notification);
 
         if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || ContextCompat.checkSelfPermission(context,
