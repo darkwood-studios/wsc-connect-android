@@ -1,5 +1,6 @@
 package wscconnect.android.fragments.myApps.appOptions;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,12 +12,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import java.util.Objects;
 
 import wscconnect.android.R;
 import wscconnect.android.listeners.OnBackPressedListener;
@@ -57,6 +59,7 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
         prepareWebview();
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     public void prepareWebview() {
         final WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -82,19 +85,14 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
 
         });
 
-        webview.setDownloadListener(new DownloadListener() {
-            @Override
-            public void onDownloadStart(String url, String userAgent,
-                                        String contentDisposition, String mimetype,
-                                        long contentLength) {
-                // handle download, here we use browser to download, also you can try other approach.
-                if (url.startsWith("blob:")) {
-                    url = url.substring(5);
-                }
-                Uri uri = Uri.parse(url);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
+        webview.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+            // handle download, here we use browser to download, also you can try other approach.
+            if (url.startsWith("blob:")) {
+                url = url.substring(5);
             }
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
         });
 
         webview.setWebViewClient(new WebViewClient() {
@@ -109,6 +107,7 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
                 refreshView.setRefreshing(false);
             }
 
+            @SuppressLint("QueryPermissionsNeeded")
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if(url.startsWith("http:") || url.startsWith("https:")) {
@@ -117,7 +116,7 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
 
                 // Otherwise allow the OS to handle things like tel, mailto, etc.
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                if (intent.resolveActivity(Objects.requireNonNull(getActivity()).getPackageManager()) != null) {
                     startActivity(intent);
                     return true;
                 }
@@ -126,12 +125,7 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
             }
         });
 
-        refreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                webview.reload();
-            }
-        });
+        refreshView.setOnRefreshListener(() -> webview.reload());
 
         loadWebview();
     }
@@ -143,15 +137,6 @@ public class AppWebviewFragment extends Fragment implements OnBackPressedListene
 
     private String getWebViewUrl() {
         return (webviewUrl == null) ? token.getAppUrl() : webviewUrl;
-    }
-
-    public boolean goBackWebview() {
-        if (webview != null && webview.canGoBack()) {
-            webview.goBack();
-            return true;
-        }
-
-        return false;
     }
 
     @Override

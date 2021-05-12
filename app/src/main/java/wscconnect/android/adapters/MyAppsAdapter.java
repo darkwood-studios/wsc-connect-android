@@ -17,6 +17,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -41,8 +43,8 @@ import wscconnect.android.models.LogoutModel;
 
 public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHolder> {
     private final MyAppsFragment fragment;
-    private MainActivity activity;
-    private List<AccessTokenModel> appList;
+    private final MainActivity activity;
+    private final List<AccessTokenModel> appList;
 
     public MyAppsAdapter(MainActivity activity, MyAppsFragment fragment, List<AccessTokenModel> appList) {
         this.activity = activity;
@@ -50,6 +52,7 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
         this.fragment = fragment;
     }
 
+    @NotNull
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
@@ -58,6 +61,7 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
         return new MyViewHolder(itemView);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         AccessTokenModel app = appList.get(position);
@@ -119,14 +123,11 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
             secure = view.findViewById(R.id.list_my_apps_secure);
             insecure = view.findViewById(R.id.list_my_apps_insecure);
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final AccessTokenModel token = appList.get(getAdapterPosition());
-                    Intent appDetail = new Intent(activity, AppActivity.class);
-                    appDetail.putExtra(AccessTokenModel.EXTRA, token);
-                    activity.startActivity(appDetail);
-                }
+            view.setOnClickListener(view1 -> {
+                final AccessTokenModel token = appList.get(getAdapterPosition());
+                Intent appDetail = new Intent(activity, AppActivity.class);
+                appDetail.putExtra(AccessTokenModel.EXTRA, token);
+                activity.startActivity(appDetail);
             });
 
             view.setOnLongClickListener(new View.OnLongClickListener() {
@@ -138,42 +139,40 @@ public class MyAppsAdapter extends RecyclerView.Adapter<MyAppsAdapter.MyViewHold
                     builder.setItems(R.array.list_my_apps_dialog_items, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            switch (which) {
-                                case 0:
-                                    FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<String> task) {
-                                            if (!task.isSuccessful()) {
-                                                Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
-                                                return;
+                            if (which == 0) {
+                                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<String> task) {
+                                        if (!task.isSuccessful()) {
+                                            Toast.makeText(activity, R.string.firebase_token_required, Toast.LENGTH_LONG).show();
+                                            return;
+                                        }
+
+                                        final LogoutModel logoutModel = new LogoutModel();
+                                        logoutModel.setFirebaseToken(task.getResult());
+
+                                        final ProgressBar progress = Utils.showProgressView(activity, notifications, android.R.attr.progressBarStyleSmall);
+                                        Utils.getAPI(activity, app.getToken()).logout(app.getAppID(), logoutModel).enqueue(new RetroCallback<ResponseBody>(activity) {
+                                            @Override
+                                            public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
+                                                super.onResponse(call, response);
+
+                                                Utils.hideProgressView(notifications, progress, false);
+
+                                                // we ignore errors and just log the user out
+                                                Utils.logout(activity, app.getAppID());
+                                                fragment.updateData();
                                             }
 
-                                            final LogoutModel logoutModel = new LogoutModel();
-                                            logoutModel.setFirebaseToken(task.getResult());
+                                            @Override
+                                            public void onFailure(Call<ResponseBody> call, @NotNull Throwable t) {
+                                                super.onFailure(call, t);
 
-                                            final ProgressBar progress = Utils.showProgressView(activity, notifications, android.R.attr.progressBarStyleSmall);
-                                            Utils.getAPI(activity, app.getToken()).logout(app.getAppID(), logoutModel).enqueue(new RetroCallback<ResponseBody>(activity) {
-                                                @Override
-                                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                                    super.onResponse(call, response);
-
-                                                    Utils.hideProgressView(notifications, progress, false);
-
-                                                    // we ignore errors and just log the user out
-                                                    Utils.logout(activity, app.getAppID());
-                                                    fragment.updateData();
-                                                }
-
-                                                @Override
-                                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                                    super.onFailure(call, t);
-
-                                                    Utils.hideProgressView(notifications, progress, false);
-                                                }
-                                            });
-                                        }
-                                    });
-                                    break;
+                                                Utils.hideProgressView(notifications, progress, false);
+                                            }
+                                        });
+                                    }
+                                });
                             }
                         }
                     });

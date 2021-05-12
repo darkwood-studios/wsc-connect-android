@@ -25,10 +25,6 @@ public class ConversationModel {
         return conversationID;
     }
 
-    public void setConversationID(int conversationID) {
-        this.conversationID = conversationID;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -49,16 +45,8 @@ public class ConversationModel {
         return link;
     }
 
-    public void setLink(String link) {
-        this.link = link;
-    }
-
     public String getParticipants() {
         return participants;
-    }
-
-    public void setParticipants(String participants) {
-        this.participants = participants;
     }
 
     public String getAvatar() {
@@ -101,7 +89,4 @@ public class ConversationModel {
         return isClosed;
     }
 
-    public void setClosed(boolean closed) {
-        isClosed = closed;
-    }
 }

@@ -1,11 +1,9 @@
 package wscconnect.android.callbacks;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import androidx.appcompat.app.AlertDialog;
 import android.widget.Toast;
+
+import org.jetbrains.annotations.NotNull;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -21,8 +19,7 @@ import wscconnect.android.Utils;
 
 public class RetroCallback<T> implements Callback<T> {
     private static Toast toast;
-    private static AlertDialog dialog;
-    private Context context;
+    private final Context context;
 
     public RetroCallback(Context context) {
         this.context = context;
@@ -45,44 +42,20 @@ public class RetroCallback<T> implements Callback<T> {
     }
 
     @Override
-    public void onResponse(Call<T> call, Response<T> response) {
+    public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
         // cancel error toast, if visible
         if (toast != null) {
             toast.cancel();
         }
 
-        switch (response.code()) {
-            // app version too old
-            case 501:
-                if (dialog == null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle(R.string.error_app_version_title);
-                    builder.setMessage(R.string.error_app_version_message);
-                    // builder.setCancelable(false);
-                    builder.setPositiveButton(R.string.error_app_version_button, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse("market://details?id=wscconnect.android"));
-                            context.startActivity(intent);
-                        }
-                    });
-                    dialog = builder.create();
-                }
-
-                if (!dialog.isShowing()) {
-                    dialog.show();
-                }
-                break;
-            // api down
-            case 502:
-                Toast.makeText(context, context.getString(R.string.error_request_api_not_available), Toast.LENGTH_SHORT).show();
-                break;
+        // api down
+        if (response.code() == 502) {
+            Toast.makeText(context, context.getString(R.string.error_request_api_not_available), Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
-    public void onFailure(Call<T> call, Throwable t) {
+    public void onFailure(Call<T> call, @NotNull Throwable t) {
         if (!call.isCanceled()) {
             showRequestError(context);
         }

@@ -13,7 +13,6 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
-import wscconnect.android.models.AppModel;
 import wscconnect.android.models.BoardModel;
 import wscconnect.android.models.ConversationMessageModel;
 import wscconnect.android.models.ConversationModel;
@@ -34,9 +33,6 @@ public interface API {
     String ENDPOINT = "https://api.wsc-connect.com/";
     //String ENDPOINT = "http://192.168.178.37:1337/";
     //String ENDPOINT = "https://dev.api.wsc-connect.com/";
-
-    @GET("apps")
-    Call<List<AppModel>> getApps();
 
     @GET("apps-mixed")
     Call<JsonObject> getMixedApps();

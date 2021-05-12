@@ -32,7 +32,6 @@ public class MyAppsFragment extends Fragment {
     private ArrayList<AccessTokenModel> myApps;
     private LinearLayout emptyView;
     private Button loginView;
-    private String appIDToSelect;
     private RecyclerView recyclerView;
     private MyAppsAdapter appAdapter;
     private SwipeRefreshLayout swipeRefresh;
@@ -54,19 +53,11 @@ public class MyAppsFragment extends Fragment {
 
         updateData();
 
-        loginView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activity.setActiveMenuItem(R.id.navigation_apps);
-            }
-        });
+        loginView.setOnClickListener(view -> activity.setActiveMenuItem(R.id.navigation_apps));
 
-        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                updateData();
-                swipeRefresh.setRefreshing(false);
-            }
+        swipeRefresh.setOnRefreshListener(() -> {
+            updateData();
+            swipeRefresh.setRefreshing(false);
         });
     }
 

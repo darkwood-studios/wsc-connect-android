@@ -1,6 +1,7 @@
 package wscconnect.android;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -12,7 +13,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -22,10 +22,9 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
+
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Base64;
@@ -37,7 +36,6 @@ import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -45,6 +43,7 @@ import com.auth0.android.jwt.JWT;
 
 import com.google.gson.GsonBuilder;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,7 +53,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -113,10 +111,6 @@ public class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void showKeyboard(Context context) {
-        ((InputMethodManager) (context).getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 
     public static void hideProgressView(View view, ProgressBar bar) {
@@ -266,14 +260,11 @@ public class Utils {
             }
         }
 
-        Collections.sort(tokens, new Comparator<AccessTokenModel>() {
-            @Override
-            public int compare(AccessTokenModel t1, AccessTokenModel t2) {
-                String app1Name = t1.getAppName().replaceAll("[^a-zA-Z]", "").toLowerCase();
-                String app2Name = t2.getAppName().replaceAll("[^a-zA-Z]", "").toLowerCase();
+        Collections.sort(tokens, (t1, t2) -> {
+            String app1Name = t1.getAppName().replaceAll("[^a-zA-Z]", "").toLowerCase();
+            String app2Name = t2.getAppName().replaceAll("[^a-zA-Z]", "").toLowerCase();
 
-                return app1Name.compareToIgnoreCase(app2Name);
-            }
+            return app1Name.compareToIgnoreCase(app2Name);
         });
 
         return tokens;
@@ -303,12 +294,9 @@ public class Utils {
         String refreshToken = Utils.getRefreshTokenString(activity, appID);
 
         if (accessTokenRefreshing) {
-            setOnRefreshAccessTokenFinishCallback(new SimpleCallback() {
-                @Override
-                public void onReady(boolean success) {
-                    setOnRefreshAccessTokenFinishCallback(null);
-                    callback.onReady(success);
-                }
+            setOnRefreshAccessTokenFinishCallback(success -> {
+                setOnRefreshAccessTokenFinishCallback(null);
+                callback.onReady(success);
             });
             return;
         }
@@ -317,7 +305,7 @@ public class Utils {
 
         Utils.getAPI(activity, refreshToken).getAccessToken().enqueue(new RetroCallback<ResponseBody>(activity) {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
                 super.onResponse(call, response);
 
                 accessTokenRefreshing = false;
@@ -325,6 +313,7 @@ public class Utils {
                 if (response.isSuccessful()) {
                     JSONObject obj;
                     try {
+                        assert response.body() != null;
                         obj = new JSONObject(response.body().string());
                         String accessToken = obj.getString("accessToken");
 
@@ -343,7 +332,7 @@ public class Utils {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 accessTokenRefreshing = false;
@@ -416,12 +405,8 @@ public class Utils {
 
         }
 
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
-            notificationBuilder.setSmallIcon(R.drawable.ic_notification_transparent);
-        } else {
-            notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
-        }
+        notificationBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
+        notificationBuilder.setSmallIcon(R.drawable.ic_notification_transparent);
 
         if (ringtone != null && !ringtone.isEmpty() && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || ContextCompat.checkSelfPermission(context,
@@ -463,25 +448,6 @@ public class Utils {
         }
     }
 
-    public static void showFullScreenPhotoDialog(final Activity activity, String photoURL) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity, android.R.style.Theme_NoTitleBar_Fullscreen);
-
-        LayoutInflater inflater = activity.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_photo, null);
-
-        ImageView photo = dialogView.findViewById(R.id.dialog_photo_photo);
-
-        builder.setView(dialogView);
-        final AlertDialog dialog = builder.show();
-
-        dialogView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-    }
-
     @SuppressWarnings("deprecation")
     public static Spanned fromHtml(String source) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -507,34 +473,28 @@ public class Utils {
         clientBuilder.connectTimeout(timeout, TimeUnit.SECONDS);
         clientBuilder.readTimeout(timeout, TimeUnit.SECONDS);
 
-        Interceptor offlineResponseCacheInterceptor = new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                if (!Utils.hasInternetConnection(context)) {
-                    request = request.newBuilder()
-                            .header("Cache-Control",
-                                    "public, only-if-cached, max-stale=" + 2419200)
-                            .build();
-                }
-                return chain.proceed(request);
+        Interceptor offlineResponseCacheInterceptor = chain -> {
+            Request request = chain.request();
+            if (!Utils.hasInternetConnection(context)) {
+                request = request.newBuilder()
+                        .header("Cache-Control",
+                                "public, only-if-cached, max-stale=" + 2419200)
+                        .build();
             }
+            return chain.proceed(request);
         };
 
-        Interceptor fixUrlInterceptor = new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                String url = request.url().toString();
-                url = url.replace("%3F", "?");
-                url = url.replace("%2F", "/");
+        Interceptor fixUrlInterceptor = chain -> {
+            Request request = chain.request();
+            String url1 = request.url().toString();
+            url1 = url1.replace("%3F", "?");
+            url1 = url1.replace("%2F", "/");
 
-                request = request.newBuilder()
-                        .url(url)
-                        .build();
+            request = request.newBuilder()
+                    .url(url1)
+                    .build();
 
-                return chain.proceed(request);
-            }
+            return chain.proceed(request);
         };
 
         clientBuilder.addInterceptor(offlineResponseCacheInterceptor);
@@ -543,28 +503,22 @@ public class Utils {
                 "APICache"), 50 * 1024 * 1024));
 
         if (token != null) {
-            clientBuilder.addInterceptor(new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request newRequest = chain.request().newBuilder()
-                            .addHeader("Authorization", "Bearer " + token)
-                            // necessary, because some Apache webservers discard the auth headers
-                            .addHeader("X-Authorization", "Bearer " + token)
-                            .build();
-                    return chain.proceed(newRequest);
-                }
+            clientBuilder.addInterceptor(chain -> {
+                Request newRequest = chain.request().newBuilder()
+                        .addHeader("Authorization", "Bearer " + token)
+                        // necessary, because some Apache webservers discard the auth headers
+                        .addHeader("X-Authorization", "Bearer " + token)
+                        .build();
+                return chain.proceed(newRequest);
             });
         }
 
         // set user agent
-        clientBuilder.addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request newRequest = chain.request().newBuilder()
-                        .addHeader("User-Agent", AppWebviewFragment.USER_AGENT)
-                        .build();
-                return chain.proceed(newRequest);
-            }
+        clientBuilder.addInterceptor(chain -> {
+            Request newRequest = chain.request().newBuilder()
+                    .addHeader("User-Agent", AppWebviewFragment.USER_AGENT)
+                    .build();
+            return chain.proceed(newRequest);
         });
 
         // add current app version
@@ -577,21 +531,18 @@ public class Utils {
             versionCode = 1;
         }
         final int finalVersionCode = versionCode;
-        clientBuilder.addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request newRequest = chain.request().newBuilder()
-                        .addHeader("X-App-Version-Code", String.valueOf(finalVersionCode))
-                        .build();
-                return chain.proceed(newRequest);
-            }
+        clientBuilder.addInterceptor(chain -> {
+            Request newRequest = chain.request().newBuilder()
+                    .addHeader("X-App-Version-Code", String.valueOf(finalVersionCode))
+                    .build();
+            return chain.proceed(newRequest);
         });
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-// set your desired log level
+        // set your desired log level
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-// add your other interceptors …
-// add logging as last interceptor
+        // add your other interceptors …
+        // add logging as last interceptor
         clientBuilder.addInterceptor(logging);  // <-- this is the important line!
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -633,10 +584,10 @@ public class Utils {
     }
 
     public static void setError(Context context, TextView view) {
-        setError(context, view, context.getString(R.string.required));
+        setError(view, context.getString(R.string.required));
     }
 
-    public static void setError(Context context, TextView view, String error) {
+    public static void setError(TextView view, String error) {
         view.requestFocus();
         view.setError(error);
         ViewParent parent = view.getParent();
@@ -645,6 +596,7 @@ public class Utils {
         }
     }
 
+    @SuppressLint("InflateParams")
     public static void showLoadingOverlay(Activity activity, boolean show) {
         if (activity == null) {
             return;
@@ -672,17 +624,6 @@ public class Utils {
                 rootView.findViewById(R.id.loading_overlay_view).setVisibility(View.GONE);
             }
         }
-    }
-
-    public static int dpToPx(int dp, Context context) {
-        Resources r = context.getResources();
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
-    }
-
-    public static String decodeBase64(String string) {
-        byte[] base = Base64.decode(string, Base64.DEFAULT);
-        return new String(base, StandardCharsets.UTF_8);
-
     }
 
     public static String decryptString(String encryptedText, String secret, String initVector) {

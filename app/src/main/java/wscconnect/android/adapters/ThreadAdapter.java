@@ -1,5 +1,6 @@
 package wscconnect.android.adapters;
 
+import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.os.Handler;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import wscconnect.android.GlideApp;
@@ -17,7 +20,6 @@ import wscconnect.android.R;
 import wscconnect.android.ViewHolder;
 import wscconnect.android.activities.AppActivity;
 import wscconnect.android.fragments.myApps.appOptions.AppForumFragment;
-import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.BoardModel;
 import wscconnect.android.models.ThreadModel;
 
@@ -30,21 +32,20 @@ import wscconnect.android.models.ThreadModel;
 public class ThreadAdapter extends RecyclerView.Adapter<ViewHolder> {
     private static final int TYPE_HEADER = 1;
     private static final int TYPE_THREAD = 2;
-    private final AccessTokenModel token;
     private final AppForumFragment fragment;
     private BoardModel board;
-    private AppActivity activity;
-    private List<ThreadModel> threadList;
+    private final AppActivity activity;
+    private final List<ThreadModel> threadList;
 
-    public ThreadAdapter(AppActivity activity, AppForumFragment fragment, List<ThreadModel> threadList, AccessTokenModel token) {
+    public ThreadAdapter(AppActivity activity, AppForumFragment fragment, List<ThreadModel> threadList) {
         this.activity = activity;
         this.fragment = fragment;
         this.threadList = threadList;
-        this.token = token;
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         ViewHolder v = null;
 
         switch (viewType) {
@@ -58,6 +59,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ViewHolder> {
                 break;
         }
 
+        assert v != null;
         return v;
     }
 
@@ -71,6 +73,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ViewHolder> {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
@@ -129,14 +132,10 @@ public class ThreadAdapter extends RecyclerView.Adapter<ViewHolder> {
             replies = view.findViewById(R.id.list_thread_replies);
             avatar = view.findViewById(R.id.list_thread_avatar);
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    loadThread();
-                }
-            });
+            view.setOnClickListener(view1 -> loadThread());
         }
 
+        @SuppressWarnings("deprecation")
         private void loadThread() {
             int position = getActualPosition(getAdapterPosition());
 
@@ -146,11 +145,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ViewHolder> {
                 fragment.getPosts(thread, AppForumFragment.LIMIT, 0);
             } else {
                 // wait a short time and try again.
-                new Handler().postDelayed(new Runnable() {
-                    public void run() {
-                        loadThread();
-                    }
-                }, 200);
+                new Handler().postDelayed(this::loadThread, 200);
             }
         }
     }

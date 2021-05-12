@@ -48,10 +48,6 @@ public class ThreadModel {
         return topic;
     }
 
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
     public boolean isNew() {
         return isNew;
     }
@@ -64,32 +60,16 @@ public class ThreadModel {
         return isClosed;
     }
 
-    public void setClosed(boolean closed) {
-        isClosed = closed;
-    }
-
     public int getLastPostTime() {
         return lastPostTime;
-    }
-
-    public void setLastPostTime(int lastPostTime) {
-        this.lastPostTime = lastPostTime;
     }
 
     public String getLastPostUsername() {
         return lastPostUsername;
     }
 
-    public void setLastPostUsername(String lastPostUsername) {
-        this.lastPostUsername = lastPostUsername;
-    }
-
     public int getReplies() {
         return replies;
-    }
-
-    public void setReplies(int replies) {
-        this.replies = replies;
     }
 
     public String getLastPostAvatar() {

@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import wscconnect.android.R;
@@ -19,14 +21,15 @@ import wscconnect.android.models.MessageModel;
  */
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHolder> {
-    private Activity activity;
-    private List<MessageModel> messageList;
+    private final Activity activity;
+    private final List<MessageModel> messageList;
 
     public MessageAdapter(Activity activity, List<MessageModel> messageList) {
         this.activity = activity;
         this.messageList = messageList;
     }
 
+    @NotNull
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
@@ -49,7 +52,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         return messageList.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView title, message, time;
 
         public MyViewHolder(View view) {

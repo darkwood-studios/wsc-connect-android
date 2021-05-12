@@ -46,6 +46,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonObject;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -55,6 +56,7 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -172,20 +174,13 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         activity.setOnBackPressedListener(this);
 
         privacy.setMovementMethod(LinkMovementMethod.getInstance());
-        privacyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    privacyCheckbox.setError(null);
-                }
+        privacyCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                privacyCheckbox.setError(null);
             }
         });
 
-        othersMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFullList(true);
-            }
-        });
+        othersMore.setOnClickListener(v -> showFullList(true));
 
         showProgressBars(true);
         loadApps();
@@ -205,15 +200,15 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NotNull Menu menu, @NotNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.apps_fragment, menu);
 
@@ -270,7 +265,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         // set list to default list, in case a search was performed
         if (hidden) {
             performSearch(null);
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            Objects.requireNonNull(activity.getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
         } else {
             activity.setOnBackPressedListener(this);
         }
@@ -291,14 +286,12 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                         appListFull.add(app);
                     }
                 }
-                appFullAdapter.notifyDataSetChanged();
-                toggleIsEmptyForFullList();
             } else {
                 appListFull.clear();
                 appListFull.addAll(allVisibleApps);
-                appFullAdapter.notifyDataSetChanged();
-                toggleIsEmptyForFullList();
             }
+            appFullAdapter.notifyDataSetChanged();
+            toggleIsEmptyForFullList();
         }
     }
 
@@ -317,27 +310,28 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             allFullContainer.setVisibility(View.VISIBLE);
 
             // toolbar
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(activity.getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
             showSearchIcon(true);
         } else {
             isFullAppListVisible = false;
             allFullContainer.setVisibility(View.GONE);
             scrollView.setVisibility(View.VISIBLE);
 
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            Objects.requireNonNull(activity.getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
         }
     }
 
     private void loadApps() {
         Utils.getAPI(activity).getMixedApps().enqueue(new RetroCallback<JsonObject>(activity) {
             @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+            public void onResponse(@NotNull Call<JsonObject> call, @NotNull Response<JsonObject> response) {
                 super.onResponse(call, response);
 
                 showProgressBars(false);
 
                 if (response.isSuccessful()) {
                     newestList.clear();
+                    assert response.body() != null;
                     newestList.addAll(AppModel.fromJSONArray(response.body().getAsJsonArray("newest")));
                     newestListAdapter.notifyDataSetChanged();
 
@@ -366,7 +360,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             }
 
             @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
+            public void onFailure(Call<JsonObject> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 showProgressBars(false);
@@ -374,6 +368,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
         });
     }
 
+    @SuppressWarnings("deprecation")
     public void switchToDetailView(boolean detail, boolean forceLogin, final AppModel app) {
         detailApp = app;
 
@@ -397,26 +392,18 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             }
 
             if (app.isLoggedIn(activity) && !forceLogin) {
-                String username = Utils.getAccessToken(activity, app.getAppID()).getUsername();
+                String username = Objects.requireNonNull(Utils.getAccessToken(activity, app.getAppID())).getUsername();
                 if (username == null || username.isEmpty()) {
                     username = Utils.getUsername(activity, app.getAppID());
                 }
 
                 loggedInAs.setText(getString(R.string.fragment_apps_details_logged_in_as, username));
-                showAccountButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        activity.setNotificationAppID(app.getAppID());
-                        activity.setActiveMenuItem(R.id.navigation_my_apps);
-                    }
+                showAccountButton.setOnClickListener(view -> {
+                    activity.setNotificationAppID(app.getAppID());
+                    activity.setActiveMenuItem(R.id.navigation_my_apps);
                 });
 
-                switchAccountButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        switchToDetailView(true, true, app);
-                    }
-                });
+                switchAccountButton.setOnClickListener(view -> switchToDetailView(true, true, app));
 
                 logoutAccountButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -439,7 +426,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                                 String token = Utils.getAccessTokenString(activity, app.getAppID());
                                 Utils.getAPI(activity, token).logout(app.getAppID(), logoutModel).enqueue(new RetroCallback<ResponseBody>(activity) {
                                     @Override
-                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
                                         super.onResponse(call, response);
 
                                         showAccountButton.setEnabled(true);
@@ -453,7 +440,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                                     }
 
                                     @Override
-                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    public void onFailure(Call<ResponseBody> call, @NotNull Throwable t) {
                                         super.onFailure(call, t);
 
                                         showAccountButton.setEnabled(true);
@@ -468,36 +455,23 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                 detailsContainerLoggedIn.setVisibility(View.VISIBLE);
             } else {
                 thirdPartyInfoView.setText(activity.getString(R.string.dialog_login_third_party_info, app.getName()));
-                passwordVisibleView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (passwordView.getInputType() == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
-                            passwordView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                            Glide.with(activity).load(R.drawable.ic_visibility_black_36dp).into(passwordVisibleView);
-                        } else {
-                            passwordView.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                            GlideApp.with(activity).load(R.drawable.ic_visibility_off_black_36dp).into(passwordVisibleView);
-                        }
-
-                        passwordView.setSelection(passwordView.length());
+                passwordVisibleView.setOnClickListener(view -> {
+                    if (passwordView.getInputType() == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+                        passwordView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        Glide.with(activity).load(R.drawable.ic_visibility_black_36dp).into(passwordVisibleView);
+                    } else {
+                        passwordView.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                        GlideApp.with(activity).load(R.drawable.ic_visibility_off_black_36dp).into(passwordVisibleView);
                     }
+
+                    passwordView.setSelection(passwordView.length());
                 });
 
                 GlideApp.with(activity).load(R.drawable.ic_visibility_black_36dp).into(passwordVisibleView);
 
-                thirdPartySubmitView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        login(app, usernameView, passwordView, submitView, thirdPartySubmitView, true);
-                    }
-                });
+                thirdPartySubmitView.setOnClickListener(view -> login(app, usernameView, passwordView, submitView, thirdPartySubmitView, true));
 
-                submitView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        login(app, usernameView, passwordView, submitView, thirdPartySubmitView, false);
-                    }
-                });
+                submitView.setOnClickListener(v -> login(app, usernameView, passwordView, submitView, thirdPartySubmitView, false));
 
                 detailsContainerLoggedIn.setVisibility(View.GONE);
                 detailsContainerLoggedOut.setVisibility(View.VISIBLE);
@@ -507,11 +481,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
             appsContainer.setVisibility(View.VISIBLE);
             setupToolbar(false, null);
 
-            if (isFullAppListVisible) {
-                showFullList(true);
-            } else {
-                showFullList(false);
-            }
+            showFullList(isFullAppListVisible);
 
             Utils.hideKeyboard(activity);
 
@@ -525,12 +495,12 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
 
     private void setupToolbar(boolean detail, AppModel app) {
         if (detail) {
-            activity.getSupportActionBar().setTitle(app.getName());
+            Objects.requireNonNull(activity.getSupportActionBar()).setTitle(app.getName());
             activity.getSupportActionBar().setSubtitle(app.getUrl());
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             showSearchIcon(false);
         } else {
-            activity.getSupportActionBar().setTitle(R.string.app_name);
+            Objects.requireNonNull(activity.getSupportActionBar()).setTitle(R.string.app_name);
             activity.getSupportActionBar().setSubtitle(null);
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             showSearchIcon(true);
@@ -599,15 +569,18 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                 loginModel.setFirebaseToken(token);
                 loginModel.setThirdPartyLogin(thirdParty);
                 loginModel.setDevice(Build.MODEL);
+                assert keyPair != null;
                 loginModel.setPublicKey(KeyUtils.getPublicPemKey(keyPair));
 
                 Utils.getAPI(activity).login(app.getAppID(), loginModel).enqueue(new RetroCallback<ResponseBody>(activity) {
+                    @SuppressWarnings("deprecation")
                     @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
                         super.onResponse(call, response);
 
                         if (response.isSuccessful()) {
                             try {
+                                assert response.body() != null;
                                 JSONObject obj = new JSONObject(response.body().string());
                                 final String accessToken = obj.getString("accessToken");
                                 final String refreshToken = obj.getString("refreshToken");
@@ -639,6 +612,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                                             saveLogin(accessToken, refreshToken, wscConnectToken, username);
                                         }
 
+                                        @SuppressWarnings("deprecation")
                                         @Override
                                         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                                             //Handle the error
@@ -660,17 +634,12 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                                     });
                                     webview.postUrl(app.getApiUrl(), postData.getBytes());
 
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            // in case the webview login is not finished after the timeout, cancel it manually
-                                            if (!webviewFinishedLoading) {
-                                                if (webview != null) {
-                                                    webview.stopLoading();
-                                                }
-                                                webviewFinishedLoading = true;
-                                                saveLogin(accessToken, refreshToken, wscConnectToken, username);
-                                            }
+                                    new Handler().postDelayed(() -> {
+                                        // in case the webview login is not finished after the timeout, cancel it manually
+                                        if (!webviewFinishedLoading) {
+                                            webview.stopLoading();
+                                            webviewFinishedLoading = true;
+                                            saveLogin(accessToken, refreshToken, wscConnectToken, username);
                                         }
                                     }, WEBVIEW_TIMEOUT);
                                 }
@@ -713,7 +682,7 @@ public class AppsFragment extends Fragment implements OnBackPressedListener {
                     }
 
                     @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    public void onFailure(Call<ResponseBody> call, @NotNull Throwable t) {
                         hideLoading();
                         Toast.makeText(activity, R.string.login_failed_global, Toast.LENGTH_SHORT).show();
                     }

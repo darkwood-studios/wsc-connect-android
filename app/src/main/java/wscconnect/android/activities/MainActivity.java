@@ -1,5 +1,6 @@
 package wscconnect.android.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,6 +23,8 @@ import android.widget.TextView;
 
 import com.google.firebase.FirebaseApp;
 
+import java.util.Objects;
+
 import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.fragments.AppsFragment;
@@ -37,7 +40,6 @@ import static wscconnect.android.Utils.getAllAccessTokens;
  */
 
 public class MainActivity extends AppCompatActivity {
-    public final static String TAG = "WSC-Connect";
     public final static String EXTRA_NOTIFICATION = "extraNotification";
     public final static String EXTRA_OPTION_TYPE = "extraOptionType";
     public static boolean IS_VISIBLE = true;
@@ -50,9 +52,10 @@ public class MainActivity extends AppCompatActivity {
     private FragmentManager fManager;
     private String notificationAppID;
     private OnBackPressedListener onBackPressedListener;
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+    private final BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
+        @SuppressLint("NonConstantResourceId")
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
@@ -106,10 +109,6 @@ public class MainActivity extends AppCompatActivity {
         this.notificationAppID = notificationAppID;
     }
 
-    public Fragment getCurrentFragment() {
-        return currentFragment;
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -131,16 +130,15 @@ public class MainActivity extends AppCompatActivity {
         IS_VISIBLE = true;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     public void setOnBackPressedListener(OnBackPressedListener callback) {
@@ -163,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 hideFragments(myAppsFragmentTag);
-                getSupportActionBar().setTitle(R.string.app_name);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.app_name);
                 break;
             case 1:
                 newFragment = fManager.findFragmentByTag(myAppsFragmentTag);
@@ -177,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 hideFragments(appsFragmentTag);
-                getSupportActionBar().setTitle(R.string.title_my_apps);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.title_my_apps);
                 getSupportActionBar().setSubtitle(null);
                 break;
         }
@@ -267,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
 
             AlertDialog dialog = builder.show();
 
-            ((TextView) dialog.findViewById(R.id.privacy_part_1)).setMovementMethod(LinkMovementMethod.getInstance());
+            ((TextView) Objects.requireNonNull(dialog.findViewById(R.id.privacy_part_1))).setMovementMethod(LinkMovementMethod.getInstance());
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.textColor));
         }
 

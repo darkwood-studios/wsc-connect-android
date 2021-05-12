@@ -32,19 +32,6 @@ public class NotificationModel {
         return link;
     }
 
-    public void setLink(String link) {
-        this.link = link;
-    }
-
-    public String getLogo() {
-        // glide can't properly handle .svg
-        if (logo == null || logo.endsWith(".svg")) {
-            return "";
-        }
-
-        return logo;
-    }
-
     public void setLogo(String logo) {
         this.logo = logo;
     }

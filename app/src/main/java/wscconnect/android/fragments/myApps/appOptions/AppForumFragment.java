@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +28,6 @@ import wscconnect.android.adapters.BoardAdapter;
 import wscconnect.android.adapters.PostAdapter;
 import wscconnect.android.adapters.ThreadAdapter;
 import wscconnect.android.callbacks.RetroCallback;
-import wscconnect.android.callbacks.SimpleCallback;
 import wscconnect.android.listeners.OnBackPressedListener;
 import wscconnect.android.listeners.OnFragmentUpdateListener;
 import wscconnect.android.models.AccessTokenModel;
@@ -42,7 +43,6 @@ import wscconnect.android.models.ThreadModel;
 
 public class AppForumFragment extends Fragment implements OnBackPressedListener, OnFragmentUpdateListener {
     public final static int LIMIT = 20;
-    private final static int VISIBLE_THRESHOLD = 3;
     private AppActivity activity;
     private AccessTokenModel token;
     private RecyclerView boardListView;
@@ -72,6 +72,7 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        assert getArguments() != null;
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
         host = Utils.prepareApiUrl(token.getAppApiUrl());
         activeView = ActiveView.BOARD_LIST;
@@ -83,8 +84,8 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
         postList = new ArrayList<>();
         boardAdapter = new BoardAdapter(activity, this, boardList, token);
         categoryBoardAdapter = new BoardAdapter(activity, this, categoryBoardList, token);
-        threadAdapter = new ThreadAdapter(activity, this, threadList, token);
-        postAdapter = new PostAdapter(activity, this, postList, token);
+        threadAdapter = new ThreadAdapter(activity, this, threadList);
+        postAdapter = new PostAdapter(activity, postList);
 
         boardListView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         boardListView.setAdapter(boardAdapter);
@@ -100,26 +101,23 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
 
         loadingTextView.setText(getString(R.string.fragment_app_forum_loading_info, token.getAppName()));
         loadingView.setVisibility(View.VISIBLE);
-        getBoards(null);
+        getBoards();
 
-        refreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getBoards(null);
-            }
-        });
+        refreshView.setOnRefreshListener(this::getBoards);
     }
 
-    public void getBoards(final SimpleCallback callback) {
+    @SuppressWarnings("deprecation")
+    public void getBoards() {
         Utils.getAPI(activity, host, token.getToken()).getBoards(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getBoards"), null).enqueue(new RetroCallback<List<BoardModel>>(activity) {
             @Override
-            public void onResponse(Call<List<BoardModel>> call, Response<List<BoardModel>> response) {
+            public void onResponse(@NotNull Call<List<BoardModel>> call, @NotNull Response<List<BoardModel>> response) {
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
 
                 if (response.isSuccessful()) {
                     boardList.clear();
+                    assert response.body() != null;
                     boardList.addAll(response.body());
                     boardAdapter.notifyDataSetChanged();
                     loadingView.setVisibility(View.GONE);
@@ -133,7 +131,7 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
             }
 
             @Override
-            public void onFailure(Call<List<BoardModel>> call, Throwable t) {
+            public void onFailure(Call<List<BoardModel>> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 refreshView.setRefreshing(false);
@@ -176,18 +174,20 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
 
     }
 
+    @SuppressWarnings("deprecation")
     public void getPosts(final ThreadModel thread, int limit, int offset) {
         refreshView.setRefreshing(true);
 
         Utils.getAPI(activity, host, token.getToken()).getPosts(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getPosts"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(thread.getThreadID())), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset))).enqueue(new RetroCallback<List<PostModel>>(activity) {
             @Override
-            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
+            public void onResponse(@NotNull Call<List<PostModel>> call, @NotNull Response<List<PostModel>> response) {
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
 
                 if (response.isSuccessful()) {
                     postList.clear();
+                    assert response.body() != null;
                     postList.addAll(response.body());
                     postAdapter.setThread(thread);
                     postAdapter.notifyDataSetChanged();
@@ -204,7 +204,7 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
             }
 
             @Override
-            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+            public void onFailure(Call<List<PostModel>> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 refreshView.setRefreshing(false);
@@ -214,18 +214,20 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
         });
     }
 
+    @SuppressWarnings("deprecation")
     public void getThreads(final BoardModel board, int limit, int offset) {
         refreshView.setRefreshing(true);
 
         Utils.getAPI(activity, host, token.getToken()).getThreads(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getThreads"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(board.getBoardID())), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset))).enqueue(new RetroCallback<List<ThreadModel>>(activity) {
             @Override
-            public void onResponse(Call<List<ThreadModel>> call, Response<List<ThreadModel>> response) {
+            public void onResponse(@NotNull Call<List<ThreadModel>> call, @NotNull Response<List<ThreadModel>> response) {
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
 
                 if (response.isSuccessful()) {
                     threadList.clear();
+                    assert response.body() != null;
                     threadList.addAll(response.body());
                     threadAdapter.setBoard(board);
                     threadAdapter.notifyDataSetChanged();
@@ -242,7 +244,7 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
             }
 
             @Override
-            public void onFailure(Call<List<ThreadModel>> call, Throwable t) {
+            public void onFailure(Call<List<ThreadModel>> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 refreshView.setRefreshing(false);
@@ -252,19 +254,21 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
         });
     }
 
+    @SuppressWarnings("deprecation")
     public void getCategoryBoards(final BoardModel board) {
         refreshView.setRefreshing(true);
         activeBoard = board;
 
         Utils.getAPI(activity, host, token.getToken()).getBoards(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getBoards"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(board.getBoardID()))).enqueue(new RetroCallback<List<BoardModel>>(activity) {
             @Override
-            public void onResponse(Call<List<BoardModel>> call, Response<List<BoardModel>> response) {
+            public void onResponse(@NotNull Call<List<BoardModel>> call, @NotNull Response<List<BoardModel>> response) {
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
 
                 if (response.isSuccessful()) {
                     categoryBoardList.clear();
+                    assert response.body() != null;
                     categoryBoardList.addAll(response.body());
                     categoryBoardAdapter.setCategory(activeBoard);
                     categoryBoardAdapter.notifyDataSetChanged();
@@ -282,7 +286,7 @@ public class AppForumFragment extends Fragment implements OnBackPressedListener,
             }
 
             @Override
-            public void onFailure(Call<List<BoardModel>> call, Throwable t) {
+            public void onFailure(Call<List<BoardModel>> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 refreshView.setRefreshing(false);

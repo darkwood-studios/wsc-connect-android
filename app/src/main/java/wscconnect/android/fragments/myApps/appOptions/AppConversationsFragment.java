@@ -18,14 +18,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -46,8 +47,6 @@ import wscconnect.android.models.ConversationMessageModel;
 import wscconnect.android.models.ConversationModel;
 
 import static android.view.View.GONE;
-import static wscconnect.android.activities.AppActivity.EXTRA_EVENT_ID;
-import static wscconnect.android.activities.AppActivity.EXTRA_EVENT_NAME;
 import static wscconnect.android.activities.AppActivity.EXTRA_FORCE_LOAD;
 
 /**
@@ -90,13 +89,14 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        assert getArguments() != null;
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
         host = Utils.prepareApiUrl(token.getAppApiUrl());
 
         activity = (AppActivity) getActivity();
         conversationList = new ArrayList<>();
         conversationMessageList = new ArrayList<>();
-        conversationAdapter = new ConversationAdapter(activity, this, conversationList, token);
+        conversationAdapter = new ConversationAdapter(activity, this, conversationList);
         conversationMessageAdapter = new ConversationMessageAdapter(activity, this, conversationMessageList, token);
 
         final LinearLayoutManager conversationLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -109,30 +109,21 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
         loadingTextView.setText(getString(R.string.fragment_app_conversations_loading_info, token.getAppName()));
         getConversations(LIMIT, 0, null);
 
-        refreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if (messageListVisible()) {
-                    getConversationMessages(activeConversation, LIMIT, 0, null);
-                } else {
-                    getConversations(LIMIT, 0, new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            refreshView.setRefreshing(false);
-                        }
-                    });
-                }
+        refreshView.setOnRefreshListener(() -> {
+            if (messageListVisible()) {
+                getConversationMessages(activeConversation, LIMIT, 0, null);
+            } else {
+                getConversations(LIMIT, 0, success -> refreshView.setRefreshing(false));
             }
         });
 
         conversationListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int lastVisibleItem, totalItemCount;
 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                totalItemCount = conversationLayoutManager.getItemCount();
-                lastVisibleItem = conversationLayoutManager.findLastVisibleItemPosition();
+                int totalItemCount = conversationLayoutManager.getItemCount();
+                int lastVisibleItem = conversationLayoutManager.findLastVisibleItemPosition();
                 if (!conversationsLoading && !conversationsAllLoaded && totalItemCount <= (lastVisibleItem + VISIBLE_THRESHOLD)) {
                     conversationsLoading = true;
                     refreshView.setRefreshing(true);
@@ -142,13 +133,12 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
         });
 
         conversationMessageListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int lastVisibleItem, totalItemCount;
 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                totalItemCount = conversationMessagesLayoutManger.getItemCount();
-                lastVisibleItem = conversationMessagesLayoutManger.findLastVisibleItemPosition();
+                int totalItemCount = conversationMessagesLayoutManger.getItemCount();
+                int lastVisibleItem = conversationMessagesLayoutManger.findLastVisibleItemPosition();
                 if (totalItemCount <= (lastVisibleItem + VISIBLE_THRESHOLD)) {
                     conversationMessageFab.hide();
                     if (conversationMessagesShouldLoad && conversationMessageAdapter.isConversationMessagesAutoLoad() && !conversationMessagesLoading && !conversationMessagesAllLoaded) {
@@ -163,12 +153,9 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
             }
         });
 
-        conversationMessageFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                conversationMessagesShouldLoad = false;
-                conversationMessageListView.scrollToPosition(conversationMessagesLayoutManger.getItemCount() - 1);
-            }
+        conversationMessageFab.setOnClickListener(v -> {
+            conversationMessagesShouldLoad = false;
+            conversationMessageListView.scrollToPosition(conversationMessagesLayoutManger.getItemCount() - 1);
         });
     }
 
@@ -182,6 +169,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
         this.token = token;
     }
 
+    @SuppressWarnings("deprecation")
     public void getConversations(final int limit, final int offset, final SimpleCallback callback) {
         if (callback == null) {
             loadingView.setVisibility(View.VISIBLE);
@@ -197,7 +185,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
         apiCall = Utils.getAPI(activity, host, token.getToken()).getConversations(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getConversations"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset)));
         apiCall.enqueue(new RetroCallback<List<ConversationModel>>(activity) {
             @Override
-            public void onResponse(Call<List<ConversationModel>> call, Response<List<ConversationModel>> response) {
+            public void onResponse(@NotNull Call<List<ConversationModel>> call, @NotNull Response<List<ConversationModel>> response) {
                 super.onResponse(call, response);
 
                 if (response.isSuccessful()) {
@@ -211,6 +199,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                     }
 
                     // if we receive less data then we requested, there is no more available
+                    assert response.body() != null;
                     if (response.body().size() < limit) {
                         conversationsAllLoaded = true;
                     }
@@ -235,17 +224,13 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                     setEmptyView();
                     callCallback(callback, true);
                 } else if (response.code() == 409) {
-                    Utils.refreshAccessToken(activity, finalToken.getAppID(), new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (success) {
-                                // refresh token
-                                token = Utils.getAccessToken(activity, token.getAppID());
-                                getConversations(limit, offset, callback);
-                            } else {
-                                callCallback(callback, false);
-                                // TODO show info to refresh manually
-                            }
+                    Utils.refreshAccessToken(activity, finalToken.getAppID(), success -> {
+                        if (success) {
+                            // refresh token
+                            token = Utils.getAccessToken(activity, token.getAppID());
+                            getConversations(limit, offset, callback);
+                        } else {
+                            callCallback(callback, false);
                         }
                     });
                 } else if (response.code() == 404) {
@@ -264,6 +249,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                     String message = "";
 
                     try {
+                        assert response.errorBody() != null;
                         String error = response.errorBody().string();
                         JSONObject json = new JSONObject(error);
                         message = json.getString("message");
@@ -284,7 +270,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
             }
 
             @Override
-            public void onFailure(Call<List<ConversationModel>> call, Throwable t) {
+            public void onFailure(Call<List<ConversationModel>> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 loadingView.setVisibility(GONE);
@@ -296,18 +282,10 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     }
 
     private void sortConversations() {
-        Collections.sort(conversationList, new Comparator<ConversationModel>() {
-            @Override
-            public int compare(ConversationModel c1, ConversationModel c2) {
-                if (c1.getTime() < c2.getTime())
-                    return 1;
-                if (c1.getTime() > c2.getTime())
-                    return -1;
-                return 0;
-            }
-        });
+        Collections.sort(conversationList, (c1, c2) -> Integer.compare(c2.getTime(), c1.getTime()));
     }
 
+    @SuppressWarnings("deprecation")
     public void getConversationMessages(final ConversationModel conversation, final int limit, final int offset, final SimpleCallback callback) {
         if (conversation == null) {
             return;
@@ -317,7 +295,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
 
         Utils.getAPI(activity, host, token.getToken()).getConversationMessages(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getConversationMessages"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversation.getConversationID())), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(limit)), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(offset))).enqueue(new RetroCallback<List<ConversationMessageModel>>(activity) {
             @Override
-            public void onResponse(Call<List<ConversationMessageModel>> call, Response<List<ConversationMessageModel>> response) {
+            public void onResponse(@NotNull Call<List<ConversationMessageModel>> call, @NotNull Response<List<ConversationMessageModel>> response) {
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
@@ -325,7 +303,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                 if (response.isSuccessful()) {
                     // only clear list, if no offset parameter is passed
                     if (offset == 0) {
-                        ((LinearLayoutManager) conversationMessageListView.getLayoutManager()).scrollToPositionWithOffset(0, 0);
+                        ((LinearLayoutManager) Objects.requireNonNull(conversationMessageListView.getLayoutManager())).scrollToPositionWithOffset(0, 0);
                         conversationMessageList.clear();
                         conversationMessagesAllLoaded = false;
 
@@ -333,6 +311,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                     }
 
                     // if we receive less data then we requested, there is no more available
+                    assert response.body() != null;
                     if (response.body().size() < limit) {
                         conversationMessageAdapter.setConversationMessagesAutoLoad(true);
                         conversationMessagesAllLoaded = true;
@@ -349,24 +328,20 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                     conversationAdapter.notifyDataSetChanged();
                     activity.setCustomTabView();
                 } else if (response.code() == 409) {
-                    Utils.refreshAccessToken(activity, token.getAppID(), new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (success) {
-                                // refresh token
-                                token = Utils.getAccessToken(activity, token.getAppID());
-                                getConversationMessages(conversation, limit, offset, callback);
-                            } else {
-                                callCallback(callback, false);
-                                // TODO show info to refresh manually
-                            }
+                    Utils.refreshAccessToken(activity, token.getAppID(), success -> {
+                        if (success) {
+                            // refresh token
+                            token = Utils.getAccessToken(activity, token.getAppID());
+                            getConversationMessages(conversation, limit, offset, callback);
+                        } else {
+                            callCallback(callback, false);
                         }
                     });
                 }
             }
 
             @Override
-            public void onFailure(Call<List<ConversationMessageModel>> call, Throwable t) {
+            public void onFailure(Call<List<ConversationMessageModel>> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 refreshView.setRefreshing(false);
@@ -438,10 +413,11 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
         return conversationMessageListContainer.getVisibility() == View.VISIBLE;
     }
 
+    @SuppressWarnings("deprecation")
     public void addConversationMessage(final int conversationID, final String message, final SimpleJSONCallback callback) {
         Utils.getAPI(activity, host, token.getToken()).addConversationMessage(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "addConversationMessage"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversationID)), RequestBody.create(MediaType.parse("text/plain"), message)).enqueue(new RetroCallback<ConversationMessageModel>(activity) {
             @Override
-            public void onResponse(Call<ConversationMessageModel> call, Response<ConversationMessageModel> response) {
+            public void onResponse(@NotNull Call<ConversationMessageModel> call, @NotNull Response<ConversationMessageModel> response) {
                 super.onResponse(call, response);
 
                 if (response.isSuccessful()) {
@@ -460,25 +436,22 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
                     }
 
                     // scroll to top
-                    (conversationMessageListView.getLayoutManager()).smoothScrollToPosition(conversationMessageListView, null, 0);
+                    (Objects.requireNonNull(conversationMessageListView.getLayoutManager())).smoothScrollToPosition(conversationMessageListView, null, 0);
 
                     callJSONCallback(callback, null, true);
                 } else if (response.code() == 409) {
-                    Utils.refreshAccessToken(activity, token.getAppID(), new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (success) {
-                                // refresh token
-                                token = Utils.getAccessToken(activity, token.getAppID());
-                                addConversationMessage(conversationID, message, callback);
-                            } else {
-                                callJSONCallback(callback, null, false);
-                                // TODO show info to refresh manually
-                            }
+                    Utils.refreshAccessToken(activity, token.getAppID(), success -> {
+                        if (success) {
+                            // refresh token
+                            token = Utils.getAccessToken(activity, token.getAppID());
+                            addConversationMessage(conversationID, message, callback);
+                        } else {
+                            callJSONCallback(callback, null, false);
                         }
                     });
                 } else {
                     try {
+                        assert response.errorBody() != null;
                         JSONObject error = new JSONObject(response.errorBody().string());
                         callJSONCallback(callback, error, false);
                     } catch (JSONException | IOException e) {
@@ -488,7 +461,7 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
             }
 
             @Override
-            public void onFailure(Call<ConversationMessageModel> call, Throwable t) {
+            public void onFailure(Call<ConversationMessageModel> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 callJSONCallback(callback, null, false);
@@ -497,12 +470,9 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     }
 
     public void onLoadMoreConversations() {
-        getConversations(LIMIT, conversationList.size(), new SimpleCallback() {
-            @Override
-            public void onReady(boolean success) {
-                refreshView.setRefreshing(false);
-                conversationsLoading = false;
-            }
+        getConversations(LIMIT, conversationList.size(), success -> {
+            refreshView.setRefreshing(false);
+            conversationsLoading = false;
         });
     }
 
@@ -511,33 +481,23 @@ public class AppConversationsFragment extends Fragment implements OnBackPressedL
     }
 
     public void onLoadMoreConversationMessages(final SimpleCallback callback) {
-        getConversationMessages(activeConversation, LIMIT, conversationMessageList.size(), new SimpleCallback() {
-            @Override
-            public void onReady(boolean success) {
-                refreshView.setRefreshing(false);
-                conversationMessagesLoading = false;
+        getConversationMessages(activeConversation, LIMIT, conversationMessageList.size(), success -> {
+            refreshView.setRefreshing(false);
+            conversationMessagesLoading = false;
 
-                if (callback != null) {
-                    callback.onReady(success);
-                }
+            if (callback != null) {
+                callback.onReady(success);
             }
         });
     }
 
     @Override
     public void onUpdate(Bundle bundle) {
-        int eventID = bundle.getInt(EXTRA_EVENT_ID);
-        int eventname = bundle.getInt(EXTRA_EVENT_NAME);
         boolean forceLoad = bundle.getBoolean(EXTRA_FORCE_LOAD);
 
         if (forceLoad) {
             refreshView.setRefreshing(true);
-            getConversations(LIMIT, 0, new SimpleCallback() {
-                @Override
-                public void onReady(boolean success) {
-                    refreshView.setRefreshing(false);
-                }
-            });
+            getConversations(LIMIT, 0, success -> refreshView.setRefreshing(false));
         }
     }
 }

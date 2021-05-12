@@ -9,13 +9,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import wscconnect.android.GlideApp;
 import wscconnect.android.R;
 import wscconnect.android.activities.AppActivity;
 import wscconnect.android.fragments.myApps.appOptions.AppConversationsFragment;
-import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.ConversationModel;
 
 /**
@@ -25,18 +26,17 @@ import wscconnect.android.models.ConversationModel;
  */
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.MyViewHolder> {
-    private final AccessTokenModel token;
     private final AppConversationsFragment fragment;
-    private AppActivity activity;
-    private List<ConversationModel> conversationList;
+    private final AppActivity activity;
+    private final List<ConversationModel> conversationList;
 
-    public ConversationAdapter(AppActivity activity, AppConversationsFragment fragment, List<ConversationModel> conversationList, AccessTokenModel token) {
+    public ConversationAdapter(AppActivity activity, AppConversationsFragment fragment, List<ConversationModel> conversationList) {
         this.activity = activity;
         this.fragment = fragment;
         this.conversationList = conversationList;
-        this.token = token;
     }
 
+    @NotNull
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
@@ -77,12 +77,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             participants = view.findViewById(R.id.list_conversation_participants);
             avatar = view.findViewById(R.id.list_conversation_avatar);
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    loadConversationMessages();
-                }
-            });
+            view.setOnClickListener(view1 -> loadConversationMessages());
         }
 
         private void loadConversationMessages() {
@@ -95,11 +90,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 fragment.getConversationMessages(conversation, AppConversationsFragment.LIMIT, 0, null);
             } else {
                 // wait a short time and try again.
-                new Handler().postDelayed(new Runnable() {
-                    public void run() {
-                        loadConversationMessages();
-                    }
-                }, 200);
+                new Handler().postDelayed(this::loadConversationMessages, 200);
             }
         }
     }

@@ -1,6 +1,5 @@
 package wscconnect.android.fragments;
 
-
 import android.Manifest;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -43,12 +42,10 @@ public class SettingsFragment extends PreferenceFragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch (requestCode) {
-            case SettingsFragment.PERMISSION_READ_EXTERNAL: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length == 0 ||  grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    showPermissionDialog();
-                }
+        if (requestCode == SettingsFragment.PERMISSION_READ_EXTERNAL) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                showPermissionDialog();
             }
         }
     }
@@ -57,15 +54,12 @@ public class SettingsFragment extends PreferenceFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.error_permission_external);
         builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setPositiveButton(R.string.error_permission_external_button, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
-                intent.setData(uri);
-                startActivity(intent);
-            }
+        builder.setPositiveButton(R.string.error_permission_external_button, (dialog, which) -> {
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
         });
         builder.show();
     }
@@ -86,48 +80,45 @@ public class SettingsFragment extends PreferenceFragment {
             ringtonePref.setSummary(getRingtoneName(ringtone));
         }
 
-        ringtonePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                if (ContextCompat.checkSelfPermission(getActivity(),
-                        Manifest.permission.READ_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
+        ringtonePref.setOnPreferenceChangeListener((preference, o) -> {
+            if (ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
 
-                    // Permission is not granted
-                    // Should we show an explanation?
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                            Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        showPermissionDialog();
-                    } else {
-                        // No explanation needed; request the permission
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                    PERMISSION_READ_EXTERNAL);
-                        }
-
-                        // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                        // app-defined int constant. The callback method gets the
-                        // result of the request.
-                    }
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-                    String channelName = Utils.getNotificationChannel(getActivity());
-                    if (channelName != null) {
-                        mNotificationManager.deleteNotificationChannel(channelName);
-                    }
-                    Utils.setNotificationChannel(getActivity(), null);
-                }
-                String value = (String) o;
-                if (!value.isEmpty() && !getRingtoneName(value).isEmpty()) {
-                    ringtonePref.setSummary(getRingtoneName(value));
+                // Permission is not granted
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    showPermissionDialog();
                 } else {
-                    ringtonePref.setSummary(R.string.pref_notifications_ringtone_summary);
-                }
+                    // No explanation needed; request the permission
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                PERMISSION_READ_EXTERNAL);
+                    }
 
-                return true;
+                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                    // app-defined int constant. The callback method gets the
+                    // result of the request.
+                }
             }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+                String channelName = Utils.getNotificationChannel(getActivity());
+                if (channelName != null) {
+                    mNotificationManager.deleteNotificationChannel(channelName);
+                }
+                Utils.setNotificationChannel(getActivity(), null);
+            }
+            String value = (String) o;
+            if (!value.isEmpty() && !getRingtoneName(value).isEmpty()) {
+                ringtonePref.setSummary(getRingtoneName(value));
+            } else {
+                ringtonePref.setSummary(R.string.pref_notifications_ringtone_summary);
+            }
+
+            return true;
         });
     }
 

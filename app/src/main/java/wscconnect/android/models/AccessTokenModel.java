@@ -34,7 +34,7 @@ public class AccessTokenModel implements Parcelable {
             return new AccessTokenModel[size];
         }
     };
-    private long uniqueID;
+    private final long uniqueID;
     private int userID;
     private String username;
     private String appID;
@@ -44,7 +44,7 @@ public class AccessTokenModel implements Parcelable {
     private String appUrl;
     private String appLogo;
     private String appApiUrl;
-    private List<String> appTabs = new ArrayList<String>();
+    private List<String> appTabs = new ArrayList<>();
 
     private String secretToken;
     private transient List<String> orderedTabs;
@@ -69,6 +69,7 @@ public class AccessTokenModel implements Parcelable {
         uniqueID = r.nextLong();
     }
 
+    @SuppressWarnings("deprecation")
     public static AccessTokenModel fromJWT(JWT jwt) {
         AccessTokenModel token = new AccessTokenModel();
 
@@ -85,10 +86,6 @@ public class AccessTokenModel implements Parcelable {
         token.setSecretToken(jwt.getClaim("secretToken").asString());
 
         return token;
-    }
-
-    public int getUserID() {
-        return userID;
     }
 
     public void setUserID(int userID) {
@@ -177,10 +174,6 @@ public class AccessTokenModel implements Parcelable {
 
     public void setAppLogo(String appLogo) {
         this.appLogo = appLogo;
-    }
-
-    public long getUniqueID() {
-        return uniqueID;
     }
 
     public String getAppApiUrl() {

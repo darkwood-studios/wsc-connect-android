@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import wscconnect.android.GlideApp;
@@ -35,8 +37,8 @@ public class BoardAdapter extends RecyclerView.Adapter<ViewHolder> {
     private final AccessTokenModel token;
     private final AppForumFragment fragment;
     private BoardModel category;
-    private AppActivity activity;
-    private List<BoardModel> boardList;
+    private final AppActivity activity;
+    private final List<BoardModel> boardList;
 
     public BoardAdapter(AppActivity activity, AppForumFragment fragment, List<BoardModel> boardList, AccessTokenModel token) {
         this.activity = activity;
@@ -45,8 +47,9 @@ public class BoardAdapter extends RecyclerView.Adapter<ViewHolder> {
         this.token = token;
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         ViewHolder v = null;
 
         if (category != null) {
@@ -65,6 +68,7 @@ public class BoardAdapter extends RecyclerView.Adapter<ViewHolder> {
                     .inflate(R.layout.list_board, parent, false));
         }
 
+        assert v != null;
         return v;
     }
 
@@ -79,7 +83,7 @@ public class BoardAdapter extends RecyclerView.Adapter<ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NotNull final ViewHolder holder, int position) {
         if (category != null) {
             switch (holder.getItemViewType()) {
                 case TYPE_HEADER:
@@ -157,14 +161,10 @@ public class BoardAdapter extends RecyclerView.Adapter<ViewHolder> {
             unreadThreads = view.findViewById(R.id.list_board_unread_threads);
             icon = view.findViewById(R.id.list_board_icon);
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    loadBoard();
-                }
-            });
+            view.setOnClickListener(view1 -> loadBoard());
         }
 
+        @SuppressWarnings("deprecation")
         private void loadBoard() {
             int position = getActualPosition(getAdapterPosition());
 
@@ -187,11 +187,7 @@ public class BoardAdapter extends RecyclerView.Adapter<ViewHolder> {
                 }
             } else {
                 // wait a short time and try again.
-                new Handler().postDelayed(new Runnable() {
-                    public void run() {
-                        loadBoard();
-                    }
-                }, 200);
+                new Handler().postDelayed(this::loadBoard, 200);
             }
         }
     }

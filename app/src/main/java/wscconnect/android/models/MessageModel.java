@@ -57,10 +57,6 @@ public class MessageModel {
         return DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
     }
 
-    public String getLogo() {
-        return logo;
-    }
-
     public void setLogo(String logo) {
         this.logo = logo;
     }

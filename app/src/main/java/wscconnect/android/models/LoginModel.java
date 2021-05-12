@@ -30,10 +30,6 @@ public class LoginModel {
         this.password = password;
     }
 
-    public String getFirebaseToken() {
-        return firebaseToken;
-    }
-
     public void setFirebaseToken(String firebaseToken) {
         this.firebaseToken = firebaseToken;
     }
@@ -46,16 +42,8 @@ public class LoginModel {
         this.thirdPartyLogin = thirdPartyLogin;
     }
 
-    public String getDevice() {
-        return device;
-    }
-
     public void setDevice(String device) {
         this.device = device;
-    }
-
-    public String getPublicKey() {
-        return publicKey;
     }
 
     public void setPublicKey(String publicKey) {

@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +33,6 @@ import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.NotificationModel;
 
 import static android.view.View.GONE;
-import static wscconnect.android.activities.AppActivity.EXTRA_EVENT_ID;
-import static wscconnect.android.activities.AppActivity.EXTRA_EVENT_NAME;
 import static wscconnect.android.activities.AppActivity.EXTRA_FORCE_LOAD;
 
 /**
@@ -61,6 +61,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        assert getArguments() != null;
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
 
         activity = (AppActivity) getActivity();
@@ -75,17 +76,9 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
 
         getNotifications(null);
 
-        refreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshView.setRefreshing(true);
-                getNotifications(new SimpleCallback() {
-                    @Override
-                    public void onReady(boolean success) {
-                        refreshView.setRefreshing(false);
-                    }
-                });
-            }
+        refreshView.setOnRefreshListener(() -> {
+            refreshView.setRefreshing(true);
+            getNotifications(success -> refreshView.setRefreshing(false));
         });
     }
 
@@ -93,6 +86,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
         this.token = token;
     }
 
+    @SuppressWarnings("deprecation")
     public void getNotificationsLegacy(final SimpleCallback callback) {
         if (token == null) {
             setEmptyView();
@@ -113,7 +107,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
         apiCall = Utils.getAPI(activity, token.getToken()).getNotifications(token.getAppID());
         apiCall.enqueue(new RetroCallback<List<NotificationModel>>(activity) {
             @Override
-            public void onResponse(Call<List<NotificationModel>> call, Response<List<NotificationModel>> response) {
+            public void onResponse(@NotNull Call<List<NotificationModel>> call, @NotNull Response<List<NotificationModel>> response) {
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
@@ -123,6 +117,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
                     recyclerView.setVisibility(View.VISIBLE);
 
                     notificationList.clear();
+                    assert response.body() != null;
                     notificationList.addAll(response.body());
                     notificationAdapter.notifyDataSetChanged();
 
@@ -142,17 +137,13 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
                     setEmptyView();
                     callCallback(callback, true);
                 } else if (response.code() == 401) {
-                    Utils.refreshAccessToken(activity, finalToken.getAppID(), new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (success) {
-                                // refresh token
-                                token = Utils.getAccessToken(activity, token.getAppID());
-                                getNotificationsLegacy(callback);
-                            } else {
-                                callCallback(callback, false);
-                                // TODO show info to refresh manually
-                            }
+                    Utils.refreshAccessToken(activity, finalToken.getAppID(), success -> {
+                        if (success) {
+                            // refresh token
+                            token = Utils.getAccessToken(activity, token.getAppID());
+                            getNotificationsLegacy(callback);
+                        } else {
+                            callCallback(callback, false);
                         }
                     });
                 } else {
@@ -164,7 +155,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
             }
 
             @Override
-            public void onFailure(Call<List<NotificationModel>> call, Throwable t) {
+            public void onFailure(Call<List<NotificationModel>> call, @NotNull Throwable t) {
                 refreshView.setRefreshing(false);
                 loadingView.setVisibility(GONE);
                 recyclerView.setVisibility(View.VISIBLE);
@@ -174,6 +165,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
         });
     }
 
+    @SuppressWarnings("deprecation")
     public void getNotifications(final SimpleCallback callback) {
         if (token == null) {
             setEmptyView();
@@ -196,7 +188,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
         apiCall = Utils.getAPI(activity, host, token.getToken()).getNotifications(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getNotifications"));
         apiCall.enqueue(new RetroCallback<List<NotificationModel>>(activity) {
             @Override
-            public void onResponse(Call<List<NotificationModel>> call, Response<List<NotificationModel>> response) {
+            public void onResponse(@NotNull Call<List<NotificationModel>> call, @NotNull Response<List<NotificationModel>> response) {
                 super.onResponse(call, response);
 
                 refreshView.setRefreshing(false);
@@ -206,6 +198,7 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
                     recyclerView.setVisibility(View.VISIBLE);
 
                     notificationList.clear();
+                    assert response.body() != null;
                     notificationList.addAll(response.body());
                     notificationAdapter.notifyDataSetChanged();
 
@@ -225,49 +218,30 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
                     setEmptyView();
                     callCallback(callback, true);
                 } else if (response.code() == 409) {
-                    Utils.refreshAccessToken(activity, finalToken.getAppID(), new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (success) {
-                                // refresh token
-                                token = Utils.getAccessToken(activity, token.getAppID());
-                                getNotifications(callback);
-                            } else {
-                                callCallback(callback, false);
-                                // TODO show info to refresh manually
-                            }
+                    Utils.refreshAccessToken(activity, finalToken.getAppID(), success -> {
+                        if (success) {
+                            // refresh token
+                            token = Utils.getAccessToken(activity, token.getAppID());
+                            getNotifications(callback);
+                        } else {
+                            callCallback(callback, false);
                         }
                     });
                 } else if (response.code() == 404) {
-                    // TODO for legacy plugin versions. Remove in next version
-                    getNotificationsLegacy(new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (!success && isAdded()) {
-                                Utils.logout(activity, token.getAppID());
-                                Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
-                            }
+                    getNotificationsLegacy(success -> {
+                        if (!success && isAdded()) {
+                            Utils.logout(activity, token.getAppID());
+                            Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
                         }
                     });
                     // app has not been found in the database, remove
-                    /*Utils.logout(activity, token.getAppID());
-                    Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();*/
                 } else if (response.code() == 403) {
-                    // TODO for legacy plugin versions. Remove in next version
-                    getNotificationsLegacy(new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (!success && isAdded()) {
-                                Utils.logout(activity, token.getAppID());
-                                Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
-                            }
+                    getNotificationsLegacy(success -> {
+                        if (!success && isAdded()) {
+                            Utils.logout(activity, token.getAppID());
+                            Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
                         }
                     });
-                    /*
-                    // user has been logged out
-                    Utils.logout(activity, token.getAppID());
-                   // activity.updateAllFragments();
-                    Toast.makeText(activity, getString(R.string.fragment_app_notifications_logged_out, token.getAppName()), Toast.LENGTH_LONG).show();*/
                 } else {
                     loadingView.setVisibility(GONE);
                     recyclerView.setVisibility(View.VISIBLE);
@@ -278,15 +252,12 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
             }
 
             @Override
-            public void onFailure(Call<List<NotificationModel>> call, Throwable t) {
+            public void onFailure(Call<List<NotificationModel>> call, @NotNull Throwable t) {
                 if (t instanceof IllegalStateException) {
-                    getNotificationsLegacy(new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (!success && isAdded()) {
-                                Utils.logout(activity, token.getAppID());
-                                Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
-                            }
+                    getNotificationsLegacy(success -> {
+                        if (!success && isAdded()) {
+                            Utils.logout(activity, token.getAppID());
+                            Toast.makeText(activity, getString(R.string.fragment_app_notifications_app_removed, token.getAppName()), Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
@@ -333,18 +304,11 @@ public class AppNotificationsFragment extends Fragment implements OnFragmentUpda
 
     @Override
     public void onUpdate(Bundle bundle) {
-        int eventID = bundle.getInt(EXTRA_EVENT_ID);
-        int eventname = bundle.getInt(EXTRA_EVENT_NAME);
         boolean forceLoad = bundle.getBoolean(EXTRA_FORCE_LOAD);
 
         if (forceLoad) {
             refreshView.setRefreshing(true);
-            getNotifications(new SimpleCallback() {
-                @Override
-                public void onReady(boolean success) {
-                    refreshView.setRefreshing(false);
-                }
-            });
+            getNotifications(success -> refreshView.setRefreshing(false));
         }
     }
 }

@@ -10,10 +10,6 @@ public class LogoutModel {
     private String firebaseToken;
 
 
-    public String getFirebaseToken() {
-        return firebaseToken;
-    }
-
     public void setFirebaseToken(String firebaseToken) {
         this.firebaseToken = firebaseToken;
     }

@@ -11,8 +11,6 @@ import android.os.Bundle;
 public interface OnFragmentUpdateListener {
     /**
      * Is called, when a fragment should be updated from the outside
-     *
-     * @param bundle
      */
     void onUpdate(Bundle bundle);
 }

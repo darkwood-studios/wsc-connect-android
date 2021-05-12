@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import wscconnect.android.GlideApp;
@@ -18,8 +20,6 @@ import wscconnect.android.R;
 import wscconnect.android.Utils;
 import wscconnect.android.ViewHolder;
 import wscconnect.android.activities.AppActivity;
-import wscconnect.android.fragments.myApps.appOptions.AppForumFragment;
-import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.PostModel;
 import wscconnect.android.models.ThreadModel;
 
@@ -33,17 +33,13 @@ public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
     private static final int TYPE_HEADER = 1;
     private static final int TYPE_POST = 2;
     private static final int TYPE_FORM = 3;
-    private final AppForumFragment fragment;
-    private AccessTokenModel token;
     private ThreadModel thread;
-    private AppActivity activity;
-    private List<PostModel> postList;
+    private final AppActivity activity;
+    private final List<PostModel> postList;
 
-    public PostAdapter(AppActivity activity, AppForumFragment fragment, List<PostModel> postList, AccessTokenModel token) {
+    public PostAdapter(AppActivity activity, List<PostModel> postList) {
         this.activity = activity;
-        this.fragment = fragment;
         this.postList = postList;
-        this.token = token;
     }
 
     public void setThread(ThreadModel thread) {
@@ -61,8 +57,9 @@ public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
         }
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         ViewHolder v = null;
 
         switch (viewType) {
@@ -80,6 +77,7 @@ public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
                 break;
         }
 
+        assert v != null;
         return v;
     }
 
@@ -111,7 +109,7 @@ public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
                 break;
             case TYPE_FORM:
                 FormViewHolder formViewHolder = (FormViewHolder) holder;
-                Utils.setError(activity, formViewHolder.text, null);
+                Utils.setError(formViewHolder.text, null);
 
                 if (thread.isClosed()) {
                     formViewHolder.text.setVisibility(View.GONE);
@@ -142,27 +140,23 @@ public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
             text = view.findViewById(R.id.list_generic_message_form_text);
             submit = view.findViewById(R.id.list_generic_message_form_submit);
 
-            submit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!submit.isEnabled()) {
-                        return;
-                    }
+            submit.setOnClickListener(view1 -> {
+                if (!submit.isEnabled()) {
+                    return;
+                }
 
-                    String separator = System.getProperty("line.separator");
-                    String message = text.getText().toString().trim().replaceAll(separator, "<br>");
+                String separator = System.getProperty("line.separator");
+                assert separator != null;
+                String message = text.getText().toString().trim().replaceAll(separator, "<br>");
 
-                    if (message.isEmpty()) {
-                        Utils.setError(activity, text);
-                        return;
-                    }
-                    // TODO
+                if (message.isEmpty()) {
+                    Utils.setError(activity, text);
                 }
             });
         }
     }
 
-    public class PostViewHolder extends ViewHolder {
+    public static class PostViewHolder extends ViewHolder {
         public TextView message, time, username;
         public ImageView avatar;
         public LinearLayout content;
@@ -175,15 +169,7 @@ public class PostAdapter extends RecyclerView.Adapter<ViewHolder> {
             avatar = view.findViewById(R.id.list_conversation_message_avatar);
             content = view.findViewById(R.id.list_conversation_message_content);
 
-            view.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    final PostModel post = postList.get(getActualPosition(getAdapterPosition()));
-
-
-                    return true;
-                }
-            });
+            view.setOnLongClickListener(view1 -> true);
         }
     }
 }

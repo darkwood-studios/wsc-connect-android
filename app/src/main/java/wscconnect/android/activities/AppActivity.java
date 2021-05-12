@@ -1,5 +1,6 @@
 package wscconnect.android.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +17,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.auth0.android.jwt.JWT;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 import wscconnect.android.R;
 import wscconnect.android.Utils;
@@ -73,14 +78,15 @@ public class AppActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try
         {
-            this.getSupportActionBar().hide();
+            Objects.requireNonNull(this.getSupportActionBar()).hide();
         }
-        catch (NullPointerException e){}
+        catch (NullPointerException ignored){}
 
         setContentView(R.layout.activity_main);
         setContentView(R.layout.activity_app);
@@ -96,7 +102,7 @@ public class AppActivity extends AppCompatActivity {
             return;
         }
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setElevation(0);
         getSupportActionBar().setTitle(token.getAppName());
 
@@ -114,19 +120,16 @@ public class AppActivity extends AppCompatActivity {
         if (jwt.isExpired(0)) {
             tabLayout.setVisibility(View.GONE);
             Utils.showLoadingOverlay(this, true);
-            Utils.refreshAccessToken(this, token.getAppID(), new SimpleCallback() {
-                @Override
-                public void onReady(boolean success) {
-                    token = Utils.getAccessToken(AppActivity.this, token.getAppID());
-                    Utils.showLoadingOverlay(AppActivity.this, false);
-                    if (token != null) {
-                        setup(optionType, eventName, eventID);
-                    } else {
-                        Toast.makeText(AppActivity.this, getString(R.string.activity_app_token_null), Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(AppActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
+            Utils.refreshAccessToken(this, token.getAppID(), success -> {
+                token = Utils.getAccessToken(AppActivity.this, token.getAppID());
+                Utils.showLoadingOverlay(AppActivity.this, false);
+                if (token != null) {
+                    setup(optionType, eventName, eventID);
+                } else {
+                    Toast.makeText(AppActivity.this, getString(R.string.activity_app_token_null), Toast.LENGTH_LONG).show();
+                    Intent intent1 = new Intent(AppActivity.this, MainActivity.class);
+                    startActivity(intent1);
+                    finish();
                 }
             });
         } else {
@@ -175,6 +178,7 @@ public class AppActivity extends AppCompatActivity {
         // Iterate over all tabs and set the custom view
         for (int i = 0; i < tabLayout.getTabCount(); i++) {
             TabLayout.Tab tab = tabLayout.getTabAt(i);
+            assert tab != null;
             tab.setCustomView(null);
             tab.setCustomView(fragmentAdapter.getTabView(i));
         }
@@ -199,7 +203,7 @@ public class AppActivity extends AppCompatActivity {
         } else {
             Fragment currentFragment = fragmentAdapter.getFragmentAtPosition(viewPager.getCurrentItem());
 
-            if (currentFragment != null && currentFragment instanceof OnBackPressedListener) {
+            if (currentFragment instanceof OnBackPressedListener) {
                 if (!((OnBackPressedListener) currentFragment).onBackPressed()) {
                     super.onBackPressed();
                 }
@@ -209,6 +213,7 @@ public class AppActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static class AppFragmentAdapter extends FragmentPagerAdapter {
         Context context;
         AccessTokenModel token;
@@ -229,6 +234,7 @@ public class AppActivity extends AppCompatActivity {
             return registeredFragments.get(position);
         }
 
+        @NotNull
         @Override
         public Fragment getItem(int position) {
             String tabName = token.getAppTabs().get(position);
@@ -255,6 +261,7 @@ public class AppActivity extends AppCompatActivity {
 
             Bundle b = new Bundle();
             b.putParcelable(AccessTokenModel.EXTRA, token);
+            assert f != null;
             f.setArguments(b);
             registeredFragments.put(position, f);
             return f;
@@ -266,6 +273,7 @@ public class AppActivity extends AppCompatActivity {
             return context.getString(context.getResources().getIdentifier("activity_app_tab_" + tabName, "string", context.getPackageName()));
         }
 
+        @SuppressLint("InflateParams")
         public View getTabView(int position) {
             LayoutInflater inflater = LayoutInflater.from(context);
 

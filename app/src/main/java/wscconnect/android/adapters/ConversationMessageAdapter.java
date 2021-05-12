@@ -19,9 +19,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -36,8 +36,6 @@ import wscconnect.android.Utils;
 import wscconnect.android.ViewHolder;
 import wscconnect.android.activities.AppActivity;
 import wscconnect.android.callbacks.RetroCallback;
-import wscconnect.android.callbacks.SimpleCallback;
-import wscconnect.android.callbacks.SimpleJSONCallback;
 import wscconnect.android.fragments.myApps.appOptions.AppConversationsFragment;
 import wscconnect.android.models.AccessTokenModel;
 import wscconnect.android.models.ConversationMessageModel;
@@ -57,8 +55,8 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
     private final AppConversationsFragment fragment;
     private AccessTokenModel token;
     private ConversationModel conversation;
-    private AppActivity activity;
-    private List<ConversationMessageModel> messageList;
+    private final AppActivity activity;
+    private final List<ConversationMessageModel> messageList;
     private boolean conversationMessagesAutoLoad = false;
 
     public ConversationMessageAdapter(AppActivity activity, AppConversationsFragment fragment, List<ConversationMessageModel> messageList, AccessTokenModel token) {
@@ -86,8 +84,9 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         ViewHolder v = null;
 
         switch (viewType) {
@@ -109,6 +108,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
                 break;
         }
 
+        assert v != null;
         return v;
     }
 
@@ -140,7 +140,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
                 break;
             case TYPE_FORM:
                 FormViewHolder formViewHolder = (FormViewHolder) holder;
-                Utils.setError(activity, formViewHolder.text, null);
+                Utils.setError(formViewHolder.text, null);
 
                 if (conversation.isClosed()) {
                     formViewHolder.text.setVisibility(View.GONE);
@@ -182,51 +182,46 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
             text = view.findViewById(R.id.list_generic_message_form_text);
             submit = view.findViewById(R.id.list_generic_message_form_submit);
 
-            submit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!submit.isEnabled()) {
-                        return;
-                    }
-
-                    String separator = System.getProperty("line.separator");
-                    String message = text.getText().toString().trim().replaceAll(separator, "<br>");
-
-                    if (message.isEmpty()) {
-                        Utils.setError(activity, text);
-                        return;
-                    }
-
-                    final ProgressBar progressBar = Utils.showProgressView(activity, submit, android.R.attr.progressBarStyle);
-                    fragment.addConversationMessage(conversation.getConversationID(), message, new SimpleJSONCallback() {
-                        @Override
-                        public void onReady(JSONObject json, boolean success) {
-                            if (success) {
-                                text.setText(null);
-                                Utils.hideKeyboard(activity);
-                            } else if (json != null) {
-                                try {
-                                    String message = json.getString("message");
-                                    switch (message) {
-                                        case "censorship":
-                                            JSONArray words = json.getJSONArray("returnValues");
-                                            String censoredWords = words.join(", ");
-                                            Utils.setError(activity, text, activity.getString(R.string.list_conversation_message_form_error_censorship, censoredWords));
-                                            break;
-
-                                        case "length":
-                                            int maxLength = json.getInt("returnValues");
-                                            Utils.setError(activity, text, activity.getString(R.string.list_conversation_message_form_error_length, message.length(), maxLength));
-                                            break;
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            Utils.hideProgressView(submit, progressBar);
-                        }
-                    });
+            submit.setOnClickListener(view1 -> {
+                if (!submit.isEnabled()) {
+                    return;
                 }
+
+                String separator = System.getProperty("line.separator");
+                assert separator != null;
+                String message = text.getText().toString().trim().replaceAll(separator, "<br>");
+
+                if (message.isEmpty()) {
+                    Utils.setError(activity, text);
+                    return;
+                }
+
+                final ProgressBar progressBar = Utils.showProgressView(activity, submit, android.R.attr.progressBarStyle);
+                fragment.addConversationMessage(conversation.getConversationID(), message, (json, success) -> {
+                    if (success) {
+                        text.setText(null);
+                        Utils.hideKeyboard(activity);
+                    } else if (json != null) {
+                        try {
+                            String message1 = json.getString("message");
+                            switch (message1) {
+                                case "censorship":
+                                    JSONArray words = json.getJSONArray("returnValues");
+                                    String censoredWords = words.join(", ");
+                                    Utils.setError(text, activity.getString(R.string.list_conversation_message_form_error_censorship, censoredWords));
+                                    break;
+
+                                case "length":
+                                    int maxLength = json.getInt("returnValues");
+                                    Utils.setError(text, activity.getString(R.string.list_conversation_message_form_error_length, message1.length(), maxLength));
+                                    break;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    Utils.hideProgressView(submit, progressBar);
+                });
             });
         }
     }
@@ -240,23 +235,17 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
             loadMoreContainer = view.findViewById(R.id.list_generic_message_load_more_container);
             loadMore = view.findViewById(R.id.list_generic_message_load_more);
 
-            loadMore.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final ProgressBar progressBar = Utils.showProgressView(activity, loadMore, android.R.attr.progressBarStyle);
+            loadMore.setOnClickListener(view1 -> {
+                final ProgressBar progressBar = Utils.showProgressView(activity, loadMore, android.R.attr.progressBarStyle);
 
-                    fragment.onLoadMoreConversationMessages(new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (success) {
-                                conversationMessagesAutoLoad = true;
-                            } else {
-                                Toast.makeText(activity, R.string.error_general, Toast.LENGTH_SHORT).show();
-                            }
-                            Utils.hideProgressView(loadMore, progressBar);
-                        }
-                    });
-                }
+                fragment.onLoadMoreConversationMessages(success -> {
+                    if (success) {
+                        conversationMessagesAutoLoad = true;
+                    } else {
+                        Toast.makeText(activity, R.string.error_general, Toast.LENGTH_SHORT).show();
+                    }
+                    Utils.hideProgressView(loadMore, progressBar);
+                });
             });
         }
     }
@@ -295,17 +284,19 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
                             }
                         }
 
+                        @SuppressWarnings("deprecation")
                         private void getDetailedConversationMessage() {
                             final ProgressBar progressBar = Utils.showProgressView(activity, message, android.R.attr.progressBarStyle);
                             Utils.getAPI(activity, Utils.prepareApiUrl(token.getAppApiUrl()), token.getToken()).getConversationMessage(Utils.getApiUrlExtension(token.getAppApiUrl()), RequestBody.create(MediaType.parse("text/plain"), "getConversationMessage"), RequestBody.create(MediaType.parse("text/plain"), String.valueOf(conversationMessage.getMessageID()))).enqueue(new RetroCallback<ConversationMessageModel>(activity) {
                                 @Override
-                                public void onResponse(Call<ConversationMessageModel> call, Response<ConversationMessageModel> response) {
+                                public void onResponse(@NotNull Call<ConversationMessageModel> call, @NotNull Response<ConversationMessageModel> response) {
                                     super.onResponse(call, response);
 
                                     Utils.hideProgressView(message, progressBar);
 
                                     if (response.isSuccessful()) {
                                         WebView webView = new WebView(activity);
+                                        assert response.body() != null;
                                         webView.loadData(response.body().getMessage(), "text/html; charset=UTF-8", null);
 
                                         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
@@ -314,14 +305,11 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
 
                                         dialog.show();
                                     } else if (response.code() == 409) {
-                                        Utils.refreshAccessToken(activity, token.getAppID(), new SimpleCallback() {
-                                            @Override
-                                            public void onReady(boolean success) {
-                                                if (success) {
-                                                    // refresh token
-                                                    token = Utils.getAccessToken(activity, token.getAppID());
-                                                    getDetailedConversationMessage();
-                                                }
+                                        Utils.refreshAccessToken(activity, token.getAppID(), success -> {
+                                            if (success) {
+                                                // refresh token
+                                                token = Utils.getAccessToken(activity, token.getAppID());
+                                                getDetailedConversationMessage();
                                             }
                                         });
                                     } else {
@@ -330,7 +318,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<ViewHolder>
                                 }
 
                                 @Override
-                                public void onFailure(Call<ConversationMessageModel> call, Throwable t) {
+                                public void onFailure(Call<ConversationMessageModel> call, @NotNull Throwable t) {
                                     super.onFailure(call, t);
 
                                     Utils.hideProgressView(message, progressBar);

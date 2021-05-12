@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import wscconnect.android.GlideApp;
@@ -27,8 +29,8 @@ import wscconnect.android.models.NotificationModel;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.MyViewHolder> {
     private final AccessTokenModel token;
-    private AppActivity activity;
-    private List<NotificationModel> notificationList;
+    private final AppActivity activity;
+    private final List<NotificationModel> notificationList;
 
     public NotificationAdapter(AppActivity activity, List<NotificationModel> notificationList, AccessTokenModel token) {
         this.activity = activity;
@@ -36,6 +38,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         this.token = token;
     }
 
+    @NotNull
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
@@ -74,23 +77,20 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             time = view.findViewById(R.id.list_notification_time);
             avatar = view.findViewById(R.id.list_notification_avatar);
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int position = getAdapterPosition();
-                    NotificationModel n = notificationList.get(position);
+            view.setOnClickListener(view1 -> {
+                int position = getAdapterPosition();
+                NotificationModel n = notificationList.get(position);
 
-                    if (!n.isConfirmed()) {
-                        n.setConfirmed(true);
-                        notifyItemChanged(position);
-                        Utils.saveUnreadNotifications(activity, token.getAppID(), Utils.getUnreadNotifications(activity, token.getAppID()) - 1);
-                        activity.setCustomTabView();
-                    }
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString(AppWebviewFragment.URL, n.getLink());
-                    activity.setCurrentPage(AppActivity.FRAGMENT_WEBVIEW, bundle);
+                if (!n.isConfirmed()) {
+                    n.setConfirmed(true);
+                    notifyItemChanged(position);
+                    Utils.saveUnreadNotifications(activity, token.getAppID(), Utils.getUnreadNotifications(activity, token.getAppID()) - 1);
+                    activity.setCustomTabView();
                 }
+
+                Bundle bundle = new Bundle();
+                bundle.putString(AppWebviewFragment.URL, n.getLink());
+                activity.setCurrentPage(AppActivity.FRAGMENT_WEBVIEW, bundle);
             });
         }
     }

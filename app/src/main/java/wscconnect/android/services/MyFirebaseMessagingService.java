@@ -14,7 +14,10 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Map;
+import java.util.Objects;
 
 import wscconnect.android.KeyUtils;
 import wscconnect.android.Utils;
@@ -31,7 +34,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private AccessTokenModel token;
 
     @Override
-    public void onNewToken(String s) {
+    public void onNewToken(@NotNull String s) {
         super.onNewToken(s);
 
         // force user to login again
@@ -85,7 +88,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String message = data.get("message");
         String appLogo = data.get("appLogo");
         String appID = data.get("appID");
-        int eventID = Integer.parseInt((data.get("eventID") == null) ? "0" : data.get("eventID"));
+        int eventID = Integer.parseInt((data.get("eventID") == null) ? "0" : Objects.requireNonNull(data.get("eventID")));
         String eventName = (data.get("eventName") == null) ? "" : data.get("eventName");
 
         String tag = appID + "message";
@@ -100,9 +103,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String appName = data.get("appName");
         String appID = data.get("appID");
         String eventHash = (data.get("eventHash") == null) ? "" : data.get("eventHash");
-        int eventID = Integer.parseInt((data.get("eventID") == null) ? "0" : data.get("eventID"));
+        int eventID = Integer.parseInt((data.get("eventID") == null) ? "0" : Objects.requireNonNull(data.get("eventID")));
         String eventName = (data.get("eventName") == null) ? "" : data.get("eventName");
-        int authorID = Integer.parseInt((data.get("authorID") == null) ? "0" : data.get("authorID"));
+        int authorID = Integer.parseInt((data.get("authorID") == null) ? "0" : Objects.requireNonNull(data.get("authorID")));
 
         // create app/event unique tag
         String tag = appID + eventHash;
@@ -119,6 +122,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void createNotification(final String notificationTag, final int notificationID, final String appID, final String optionType, final String title, final String message, final String eventName, final int eventID, final String largeIcon) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+            @SuppressWarnings("deprecation")
             @Override
             public void run() {
                 Glide.with(getApplicationContext())
@@ -126,7 +131,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .load(largeIcon)
                         .into(new SimpleTarget<Bitmap>() {
                             @Override
-                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                            public void onResourceReady(@NotNull Bitmap resource, Transition<? super Bitmap> transition) {
                                 Utils.showDataNotification(MyFirebaseMessagingService.this, notificationTag, notificationID, appID, optionType, title, message, eventName, eventID, resource);
                             }
 

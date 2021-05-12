@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import wscconnect.android.GlideApp;
@@ -26,8 +28,8 @@ import wscconnect.android.models.AppModel;
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
     private final AppsFragment fragment;
     private final int viewResource;
-    private MainActivity activity;
-    private List<AppModel> appList;
+    private final MainActivity activity;
+    private final List<AppModel> appList;
 
     public AppAdapter(MainActivity activity, AppsFragment fragment, List<AppModel> appList) {
         this(activity, fragment, appList, R.layout.list_app);
@@ -40,13 +42,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
         this.viewResource = viewResource;
     }
 
+    @NotNull
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(viewResource, parent, false);
 
-        MyViewHolder vh = new MyViewHolder(itemView);
-        return vh;
+        return new MyViewHolder(itemView);
     }
 
     @Override
@@ -90,12 +92,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             //url = view.findViewById(R.id.list_app_url);
             logo = view.findViewById(R.id.list_app_logo);
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    switchToDetailView();
-                }
-            });
+            view.setOnClickListener(view1 -> switchToDetailView());
         }
 
         private void switchToDetailView() {
@@ -107,11 +104,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                 fragment.switchToDetailView(true, false, app);
             } else {
                 // wait a short time and try again.
-                new Handler().postDelayed(new Runnable() {
-                    public void run() {
-                        switchToDetailView();
-                    }
-                }, 200);
+                new Handler().postDelayed(this::switchToDetailView, 200);
             }
         }
     }

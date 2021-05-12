@@ -25,8 +25,6 @@ public class KeyUtils {
     private static final int    KEYSIZE             = 1024;
     private static final String PUBLICKEY_PREFIX    = "-----BEGIN PUBLIC KEY-----";
     private static final String PUBLICKEY_POSTFIX   = "-----END PUBLIC KEY-----";
-    private static final String PRIVATEKEY_PREFIX   = "-----BEGIN RSA PRIVATE KEY-----";
-    private static final String PRIVATEKEY_POSTFIX  = "-----END RSA PRIVATE KEY-----";
     private static final String DECRYPT_ALGORITHM = "RSA/ECB/OAEPWithSHA-1AndMGF1Padding";
 
     public static KeyPair generateKeyPair() {
@@ -70,9 +68,8 @@ public class KeyUtils {
     public static String getPrivateKey(String appID, Context context) {
         try {
             SharedPreferences prefs = context.getSharedPreferences(Utils.SHARED_PREF_KEY, Context.MODE_PRIVATE);
-            String privateKey = prefs.getString("privateKey-" + appID, null);
 
-            return privateKey;
+            return prefs.getString("privateKey-" + appID, null);
 
             //byte[] pivateKeyBytes = Base64.decode(privateKey, Base64.NO_WRAP);
 

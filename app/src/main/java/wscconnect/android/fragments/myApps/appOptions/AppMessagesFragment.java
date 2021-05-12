@@ -14,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +57,7 @@ public class AppMessagesFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        assert getArguments() != null;
         token = getArguments().getParcelable(AccessTokenModel.EXTRA);
 
         activity = getActivity();
@@ -68,17 +71,9 @@ public class AppMessagesFragment extends Fragment {
         loadingTextView.setText(getString(R.string.fragment_app_messagess_loading_info, token.getAppName()));
         loadMessages(null);
 
-        refreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshView.setRefreshing(true);
-                loadMessages(new SimpleCallback() {
-                    @Override
-                    public void onReady(boolean success) {
-                        refreshView.setRefreshing(false);
-                    }
-                });
-            }
+        refreshView.setOnRefreshListener(() -> {
+            refreshView.setRefreshing(true);
+            loadMessages(success -> refreshView.setRefreshing(false));
         });
     }
 
@@ -106,7 +101,7 @@ public class AppMessagesFragment extends Fragment {
         final AccessTokenModel finalToken = token;
         Utils.getAPI(activity, token.getToken()).getMessages(token.getAppID()).enqueue(new RetroCallback<List<MessageModel>>(activity) {
             @Override
-            public void onResponse(Call<List<MessageModel>> call, Response<List<MessageModel>> response) {
+            public void onResponse(@NotNull Call<List<MessageModel>> call, @NotNull Response<List<MessageModel>> response) {
                 super.onResponse(call, response);
 
                 loading = false;
@@ -117,21 +112,17 @@ public class AppMessagesFragment extends Fragment {
                     recyclerView.setVisibility(View.VISIBLE);
 
                     messageList.clear();
+                    assert response.body() != null;
                     messageList.addAll(response.body());
                     messageAdapter.notifyDataSetChanged();
 
                     setEmptyView();
                     callCallback(callback, true);
                 } else if (response.code() == 401) {
-                    Utils.refreshAccessToken(activity, finalToken.getAppID(), new SimpleCallback() {
-                        @Override
-                        public void onReady(boolean success) {
-                            if (success) {
-                                token = Utils.getAccessToken(activity, token.getAppID());
-                                loadMessages(callback);
-                            } else {
-                                // TODO show info to refresh manually
-                            }
+                    Utils.refreshAccessToken(activity, finalToken.getAppID(), success -> {
+                        if (success) {
+                            token = Utils.getAccessToken(activity, token.getAppID());
+                            loadMessages(callback);
                         }
                     });
                 } else if (response.code() == 404) {
@@ -149,7 +140,7 @@ public class AppMessagesFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<MessageModel>> call, Throwable t) {
+            public void onFailure(Call<List<MessageModel>> call, @NotNull Throwable t) {
                 super.onFailure(call, t);
 
                 loading = false;
