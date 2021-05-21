@@ -92,6 +92,11 @@
     <string name="top_apps">Top Apps</string>
     <string name="new_apps">Newest Apps</string>
 
+    <string name="github_update_check_url" translatable="false">https://api.github.com/repos/daywalk3r666/wsc-connect-android/releases/latest</string>
+    <string name="show">Show</string>
+    <string name="update_available">is available!</string>
+    <string name="url_app_home_page" translatable="false">https://github.com/daywalk3r666/wsc-connect-android/releases/latest</string>
+
     <array name="list_my_apps_dialog_items">
         <item>Logout</item>
     </array>

@@ -73,6 +73,8 @@
     <string name="fragment_app_forum_empty_threads">Es wurden keine Themen gefunden.</string>
     <string name="fragment_app_forum_empty_posts">Es wurden keine Beiträge gefunden.</string>
     <string name="list_post_header_author">Autor: %1$s</string>
+    <string name="show">Zeigen</string>
+    <string name="update_available">ist verfügbar!</string>
 
     <array name="list_my_apps_dialog_items">
         <item>Logout</item>

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 
 android {
@@ -12,7 +13,7 @@ android {
         versionCode 500
         versionName '5.0.0'
         resConfigs 'en', 'de'
-        setProperty('archivesBaseName', 'WSC-Reloaded_v' + versionName)
+        setProperty('archivesBaseName', 'WSC-Reloaded_' + versionName)
     }
 
     buildTypes {
@@ -40,11 +41,18 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    // Kotlin //
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
     // AndroidX Stuff //
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
-    // Material //
+    // Google Stuff //
     implementation 'com.google.android.material:material:1.3.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    // Volley HTTP //
+    implementation 'com.android.volley:volley:1.2.0'
 
     // Google Stuff //
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
